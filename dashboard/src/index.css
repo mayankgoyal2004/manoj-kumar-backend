@@ -1,0 +1,174 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 25% 98%;
+    --foreground: 217 33% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 217 33% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 217 33% 12%;
+    --primary: 214 62% 20%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 24% 96%;
+    --secondary-foreground: 214 50% 20%;
+    --muted: 210 24% 96.5%;
+    --muted-foreground: 215 18% 45%;
+    --accent: 42 55% 93%;
+    --accent-foreground: 214 60% 20%;
+    --destructive: 0 70% 48%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 22% 90%;
+    --input: 214 22% 88%;
+    --ring: 214 62% 30%;
+    --gold: 42 62% 46%;
+    --gold-soft: 42 60% 94%;
+    --ink: 214 62% 20%;
+    --surface-raised: 0 0% 100%;
+
+    --chart-1: 214 62% 30%;
+    --chart-2: 42 62% 50%;
+    --chart-3: 187 42% 40%;
+    --chart-4: 260 30% 55%;
+    --chart-5: 348 45% 52%;
+
+    --radius: 0.75rem;
+
+    --font-heading: "Fraunces", ui-serif, Georgia, Cambria, serif;
+    --font-display: "Fraunces", ui-serif, Georgia, Cambria, serif;
+    --font-body: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+
+    --sidebar-background: 215 62% 16%;
+    --sidebar-foreground: 210 28% 88%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 215 62% 16%;
+    --sidebar-accent: 214 48% 24%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 214 45% 26%;
+    --sidebar-ring: 42 62% 55%;
+  }
+
+  .dark {
+    --background: 217 34% 8%;
+    --foreground: 210 30% 96%;
+    --card: 217 30% 11%;
+    --card-foreground: 210 30% 96%;
+    --popover: 217 30% 11%;
+    --popover-foreground: 210 30% 96%;
+    --primary: 42 62% 55%;
+    --primary-foreground: 217 42% 10%;
+    --secondary: 217 25% 16%;
+    --secondary-foreground: 210 30% 96%;
+    --muted: 217 25% 16%;
+    --muted-foreground: 215 16% 66%;
+    --accent: 216 26% 19%;
+    --accent-foreground: 210 30% 96%;
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 217 22% 20%;
+    --input: 217 22% 23%;
+    --ring: 42 62% 55%;
+    --gold: 42 62% 58%;
+    --gold-soft: 42 25% 20%;
+    --ink: 42 62% 55%;
+    --surface-raised: 217 30% 13%;
+
+    --chart-1: 210 70% 62%;
+    --chart-2: 42 62% 58%;
+    --chart-3: 187 45% 52%;
+    --chart-4: 260 45% 68%;
+    --chart-5: 348 55% 62%;
+
+    --sidebar-background: 218 40% 10%;
+    --sidebar-foreground: 210 25% 86%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 218 40% 10%;
+    --sidebar-accent: 216 32% 17%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 216 28% 17%;
+    --sidebar-ring: 42 62% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "ss01";
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-heading tracking-tight;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+    background-clip: content-box;
+  }
+}
+
+@layer components {
+  .surface {
+    @apply bg-card border border-border rounded-xl;
+  }
+  .surface-shadow {
+    box-shadow: 0 1px 2px hsl(215 40% 20% / 0.04), 0 12px 32px -18px hsl(215 50% 20% / 0.18);
+  }
+  .dark .surface-shadow {
+    box-shadow: 0 1px 2px hsl(0 0% 0% / 0.4), 0 18px 40px -22px hsl(0 0% 0% / 0.7);
+  }
+  .label-caps {
+    @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground;
+  }
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-left {
+  from { opacity: 0.4; transform: translateX(18px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-rise {
+  animation: rise 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.animate-slide-left {
+  animation: slide-left 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.animate-fade {
+  animation: fade 0.24s ease-out both;
+}

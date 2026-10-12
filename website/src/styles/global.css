@@ -1,0 +1,176 @@
+@import './variables.css';
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-bg-page);
+  color: var(--color-text-main);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  color: var(--color-crimson-900);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.5rem; }
+h4 { font-size: 1.25rem; }
+
+p {
+  color: var(--color-text-secondary);
+  font-size: 0.975rem;
+  line-height: 1.68;
+}
+
+a {
+  color: var(--color-crimson-700);
+  text-decoration: none;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+a:hover {
+  color: var(--color-crimson-900);
+}
+
+button {
+  font-family: var(--font-sans);
+  cursor: pointer;
+  border: none;
+  background: none;
+  outline: none;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg-page);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-default);
+  border-radius: var(--radius-xs);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-crimson-800);
+}
+
+/* Utilities */
+.container {
+  max-width: var(--max-width-container);
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.serif-font {
+  font-family: var(--font-serif);
+}
+
+.mono-font {
+  font-family: var(--font-mono);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-xs);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.badge-crimson {
+  background-color: var(--color-crimson-100);
+  color: var(--color-crimson-900);
+  border: 1px solid rgba(115, 19, 38, 0.2);
+}
+
+.badge-gold {
+  background-color: var(--color-gold-100);
+  color: var(--color-gold-600);
+  border: 1px solid rgba(181, 133, 20, 0.3);
+}
+
+.badge-navy {
+  background-color: var(--color-navy-100);
+  color: var(--color-navy-800);
+  border: 1px solid rgba(30, 46, 79, 0.2);
+}
+
+.badge-sci {
+  background-color: var(--tag-sci-bg);
+  color: var(--tag-sci-text);
+  border: 1px solid rgba(55, 48, 163, 0.2);
+}
+
+.badge-scopus {
+  background-color: var(--tag-scopus-bg);
+  color: var(--tag-scopus-text);
+  border: 1px solid rgba(159, 18, 57, 0.2);
+}
+
+.badge-ugc {
+  background-color: var(--tag-ugc-bg);
+  color: var(--tag-ugc-text);
+  border: 1px solid rgba(6, 95, 70, 0.2);
+}
+
+.badge-patent {
+  background-color: var(--tag-patent-bg);
+  color: var(--tag-patent-text);
+  border: 1px solid rgba(146, 64, 14, 0.3);
+}
+
+/* Subtle Divider */
+.academic-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.academic-divider::before,
+.academic-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background-color: var(--color-border-subtle);
+}
+
+.academic-divider-symbol {
+  color: var(--color-gold-500);
+  font-size: 0.85rem;
+}
