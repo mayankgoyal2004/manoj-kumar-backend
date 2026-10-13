@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { KeyRound, Moon, Save, Sun } from "lucide-react";
+import { KeyRound, Moon, Save, Sun, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import FieldControl from "@/components/kit/FieldControl";
 import PageHeader from "@/components/kit/PageHeader";
@@ -10,6 +10,9 @@ import { btnPrimary, btnSecondary, inputCls } from "@/components/kit/styles";
 import { PROFILE } from "@/lib/DataStore";
 import { useTheme } from "@/lib/ThemeContext";
 import { cn } from "@/lib/utils";
+import api from "@/api/backendClient";
+
+import { useAuth } from "@/lib/AuthContext";
 
 export const Route = createFileRoute("/_authed/account-settings")({
   head: () => ({ meta: [{ title: "Account Settings · Portfolio Console" }] }),
@@ -17,6 +20,7 @@ export const Route = createFileRoute("/_authed/account-settings")({
 });
 
 const ACCOUNT_FIELDS = [
+  { name: "avatar", label: "Profile avatar / photograph", type: "image", full: true, hint: "Upload an official profile image or portrait for your account" },
   { name: "full_name", label: "Full name", type: "text" },
   { name: "email", label: "Sign-in email", type: "text" },
   { name: "phone", label: "Telephone", type: "text" },
@@ -27,11 +31,13 @@ const ACCOUNT_FIELDS = [
 
 function AccountSettingsPage() {
   const { theme, setTheme } = useTheme();
+  const { user, updateUser } = useAuth();
   const [values, setValues] = useState({
-    full_name: PROFILE.name,
-    email: PROFILE.email,
+    avatar: user?.avatar || "",
+    full_name: user?.full_name || PROFILE.name,
+    email: user?.email || PROFILE.email,
     phone: PROFILE.phone,
-    designation: "Vice-Chancellor",
+    designation: user?.department || "Vice-Chancellor",
     timezone: "Asia/Kolkata (IST)",
     language: "English (India)",
   });
@@ -42,27 +48,76 @@ function AccountSettingsPage() {
     digest: false,
   });
   const [passwords, setPasswords] = useState({ current: "", next: "", confirm: "" });
+  const [showPasswords, setShowPasswords] = useState({ current: false, next: false, confirm: false });
+
+  useEffect(() => {
+    let active = true;
+    async function loadMe() {
+      try {
+        const me = await api.auth.me();
+        if (active && me) {
+          setValues((prev) => ({
+            ...prev,
+            avatar: me.avatar || prev.avatar,
+            full_name: me.name || prev.full_name,
+            email: me.email || prev.email,
+            designation: me.department || me.role || prev.designation,
+          }));
+        }
+      } catch (err) {
+        console.warn("Could not load user profile:", err);
+      }
+    }
+    loadMe();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const update = (name, value) => setValues((prev) => ({ ...prev, [name]: value }));
 
-  const saveProfile = () =>
-    toast.success("Account updated", { description: "Your console profile has been saved." });
+  const saveProfile = async () => {
+    toast.info("Updating account on server...");
+    try {
+      await api.auth.updateAccount({
+        name: values.full_name,
+        email: values.email,
+        department: values.designation,
+        avatar: values.avatar,
+      });
+      updateUser({
+        full_name: values.full_name,
+        email: values.email,
+        department: values.designation,
+        avatar: values.avatar,
+      });
+      toast.success("Account updated", { description: "Your console profile and avatar have been saved." });
+    } catch (err) {
+      toast.error(err.message || "Failed to update account");
+    }
+  };
 
-  const savePassword = () => {
+  const savePassword = async () => {
     if (!passwords.current) {
       toast.error("Enter your current password");
       return;
     }
-    if (passwords.next.length < 8) {
-      toast.error("New password must be at least 8 characters");
+    if (passwords.next.length < 6) {
+      toast.error("New password must be at least 6 characters");
       return;
     }
     if (passwords.next !== passwords.confirm) {
       toast.error("New passwords do not match");
       return;
     }
-    setPasswords({ current: "", next: "", confirm: "" });
-    toast.success("Password changed", { description: "Use your new password the next time you sign in." });
+    toast.info("Changing password...");
+    try {
+      await api.auth.changePassword(passwords.current, passwords.next);
+      setPasswords({ current: "", next: "", confirm: "" });
+      toast.success("Password changed", { description: "Use your new password the next time you sign in." });
+    } catch (err) {
+      toast.error(err.message || "Failed to change password");
+    }
   };
 
   return (
@@ -106,15 +161,34 @@ function AccountSettingsPage() {
                   <label className="mb-1.5 block text-xs font-semibold text-foreground">
                     {field.label}
                   </label>
-                  <input
-                    type="password"
-                    className={inputCls}
-                    placeholder="••••••••"
-                    value={passwords[field.key]}
-                    onChange={(event) =>
-                      setPasswords((prev) => ({ ...prev, [field.key]: event.target.value }))
-                    }
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPasswords[field.key] ? "text" : "password"}
+                      className={cn(inputCls, "pr-10")}
+                      placeholder="••••••••"
+                      value={passwords[field.key]}
+                      onChange={(event) =>
+                        setPasswords((prev) => ({ ...prev, [field.key]: event.target.value }))
+                      }
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowPasswords((prev) => ({
+                          ...prev,
+                          [field.key]: !prev[field.key],
+                        }))
+                      }
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground transition cursor-pointer"
+                      aria-label={showPasswords[field.key] ? "Hide password" : "Show password"}
+                    >
+                      {showPasswords[field.key] ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

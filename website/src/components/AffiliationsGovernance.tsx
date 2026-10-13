@@ -1,15 +1,37 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Users, Landmark, FileText, CheckCircle2 } from 'lucide-react';
-import { affiliationsList } from '../data/affiliationsData';
+import { ShieldCheck } from 'lucide-react';
+import { usePortfolio } from '../context/PortfolioContext';
 
 export const AffiliationsGovernance: React.FC = () => {
+  const { affiliations } = usePortfolio();
   const [activeCategory, setActiveCategory] = useState<string>('All');
 
-  const categories = ['All', 'Fellowship', 'Life Member', 'Board of Governors', 'Academic Governance', 'Editorial & Reviewer'];
+  const normalized = affiliations.map((item: any, idx: number) => {
+    const role = item.position || item.role;
+    const organization = item.body || item.organization;
+    const category = item.kind || item.category || 'Professional Body';
+    const period = item.since ? `Since ${item.since}` : item.period;
+    const details = item.notes || item.details;
+
+    return {
+      id: item.id || idx,
+      role,
+      organization,
+      category,
+      period,
+      details,
+    };
+  });
+
+  const categoriesSet = new Set<string>();
+  normalized.forEach((item) => {
+    if (item.category) categoriesSet.add(item.category);
+  });
+  const categories = ['All', ...Array.from(categoriesSet)];
 
   const filteredAffiliations = activeCategory === 'All'
-    ? affiliationsList
-    : affiliationsList.filter(a => a.category === activeCategory);
+    ? normalized
+    : normalized.filter((a) => a.category === activeCategory);
 
   return (
     <div className="section-content-wrapper">

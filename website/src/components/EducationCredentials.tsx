@@ -1,8 +1,19 @@
 import React from 'react';
-import { GraduationCap, Award, ShieldCheck, CheckCircle2, BookmarkCheck } from 'lucide-react';
-import { degrees, executiveCertifications } from '../data/educationData';
+import { GraduationCap, Award, ShieldCheck } from 'lucide-react';
+import { usePortfolio } from '../context/PortfolioContext';
 
 export const EducationCredentials: React.FC = () => {
+  const { education } = usePortfolio();
+
+  const isCert = (item: any) => {
+    const d = (item.degree || item.title || '').toLowerCase();
+    const g = (item.grade || '').toLowerCase();
+    return d.includes('certificate') || d.includes('certified') || d.includes('diploma') || g === 'certified';
+  };
+
+  const academicDegrees = education.filter((e: any) => !isCert(e));
+  const executiveCertifications = education.filter((e: any) => isCert(e));
+
   return (
     <div className="section-content-wrapper">
       <div className="content-header">
@@ -26,25 +37,33 @@ export const EducationCredentials: React.FC = () => {
         </h3>
 
         <div className="degrees-grid">
-          {degrees.map((deg, i) => (
-            <div key={i} className="degree-card">
-              <span className="degree-year-badge">{deg.year}</span>
-              <h4 className="degree-title">{deg.degree}</h4>
-              <div className="degree-field">{deg.field}</div>
-              <div className="degree-inst">{deg.institution}</div>
-              {deg.honors && (
-                <div className="degree-honors">
-                  <Award size={14} />
-                  <span>{deg.honors}</span>
-                </div>
-              )}
-              {deg.description && (
-                <p style={{ marginTop: '0.85rem', fontSize: '0.85rem', color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>
-                  {deg.description}
-                </p>
-              )}
-            </div>
-          ))}
+          {academicDegrees.map((deg: any, i: number) => {
+            const title = deg.degree || deg.title;
+            const field = deg.specialization || deg.field;
+            const inst = deg.institution || deg.issuingBody;
+            const honors = deg.grade || deg.honors;
+            const desc = deg.notes || deg.description;
+
+            return (
+              <div key={deg.id || i} className="degree-card">
+                {deg.year && <span className="degree-year-badge">{deg.year}</span>}
+                <h4 className="degree-title">{title}</h4>
+                {field && <div className="degree-field">{field}</div>}
+                <div className="degree-inst">{inst}</div>
+                {honors && (
+                  <div className="degree-honors">
+                    <Award size={14} />
+                    <span>{honors}</span>
+                  </div>
+                )}
+                {desc && (
+                  <p style={{ marginTop: '0.85rem', fontSize: '0.85rem', color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>
+                    {desc}
+                  </p>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -56,14 +75,21 @@ export const EducationCredentials: React.FC = () => {
         </h3>
 
         <div className="certifications-grid">
-          {executiveCertifications.map((cert, i) => (
-            <div key={i} className="cert-card">
-              <span className="badge badge-gold cert-badge-tag">{cert.badge}</span>
-              <h4 className="cert-title">{cert.title}</h4>
-              <div className="cert-body">{cert.issuingBody} {cert.year ? `(${cert.year})` : ''}</div>
-              <p className="cert-desc">{cert.description}</p>
-            </div>
-          ))}
+          {executiveCertifications.map((cert: any, i: number) => {
+            const title = cert.degree || cert.title;
+            const badge = cert.specialization || cert.badge || 'Executive Credential';
+            const inst = cert.institution || cert.issuingBody;
+            const desc = cert.notes || cert.description;
+
+            return (
+              <div key={cert.id || i} className="cert-card">
+                <span className="badge badge-gold cert-badge-tag">{badge}</span>
+                <h4 className="cert-title">{title}</h4>
+                <div className="cert-body">{inst} {cert.year ? `(${cert.year})` : ''}</div>
+                {desc && <p className="cert-desc">{desc}</p>}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

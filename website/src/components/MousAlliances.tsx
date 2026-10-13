@@ -1,15 +1,42 @@
 import React, { useState } from 'react';
-import { Globe2, Building2, Landmark, ExternalLink, CheckCircle2 } from 'lucide-react';
-import { strategicMoUsList } from '../data/mousData';
+import { Globe2, Building2, ExternalLink } from 'lucide-react';
+import { usePortfolio } from '../context/PortfolioContext';
 
 export const MousAlliances: React.FC = () => {
+  const { mous } = usePortfolio();
   const [activeTab, setActiveTab] = useState<string>('All');
 
-  const internationalMoUs = strategicMoUsList.filter(m => m.type === 'International');
-  const corporateMoUs = strategicMoUsList.filter(m => m.type === 'Corporate' || m.type === 'National Institute');
+  const normalizedMoUs = mous.map((m: any, idx: number) => {
+    const partnerName = m.partner || m.partnerName;
+    const country = m.country || 'Global';
+    const isIntl = m.type === 'International' || (country && !country.toLowerCase().includes('india'));
+    const type = m.type || (isIntl ? 'International' : 'Corporate');
+
+    let link = m.link || null;
+    let institutionAtSigning = m.institutionAtSigning || 'DAV University';
+
+    if (m.notes && !m.link) {
+      const linkMatch = m.notes.match(/https?:\/\/[^\s|]+/);
+      if (linkMatch) link = linkMatch[0];
+      institutionAtSigning = m.notes.split('|')[0].replace(/^Established at:\s*/, '').trim();
+    }
+
+    return {
+      id: m.id || idx,
+      partnerName,
+      country,
+      scope: m.scope,
+      type,
+      link,
+      institutionAtSigning,
+    };
+  });
+
+  const internationalMoUs = normalizedMoUs.filter((m) => m.type === 'International');
+  const corporateMoUs = normalizedMoUs.filter((m) => m.type !== 'International');
 
   const filteredList = activeTab === 'All'
-    ? strategicMoUsList
+    ? normalizedMoUs
     : activeTab === 'International'
       ? internationalMoUs
       : corporateMoUs;
@@ -35,7 +62,7 @@ export const MousAlliances: React.FC = () => {
           className={`filter-btn ${activeTab === 'All' ? 'active' : ''}`}
           onClick={() => setActiveTab('All')}
         >
-          All Strategic Partnerships ({strategicMoUsList.length})
+          All Strategic Partnerships ({normalizedMoUs.length})
         </button>
         <button
           className={`filter-btn ${activeTab === 'International' ? 'active' : ''}`}

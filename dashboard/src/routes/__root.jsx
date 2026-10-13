@@ -3,8 +3,11 @@ import { HeadContent, Outlet, Scripts, createRootRoute } from "@tanstack/react-r
 import { DefaultCatchBoundary } from "@/components/DefaultCatchBoundary";
 import { NotFound } from "@/components/NotFound";
 import { Toaster } from "@/components/ui/sonner";
-import { AuthProvider } from "@/lib/AuthContext";
+import { AuthProvider, useAuth } from "@/lib/AuthContext";
 import { ThemeProvider } from "@/lib/ThemeContext";
+import { updateFavicon } from "@/lib/utils";
+import api from "@/api/backendClient";
+import FullPageLoader from "@/components/layout/FullPageLoader";
 import appCss from "@/index.css?url";
 
 export const Route = createRootRoute({
@@ -29,21 +32,84 @@ export const Route = createRootRoute({
       { rel: "stylesheet", href: appCss },
       {
         rel: "icon",
-        type: "image/svg+xml",
-        href: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231e3a8a'/><text x='50' y='65' font-size='50' font-weight='bold' fill='white' text-anchor='middle'>MK</text></svg>",
+        href: "/favicon.svg",
       },
     ],
   }),
+  pendingComponent: FullPageLoader,
   errorComponent: DefaultCatchBoundary,
   notFoundComponent: () => <NotFound />,
   shellComponent: RootDocument,
   component: RootComponent,
 });
 
+function DynamicFavicon() {
+  const { user } = useAuth();
+  React.useEffect(() => {
+    if (typeof document === "undefined") return;
+    let active = true;
+
+    // 1. Immediately apply cached favicon from localStorage
+    try {
+      const cached = localStorage.getItem("mk-favicon");
+      if (cached) {
+        updateFavicon(cached);
+      }
+    } catch (e) {}
+
+    // 2. Fetch latest website settings (official uploaded favicon)
+    async function syncFavicon() {
+      try {
+        const settings = await api.settings.getWebsiteSettings();
+        if (!active) return;
+        const icon = settings?.favicon || user?.avatar || "/favicon.svg";
+        if (icon) {
+          updateFavicon(icon);
+        }
+      } catch (err) {
+        if (!active) return;
+        const icon = user?.avatar || "/favicon.svg";
+        if (icon) {
+          updateFavicon(icon);
+        }
+      }
+    }
+
+    syncFavicon();
+
+    // 3. Listen to global favicon updates across components and tabs
+    const onFaviconUpdate = (e) => {
+      const target = e?.detail;
+      if (target) {
+        updateFavicon(target);
+      } else {
+        syncFavicon();
+      }
+    };
+
+    window.addEventListener("favicon:updated", onFaviconUpdate);
+    const onStorage = (e) => {
+      if (e.key === "mk-favicon" && e.newValue) {
+        updateFavicon(e.newValue);
+      }
+    };
+    window.addEventListener("storage", onStorage);
+
+    return () => {
+      active = false;
+      window.removeEventListener("favicon:updated", onFaviconUpdate);
+      window.removeEventListener("storage", onStorage);
+    };
+  }, [user?.avatar]);
+
+  return null;
+}
+
 function RootComponent() {
   return (
     <ThemeProvider>
       <AuthProvider>
+        <DynamicFavicon />
         <Outlet />
         <Toaster />
       </AuthProvider>
@@ -56,8 +122,59 @@ function RootDocument({ children }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                var t = localStorage.getItem('mk-theme');
+                if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                  document.documentElement.classList.add('dark');
+                  document.documentElement.style.colorScheme = 'dark';
+                } else {
+                  document.documentElement.classList.remove('dark');
+                  document.documentElement.style.colorScheme = 'light';
+                }
+              } catch(e){}
+
+              try {
+                var f = localStorage.getItem('mk-favicon');
+                if (f) {
+                  var links = document.querySelectorAll("link[rel*='icon']");
+                  for (var i = 0; i < links.length; i++) {
+                    if (links[i].parentNode) links[i].parentNode.removeChild(links[i]);
+                  }
+                  var nl = document.createElement('link');
+                  nl.rel = 'icon';
+                  var clean = f.split('?')[0].toLowerCase();
+                  if (clean.indexOf('.svg') !== -1) nl.type = 'image/svg+xml';
+                  else if (clean.indexOf('.png') !== -1) nl.type = 'image/png';
+                  else if (clean.indexOf('.jpg') !== -1 || clean.indexOf('.jpeg') !== -1) nl.type = 'image/jpeg';
+                  else if (clean.indexOf('.webp') !== -1) nl.type = 'image/webp';
+                  else nl.type = 'image/x-icon';
+                  nl.href = f;
+                  document.head.appendChild(nl);
+
+                  var sl = document.createElement('link');
+                  sl.rel = 'shortcut icon';
+                  sl.type = nl.type;
+                  sl.href = f;
+                  document.head.appendChild(sl);
+                }
+              } catch(e){}
+
+              // Automatically unregister any legacy/rogue service workers causing Workbox network stalls on localhost
+              if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                  for (var i = 0; i < registrations.length; i++) {
+                    registrations[i].unregister();
+                  }
+                });
+              }
+            `,
+          }}
+        />
       </head>
-      <body data-react-root="true" suppressHydrationWarning>
+      <body data-react-root="true" suppressHydrationWarning className="min-h-screen bg-background text-foreground antialiased">
         {children}
         <Scripts />
       </body>

@@ -1,11 +1,18 @@
 import React from 'react';
 import { Users, FileText, GraduationCap, BookOpen, Lightbulb, Award, Globe } from 'lucide-react';
-import { executiveProfile } from '../data/profileData';
+import { usePortfolio } from '../context/PortfolioContext';
 
 export const StatStrip: React.FC = () => {
+  const { profile, liveMetrics } = usePortfolio();
+
+  const metrics = {
+    ...profile?.metrics,
+    ...liveMetrics,
+  };
+
   const stats = [
     {
-      num: `${executiveProfile.metrics.experienceYears}`,
+      num: `${metrics.experienceYears || 35}`,
       suffix: '+',
       label: 'Years Leadership',
       detail: 'Higher Education',
@@ -13,7 +20,7 @@ export const StatStrip: React.FC = () => {
       iconClass: 'stat-icon-crimson'
     },
     {
-      num: `${executiveProfile.metrics.publicationsCount}`,
+      num: `${metrics.publicationsCount || 151}`,
       suffix: '+',
       label: 'Publications',
       detail: 'SCI / Scopus / IEEE',
@@ -21,7 +28,7 @@ export const StatStrip: React.FC = () => {
       iconClass: 'stat-icon-navy'
     },
     {
-      num: `${executiveProfile.metrics.phdSupervisedCount}`,
+      num: `${metrics.supervisionCount || metrics.phdSupervisedCount || 9}`,
       suffix: '',
       label: 'Ph.D. Scholars',
       detail: 'Supervised & Guided',
@@ -29,7 +36,7 @@ export const StatStrip: React.FC = () => {
       iconClass: 'stat-icon-crimson'
     },
     {
-      num: '13',
+      num: `${metrics.booksCount || 13}`,
       suffix: '',
       label: 'Books & Chapters',
       detail: 'Authored & Edited',
@@ -37,7 +44,7 @@ export const StatStrip: React.FC = () => {
       iconClass: 'stat-icon-gold'
     },
     {
-      num: `${executiveProfile.metrics.patentsCount}`,
+      num: `${metrics.patentsCount || 4}`,
       suffix: '',
       label: 'Patents to Credit',
       detail: 'Published & Granted',
@@ -45,7 +52,7 @@ export const StatStrip: React.FC = () => {
       iconClass: 'stat-icon-gold'
     },
     {
-      num: `${executiveProfile.metrics.awardsCount}`,
+      num: `${metrics.awardsCount || 26}`,
       suffix: '+',
       label: 'National Awards',
       detail: '& Global Honors',
@@ -53,7 +60,7 @@ export const StatStrip: React.FC = () => {
       iconClass: 'stat-icon-crimson'
     },
     {
-      num: `${executiveProfile.metrics.mousCount}`,
+      num: `${metrics.mousCount || 26}`,
       suffix: '+',
       label: 'MoUs & Alliances',
       detail: 'Industry & Global',

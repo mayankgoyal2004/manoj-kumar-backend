@@ -1,0 +1,346 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  EDITOR
+  CONTRIBUTOR
+  VIEWER
+}
+
+enum UserStatus {
+  Active
+  Invited
+  Suspended
+}
+
+model User {
+  id          String      @id @default(uuid())
+  email       String      @unique
+  password    String
+  name        String
+  role        Role        @default(ADMIN)
+  department  String?
+  avatar      String?
+  status      UserStatus  @default(Active)
+  lastActive  DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Profile {
+  id                String   @id @default(uuid())
+  name              String   @default("Prof. (Dr.) Manoj Kumar")
+  salutation        String   @default("Prof. (Dr.)")
+  designation       String   @default("Vice-Chancellor")
+  institution       String   @default("DAV University, Jalandhar")
+  location          String   @default("Jalandhar, Punjab, India")
+  academicRank      String   @default("Senior Professor & Academic Administrator")
+  tagline           String   @default("Bridging Academic Excellence, Cutting-Edge Photonics Research, and Transformative Higher Education Governance")
+  quote             String   @default("Driving innovation, research and holistic education for a stronger, value-based society.")
+  bioSummary        String   @db.Text
+  fullBio           Json?    // Array of paragraphs: string[]
+  officeAddress     String?  @db.Text
+  residenceAddress  String?  @db.Text
+  officePhone       String?
+  mobilePhones      Json?    // Array of string phones
+  officialEmail     String?
+  personalEmail     String?
+  linkedIn          String?
+  orcid             String?
+  scopus            String?
+  scholar           String?
+  twitter           String?
+  youtube           String?
+  website           String?
+  photo             String?  @db.Text
+  headerPhoto       String?  @db.Text
+  sidebarPhoto      String?  @db.Text
+  bioPhoto          String?  @db.Text
+  expertise         Json?    // Array of expertise keywords: string[]
+  metrics           Json?    // Custom key-value stats: { experienceYears, publicationsCount, ... }
+  leadershipPillars Json?    // Array of pillars: [{ title, subtitle, description, icon }]
+  headerPositions   Json?    // Array of positions/affiliations for top header: string[]
+  updatedAt         DateTime @updatedAt
+  createdAt         DateTime @default(now())
+}
+
+model Position {
+  id           String   @id @default(uuid())
+  role         String
+  organisation String
+  location     String?
+  startYear    Int?
+  endYear      Int?
+  status       String   @default("Current") // "Current", "Completed"
+  description  String?  @db.Text
+  orderIndex   Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Education {
+  id             String   @id @default(uuid())
+  degree         String
+  institution    String
+  specialization String?
+  year           Int?
+  grade          String?
+  status         String   @default("Verified") // "Verified", "Pending"
+  notes          String?  @db.Text
+  orderIndex     Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Award {
+  id           String   @id @default(uuid())
+  title        String
+  organisation String?
+  category     String?  @default("National") // "National", "International", "Institutional", "Professional Body"
+  year         Int?
+  status       String   @default("Awarded") // "Awarded", "Nominated"
+  citation     String?  @db.Text
+  orderIndex   Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Patent {
+  id           String   @id @default(uuid())
+  title        String
+  patentNumber String?
+  country      String?  @default("India")
+  filingDate   String?
+  grantDate    String?
+  inventors    String?
+  status       String   @default("Published") // "Granted", "Published", "Filed", "Expired"
+  abstract     String?  @db.Text
+  orderIndex   Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Publication {
+  id              String   @id @default(uuid())
+  title           String
+  journal         String?
+  venue           String?
+  authors         String?
+  year            Int?
+  citations       Int      @default(0)
+  doi             String?
+  indexing        String?  @default("SCI") // "SCI", "Scopus", "UGC-CARE", "Web of Science", "Conference"
+  status          String   @default("Published") // "Published", "In Press", "Under Review", "Draft"
+  abstract        String?  @db.Text
+  publicationType String?  @default("Journal") // "Journal", "Conference", "Book Chapter"
+  url             String?
+  orderIndex      Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Book {
+  id         String   @id @default(uuid())
+  title      String
+  publisher  String?
+  kind       String   @default("Authored Book") // "Authored Book", "Edited Volume", "Chapter", "Monograph"
+  isbn       String?
+  year       Int?
+  coAuthors  String?
+  status     String   @default("Published") // "Published", "In Press", "Draft"
+  abstract   String?  @db.Text
+  orderIndex Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Grant {
+  id         String   @id @default(uuid())
+  project    String
+  agency     String?
+  amount     Float?   @default(0)
+  startYear  Int?
+  endYear    Int?
+  role       String?  @default("Principal Investigator") // "Principal Investigator", "Co-Investigator", "Mentor"
+  status     String   @default("Active") // "Active", "Sanctioned", "Completed"
+  outcomes   String?  @db.Text
+  orderIndex Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Supervision {
+  id           String   @id @default(uuid())
+  scholar      String
+  thesis       String?
+  program      String   @default("PhD") // "PhD", "M.Tech", "M.Phil", "Post-Doctoral"
+  enrolledYear Int?
+  coSupervisor String?
+  status       String   @default("Ongoing") // "Ongoing", "Awarded", "Submitted"
+  progress     String?  @db.Text
+  orderIndex   Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Conference {
+  id         String   @id @default(uuid())
+  title      String
+  event      String?
+  location   String?
+  date       String?
+  role       String?  @default("Keynote") // "Keynote", "Invited Talk", "Panelist", "Session Chair", "Paper Presentation"
+  status     String   @default("Delivered") // "Delivered", "Scheduled"
+  summary    String?  @db.Text
+  orderIndex Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Affiliation {
+  id         String   @id @default(uuid())
+  body       String
+  position   String?
+  kind       String?  @default("Governing Council") // "Governing Council", "Professional Body", "Statutory Committee", "Academic Senate"
+  since      Int?
+  status     String   @default("Current") // "Current", "Completed"
+  notes      String?  @db.Text
+  orderIndex Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Mou {
+  id         String   @id @default(uuid())
+  partner    String
+  country    String?
+  scope      String?
+  signedDate String?
+  validity   String?
+  status     String   @default("Active") // "Active", "Signed", "Expired"
+  notes      String?  @db.Text
+  orderIndex Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model News {
+  id         String   @id @default(uuid())
+  headline   String
+  outlet     String?
+  category   String?  @default("Press Release") // "Press Release", "Interview", "Feature", "Announcement", "Opinion"
+  date       String?
+  link       String?
+  image      String?  @db.Text
+  status     String   @default("Published") // "Published", "Draft", "Archived"
+  summary    String?  @db.Text
+  orderIndex Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model GalleryItem {
+  id         String   @id @default(uuid())
+  caption    String
+  album      String   @default("Campus") // "Campus", "Convocation", "Leadership", "Research Labs", "Events"
+  image      String   @db.Text
+  date       String?
+  credit     String?
+  status     String   @default("Published") // "Published", "Draft"
+  orderIndex Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model MediaAsset {
+  id        String   @id @default(uuid())
+  name      String
+  kind      String   @default("Image") // "Image", "Video", "Document", "Logo"
+  folder    String   @default("Brand") // "Brand", "Campus", "Events", "Publications", "Press Kit"
+  image     String   @db.Text
+  size      String?
+  status    String   @default("Published") // "Published", "Draft"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Document {
+  id         String   @id @default(uuid())
+  name       String
+  category   String   @default("Curriculum Vitae") // "Curriculum Vitae", "Certificates", "Policy", "Research", "Administration"
+  fileType   String   @default("PDF") // "PDF", "DOCX", "XLSX", "PPTX"
+  size       String?
+  fileUrl    String?  @db.Text
+  visibility String   @default("Public") // "Public", "Internal"
+  status     String   @default("Published") // "Published", "Draft", "Archived"
+  notes      String?  @db.Text
+  orderIndex Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model ContactMessage {
+  id           String    @id @default(uuid())
+  fullName     String
+  organization String?
+  email        String
+  phone        String?
+  purpose      String    @default("Academic Collaboration")
+  message      String    @db.Text
+  status       String    @default("Unread") // "Unread", "Read", "Responded", "Archived"
+  replyNote    String?   @db.Text
+  repliedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  title     String
+  kind      String   @default("System") // "System", "Review", "Publishing", "Security"
+  message   String   @db.Text
+  time      DateTime @default(now())
+  status    String   @default("Unread") // "Unread", "Read"
+  link      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ActivityLog {
+  id        String   @id @default(uuid())
+  actor     String
+  email     String?
+  action    String   // "created", "updated", "deleted", "login"
+  module    String   // "Publications", "Profile", "Auth", etc.
+  target    String   // Record title or action target
+  kind      String   @default("info") // "create", "update", "delete", "security"
+  ip        String?  @default("127.0.0.1")
+  time      DateTime @default(now())
+  details   Json?
+}
+
+model WebsiteSetting {
+  id           String   @id @default("default")
+  siteTitle    String   @default("Prof. (Dr.) Manoj Kumar")
+  tagline      String   @default("Vice-Chancellor · DAV University, Jalandhar")
+  description  String   @db.Text
+  favicon      String?  @db.Text
+  contactEmail String   @default("vc@davuniversity.org")
+  phone        String   @default("+91 181 662 8000")
+  address      String   @db.Text
+  footer       String   @default("© 2026 DAV University, Jalandhar. All rights reserved.")
+  linkedin     String?
+  x            String?
+  youtube      String?
+  sections     Json?    // { maintenance: false, hero: true, highlights: true, publications: true, ... }
+  updatedAt    DateTime @updatedAt
+  createdAt    DateTime @default(now())
+}

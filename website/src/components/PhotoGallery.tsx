@@ -1,22 +1,57 @@
 import React, { useState } from 'react';
 import { Play, Video, ExternalLink, X, Calendar, UserCheck } from 'lucide-react';
-import { galleryItems, GalleryItem } from '../data/galleryData';
+import { usePortfolio } from '../context/PortfolioContext';
+
+export interface GalleryItem {
+  id: string;
+  title: string;
+  category: string;
+  type: 'video' | 'image';
+  videoUrl?: string;
+  youtubeId?: string;
+  imageUrl?: string;
+  thumbnailUrl?: string;
+  caption: string;
+  year?: string;
+  channel?: string;
+  duration?: string;
+}
 
 export const PhotoGallery: React.FC = () => {
+  const { gallery: rawGallery } = usePortfolio();
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
 
+  const galleryItems: GalleryItem[] = rawGallery.map((item: any, idx: number) => {
+    const youtubeMatch = (item.image || item.videoUrl || '').match(/(?:vi\/|youtu\.be\/|v=)([a-zA-Z0-9_-]{11})/);
+    const youtubeId = item.youtubeId || (youtubeMatch ? youtubeMatch[1] : (idx === 0 ? 'McyJD5FNOVM' : undefined));
+    const isVideo = item.type === 'video' || !!youtubeId;
+
+    return {
+      id: item.id || `gal-${idx}`,
+      title: item.title || (item.caption?.slice(0, 50) ? `${item.caption.slice(0, 50)}...` : 'Institutional Gallery'),
+      category: item.category || item.album || 'Leadership',
+      type: isVideo ? 'video' : 'image',
+      youtubeId,
+      videoUrl: item.videoUrl || (youtubeId ? `https://youtu.be/${youtubeId}` : undefined),
+      imageUrl: item.imageUrl || item.image,
+      thumbnailUrl: item.thumbnailUrl || (youtubeId ? `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg` : item.image),
+      caption: item.caption || item.title || '',
+      year: item.year || item.date || '2026',
+      channel: item.channel || item.credit || '',
+    };
+  });
+
   // Extract unique categories dynamically
-  const existingCategories = Array.from(new Set(galleryItems.map(item => item.category)));
+  const existingCategories = Array.from(new Set(galleryItems.map((item) => item.category)));
   const categories = ['All', ...existingCategories];
 
   const filteredItems = activeCategory === 'All'
     ? galleryItems
-    : galleryItems.filter(item => item.category === activeCategory);
+    : galleryItems.filter((item) => item.category === activeCategory);
 
-  const featuredVideo = filteredItems.find(item => item.type === 'video');
-  // Only display other items in grid to avoid duplication
-  const otherItems = filteredItems.filter(item => item.id !== featuredVideo?.id);
+  const featuredVideo = filteredItems.find((item) => item.type === 'video');
+  const otherItems = filteredItems.filter((item) => item.id !== featuredVideo?.id);
 
   return (
     <div className="section-content-wrapper">
@@ -48,7 +83,7 @@ export const PhotoGallery: React.FC = () => {
         </div>
       )}
 
-      {/* Single Video Player Card (Split Layout for ideal, compact viewing) */}
+      {/* Single Video Player Card */}
       {featuredVideo && featuredVideo.youtubeId && (
         <div className="featured-media-card">
           <div className="featured-media-split">
@@ -104,11 +139,11 @@ export const PhotoGallery: React.FC = () => {
         </div>
       )}
 
-      {/* Additional Gallery Items Grid (only rendered if there are other distinct items) */}
+      {/* Additional Gallery Items Grid */}
       {otherItems.length > 0 && (
         <div className="gallery-grid">
           {otherItems.map((item) => {
-            const displayImage = item.imageUrl || item.thumbnailUrl || `https://img.youtube.com/vi/${item.youtubeId}/hqdefault.jpg`;
+            const displayImage = item.imageUrl || item.thumbnailUrl || (item.youtubeId ? `https://img.youtube.com/vi/${item.youtubeId}/hqdefault.jpg` : '');
             const isVideo = item.type === 'video' || !!item.youtubeId;
 
             return (
@@ -128,7 +163,7 @@ export const PhotoGallery: React.FC = () => {
                       }
                     }}
                   />
-                  
+
                   <span className="badge badge-gold gallery-category-badge">
                     {item.category}
                   </span>
@@ -148,17 +183,18 @@ export const PhotoGallery: React.FC = () => {
                 <div className="gallery-info">
                   <h4 className="gallery-title">{item.title}</h4>
                   <p className="gallery-caption">{item.caption}</p>
+
                   <div className="gallery-meta-row">
-                    <span>{item.channel || (item.year ? `Year: ${item.year}` : 'Institutional Media')}</span>
-                    <span className="gallery-watch-action">
-                      {isVideo ? (
-                        <>
-                          <Play size={13} fill="currentColor" /> Watch Video
-                        </>
-                      ) : (
-                        <>View Photo</>
-                      )}
-                    </span>
+                    {item.year && (
+                      <span className="gallery-meta-item">
+                        <Calendar size={13} /> {item.year}
+                      </span>
+                    )}
+                    {item.channel && (
+                      <span className="gallery-meta-item">
+                        <UserCheck size={13} /> {item.channel}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -167,61 +203,53 @@ export const PhotoGallery: React.FC = () => {
         </div>
       )}
 
-      {/* Lightbox / Video Modal (for grid items when clicked) */}
+      {/* Lightbox Modal */}
       {selectedItem && (
-        <div className="lightbox-overlay" onClick={() => setSelectedItem(null)}>
-          <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
-            <button 
-              className="lightbox-close-btn" 
+        <div className="gallery-lightbox-overlay" onClick={() => setSelectedItem(null)}>
+          <div className="gallery-lightbox-modal" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="gallery-lightbox-close"
               onClick={() => setSelectedItem(null)}
               title="Close modal"
             >
               <X size={20} />
             </button>
 
-            {selectedItem.type === 'video' || selectedItem.youtubeId ? (
-              <div className="lightbox-video-container">
-                <iframe
-                  src={`https://www.youtube-nocookie.com/embed/${selectedItem.youtubeId}?autoplay=1&rel=0`}
-                  title={selectedItem.title}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                />
-              </div>
-            ) : (
-              <img
-                src={selectedItem.imageUrl || selectedItem.thumbnailUrl}
-                alt={selectedItem.title}
-                className="lightbox-image"
-              />
-            )}
-
-            <div className="lightbox-details">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.65rem' }}>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  <span className="badge badge-crimson">{selectedItem.category}</span>
-                  {selectedItem.year && <span className="badge badge-gold">{selectedItem.year}</span>}
-                  {selectedItem.channel && <span className="badge badge-surface">{selectedItem.channel}</span>}
+            <div className="gallery-lightbox-content">
+              {selectedItem.type === 'video' && selectedItem.youtubeId ? (
+                <div className="lightbox-video-frame">
+                  <iframe
+                    src={`https://www.youtube-nocookie.com/embed/${selectedItem.youtubeId}?autoplay=1`}
+                    title={selectedItem.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
                 </div>
-                {(selectedItem.videoUrl || selectedItem.youtubeId) && (
+              ) : (
+                <img
+                  src={selectedItem.imageUrl || selectedItem.thumbnailUrl}
+                  alt={selectedItem.title}
+                  className="lightbox-full-img"
+                />
+              )}
+
+              <div className="lightbox-meta">
+                <span className="badge badge-gold">{selectedItem.category}</span>
+                <h3 className="lightbox-title">{selectedItem.title}</h3>
+                <p className="lightbox-caption">{selectedItem.caption}</p>
+
+                {selectedItem.videoUrl && (
                   <a
-                    href={selectedItem.videoUrl || `https://youtu.be/${selectedItem.youtubeId}`}
+                    href={selectedItem.videoUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="btn btn-outline"
-                    style={{ padding: '0.35rem 0.85rem', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+                    className="btn btn-crimson-sm"
+                    style={{ marginTop: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}
                   >
-                    Open on YouTube <ExternalLink size={13} />
+                    Open in YouTube <ExternalLink size={13} />
                   </a>
                 )}
               </div>
-              
-              <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.35rem', color: 'var(--color-crimson-900)', marginBottom: '0.4rem', fontWeight: 700 }}>
-                {selectedItem.title}
-              </h3>
-              <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem', lineHeight: '1.5' }}>
-                {selectedItem.caption}
-              </p>
             </div>
           </div>
         </div>

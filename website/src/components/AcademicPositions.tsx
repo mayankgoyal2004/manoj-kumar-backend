@@ -1,10 +1,38 @@
 import React from 'react';
-import { Briefcase, MapPin, Calendar, CheckCircle, Award } from 'lucide-react';
-import { careerPositions } from '../data/positionsData';
+import { Briefcase, MapPin, Calendar, Award } from 'lucide-react';
+import { usePortfolio } from '../context/PortfolioContext';
 
 export const AcademicPositions: React.FC = () => {
-  const currentPositions = careerPositions.filter(p => p.isCurrent);
-  const pastPositions = careerPositions.filter(p => !p.isCurrent);
+  const { positions } = usePortfolio();
+
+  const parseHighlights = (pos: any) => {
+    if (Array.isArray(pos.keyHighlights) && pos.keyHighlights.length) {
+      return pos.keyHighlights;
+    }
+    if (pos.description && pos.description.includes('Milestones:')) {
+      const parts = pos.description.split('Milestones:');
+      const lines = parts[1].split('\n').map((l: string) => l.replace(/^[•\-\*]\s*/, '').trim()).filter(Boolean);
+      return lines;
+    }
+    return [];
+  };
+
+  const cleanDescription = (pos: any) => {
+    if (pos.description && pos.description.includes('Milestones:')) {
+      return pos.description.split('Milestones:')[0].trim();
+    }
+    return pos.description || '';
+  };
+
+  const formatPeriod = (pos: any) => {
+    if (pos.period) return pos.period;
+    if (pos.startYear && pos.endYear) return `${pos.startYear} – ${pos.endYear}`;
+    if (pos.startYear && !pos.endYear) return `${pos.startYear} – Present`;
+    return 'Present';
+  };
+
+  const currentPositions = positions.filter((p: any) => p.status === 'Current' || p.isCurrent);
+  const pastPositions = positions.filter((p: any) => p.status !== 'Current' && !p.isCurrent);
 
   return (
     <div className="section-content-wrapper">
@@ -29,46 +57,55 @@ export const AcademicPositions: React.FC = () => {
         </h3>
 
         <div className="timeline-container">
-          {currentPositions.map((pos) => (
-            <div key={pos.id} className="timeline-item">
-              <div className="timeline-marker current"></div>
-              <div className="position-card current">
-                <div className="position-header">
-                  <div>
-                    <h4 className="position-role">{pos.role}</h4>
-                    <div className="position-org">{pos.institution}</div>
-                  </div>
-                  <span className="badge badge-crimson">Active Appointment</span>
-                </div>
+          {currentPositions.map((pos: any) => {
+            const highlights = parseHighlights(pos);
+            const desc = cleanDescription(pos);
+            const period = formatPeriod(pos);
+            const org = pos.organisation || pos.institution;
 
-                <div className="position-meta">
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                    <Calendar size={14} />
-                    <span>{pos.period}</span>
-                  </span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                    <MapPin size={14} />
-                    <span>{pos.location}</span>
-                  </span>
-                </div>
-
-                <p className="position-desc">{pos.description}</p>
-
-                {pos.keyHighlights && pos.keyHighlights.length > 0 && (
-                  <div>
-                    <div style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--color-crimson-800)', marginBottom: '0.4rem', letterSpacing: '0.04em' }}>
-                      Key Leadership Milestones
+            return (
+              <div key={pos.id} className="timeline-item">
+                <div className="timeline-marker current"></div>
+                <div className="position-card current">
+                  <div className="position-header">
+                    <div>
+                      <h4 className="position-role">{pos.role}</h4>
+                      <div className="position-org">{org}</div>
                     </div>
-                    <ul className="position-highlights-list">
-                      {pos.keyHighlights.map((hl, i) => (
-                        <li key={i}>{hl}</li>
-                      ))}
-                    </ul>
+                    <span className="badge badge-crimson">Active Appointment</span>
                   </div>
-                )}
+
+                  <div className="position-meta">
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                      <Calendar size={14} />
+                      <span>{period}</span>
+                    </span>
+                    {pos.location && (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                        <MapPin size={14} />
+                        <span>{pos.location}</span>
+                      </span>
+                    )}
+                  </div>
+
+                  {desc && <p className="position-desc">{desc}</p>}
+
+                  {highlights.length > 0 && (
+                    <div>
+                      <div style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--color-crimson-800)', marginBottom: '0.4rem', letterSpacing: '0.04em' }}>
+                        Key Leadership Milestones
+                      </div>
+                      <ul className="position-highlights-list">
+                        {highlights.map((hl: string, i: number) => (
+                          <li key={i}>{hl}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -80,41 +117,50 @@ export const AcademicPositions: React.FC = () => {
         </h3>
 
         <div className="timeline-container">
-          {pastPositions.map((pos) => (
-            <div key={pos.id} className="timeline-item">
-              <div className="timeline-marker"></div>
-              <div className="position-card">
-                <div className="position-header">
-                  <div>
-                    <h4 className="position-role">{pos.role}</h4>
-                    <div className="position-org">{pos.institution}</div>
+          {pastPositions.map((pos: any) => {
+            const highlights = parseHighlights(pos);
+            const desc = cleanDescription(pos);
+            const period = formatPeriod(pos);
+            const org = pos.organisation || pos.institution;
+
+            return (
+              <div key={pos.id} className="timeline-item">
+                <div className="timeline-marker"></div>
+                <div className="position-card">
+                  <div className="position-header">
+                    <div>
+                      <h4 className="position-role">{pos.role}</h4>
+                      <div className="position-org">{org}</div>
+                    </div>
+                    <span className="badge badge-navy">{pos.type || 'Academic'}</span>
                   </div>
-                  <span className="badge badge-navy">{pos.type}</span>
+
+                  <div className="position-meta">
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                      <Calendar size={14} />
+                      <span>{period}</span>
+                    </span>
+                    {pos.location && (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                        <MapPin size={14} />
+                        <span>{pos.location}</span>
+                      </span>
+                    )}
+                  </div>
+
+                  {desc && <p className="position-desc">{desc}</p>}
+
+                  {highlights.length > 0 && (
+                    <ul className="position-highlights-list">
+                      {highlights.map((hl: string, i: number) => (
+                        <li key={i}>{hl}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
-
-                <div className="position-meta">
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                    <Calendar size={14} />
-                    <span>{pos.period}</span>
-                  </span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                    <MapPin size={14} />
-                    <span>{pos.location}</span>
-                  </span>
-                </div>
-
-                <p className="position-desc">{pos.description}</p>
-
-                {pos.keyHighlights && pos.keyHighlights.length > 0 && (
-                  <ul className="position-highlights-list">
-                    {pos.keyHighlights.map((hl, i) => (
-                      <li key={i}>{hl}</li>
-                    ))}
-                  </ul>
-                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

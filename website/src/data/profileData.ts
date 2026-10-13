@@ -8,6 +8,10 @@ export interface ExecutiveProfile {
   academicRank: string;
   tagline: string;
   quote: string;
+  photo?: string;
+  headerPhoto?: string;
+  sidebarPhoto?: string;
+  bioPhoto?: string;
   bioSummary: string;
   fullBio: string[];
   contact: {
@@ -18,6 +22,12 @@ export interface ExecutiveProfile {
     officialEmail: string;
     personalEmail: string;
     linkedIn: string;
+    orcid?: string;
+    scopus?: string;
+    scholar?: string;
+    twitter?: string;
+    youtube?: string;
+    website?: string;
   };
   metrics: {
     experienceYears: number;
@@ -52,6 +62,10 @@ export const executiveProfile: ExecutiveProfile = {
   academicRank: "Senior Professor & Academic Administrator",
   tagline: "Bridging Academic Excellence, Cutting-Edge Photonics Research, and Transformative Higher Education Governance",
   quote: "Driving innovation, research and holistic education for a stronger, value-based society.",
+  photo: "/images/prof_manoj_kumar.jpg",
+  headerPhoto: "/images/prof_manoj_kumar.jpg",
+  sidebarPhoto: "/images/unnamed.webp",
+  bioPhoto: "/images/iamge-2.webp",
   bioSummary: "Prof. (Dr.) Manoj Kumar is an eminent academician, administrator, and researcher with over 35 years of distinguished experience in engineering education, photonics & optical wireless communications research, and university governance. Currently serving as the Vice-Chancellor of DAV University, Jalandhar, he also serves as Dean's Visiting Scholar at the University of Memphis School of Public Health (USA), President of Jalandhar Management Association (AIMA), and Honorary Colonel Commandant in the National Cadet Corps (NCC).",
   fullBio: [
     "Prof. (Dr.) Manoj Kumar apart from being an administrator par excellence, is a brilliant researcher with exciting ideas and quality publications. He received his B.E. (Electronics & Communication Engineering) in 1990, M.Tech. (Electronics & Communication Engineering) in 2001 (Silver Medalist at Punjab Technical University), and Ph.D. from Punjab Technical University, Jalandhar in 2007.",
@@ -66,7 +80,8 @@ export const executiveProfile: ExecutiveProfile = {
     mobilePhones: ["+91 9872203898", "+91 9478101102"],
     officialEmail: "drmanojkumarindia@gmail.com",
     personalEmail: "drmanojkumarindia@gmail.com",
-    linkedIn: "https://in.linkedin.com/in/dr-manoj-kumar-56183928"
+    linkedIn: "https://in.linkedin.com/in/dr-manoj-kumar-56183928",
+    website: "https://www.davuniversity.org"
   },
   metrics: {
     experienceYears: 35,

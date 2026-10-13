@@ -1,15 +1,21 @@
 import React, { useState } from 'react';
-import { Award, Trophy, Medal, Building2, Landmark, CheckCircle } from 'lucide-react';
-import { awardsList } from '../data/awardsData';
+import { Trophy, Building2 } from 'lucide-react';
+import { usePortfolio } from '../context/PortfolioContext';
 
 export const AwardsRecognitions: React.FC = () => {
+  const { awards } = usePortfolio();
   const [activeCategory, setActiveCategory] = useState<string>('All');
 
-  const filteredAwards = activeCategory === 'All'
-    ? awardsList
-    : awardsList.filter(a => a.category === activeCategory);
+  // Dynamically extract categories
+  const categoriesSet = new Set<string>();
+  awards.forEach((a: any) => {
+    if (a.category) categoriesSet.add(a.category);
+  });
+  const categories = ['All', ...Array.from(categoriesSet)];
 
-  const categories = ['All', 'Personal', 'Institutional', 'Government'];
+  const filteredAwards = activeCategory === 'All'
+    ? awards
+    : awards.filter((a: any) => a.category === activeCategory);
 
   return (
     <div className="section-content-wrapper">
@@ -28,45 +34,56 @@ export const AwardsRecognitions: React.FC = () => {
 
       {/* Filter Toolbar */}
       <div className="awards-filter-bar">
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            className={`filter-btn ${activeCategory === cat ? 'active' : ''}`}
-            onClick={() => setActiveCategory(cat)}
-          >
-            {cat === 'All' ? 'All Honors & Accolades' : `${cat} Awards`}
-            {' '}
-            <span style={{ opacity: 0.7, fontSize: '0.75rem', fontFamily: 'var(--font-mono)' }}>
-              ({cat === 'All' ? awardsList.length : awardsList.filter(a => a.category === cat).length})
-            </span>
-          </button>
-        ))}
+        {categories.map((cat) => {
+          const count = cat === 'All' ? awards.length : awards.filter((a: any) => a.category === cat).length;
+          return (
+            <button
+              key={cat}
+              className={`filter-btn ${activeCategory === cat ? 'active' : ''}`}
+              onClick={() => setActiveCategory(cat)}
+            >
+              {cat === 'All' ? 'All Honors & Accolades' : `${cat} Awards`}
+              {' '}
+              <span style={{ opacity: 0.7, fontSize: '0.75rem', fontFamily: 'var(--font-mono)' }}>
+                ({count})
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Awards List */}
       <div className="awards-cards-list">
-        {filteredAwards.map((award) => (
-          <div key={award.id} className="award-card">
-            <div className="award-medal-icon">
-              {award.category === 'Institutional' ? <Building2 size={22} /> : <Trophy size={22} />}
-            </div>
+        {filteredAwards.map((award: any) => {
+          const conferringBody = award.organisation || award.conferringBody;
+          const desc = award.citation || award.description;
+          const isInst = award.category === 'Institutional';
 
-            <div className="award-content">
-              <div className="award-header-row">
-                <h4 className="award-title">{award.title}</h4>
-                <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                  <span className="badge badge-gold">{award.year}</span>
-                  <span className={`badge ${award.category === 'Institutional' ? 'badge-navy' : 'badge-crimson'}`}>
-                    {award.category}
-                  </span>
-                </div>
+          return (
+            <div key={award.id} className="award-card">
+              <div className="award-medal-icon">
+                {isInst ? <Building2 size={22} /> : <Trophy size={22} />}
               </div>
 
-              <div className="award-conferring">{award.conferringBody}</div>
-              <p className="award-desc">{award.description}</p>
+              <div className="award-content">
+                <div className="award-header-row">
+                  <h4 className="award-title">{award.title}</h4>
+                  <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                    {award.year && <span className="badge badge-gold">{award.year}</span>}
+                    {award.category && (
+                      <span className={`badge ${isInst ? 'badge-navy' : 'badge-crimson'}`}>
+                        {award.category}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {conferringBody && <div className="award-conferring">{conferringBody}</div>}
+                {desc && <p className="award-desc">{desc}</p>}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

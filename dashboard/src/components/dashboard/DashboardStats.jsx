@@ -5,9 +5,20 @@ import { useData } from "@/lib/DataStore";
 import { formatINR } from "@/lib/format";
 
 export default function DashboardStats() {
-  const { collections } = useData();
+  const { collections, dashboardStats } = useData();
 
   const stats = useMemo(() => {
+    if (dashboardStats?.summary) {
+      return {
+        publications: dashboardStats.summary.publications ?? 0,
+        citations: dashboardStats.summary.totalCitations ?? 0,
+        ongoing: dashboardStats.summary.supervision ?? 0,
+        scholars: dashboardStats.summary.supervision ?? 0,
+        funding: dashboardStats.summary.grantsAmount ?? 0,
+        activeGrants: dashboardStats.summary.activeGrants ?? 0,
+      };
+    }
+
     const publications = collections.publications || [];
     const citations = publications.reduce((sum, row) => sum + (Number(row.citations) || 0), 0);
     const scholars = collections.supervision || [];
@@ -20,7 +31,7 @@ export default function DashboardStats() {
       funding: grants.reduce((sum, row) => sum + (Number(row.amount) || 0), 0),
       activeGrants: grants.filter((row) => row.status === "Active").length,
     };
-  }, [collections]);
+  }, [collections, dashboardStats]);
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">

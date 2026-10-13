@@ -1,8 +1,18 @@
 import React from 'react';
-import { Users, GraduationCap, Calendar, BookOpen, CheckCircle } from 'lucide-react';
-import { phdScholarsList, mtechSupervisionList } from '../data/phdSupervisionData';
+import { GraduationCap, BookOpen } from 'lucide-react';
+import { usePortfolio } from '../context/PortfolioContext';
 
 export const PhdSupervision: React.FC = () => {
+  const { supervision } = usePortfolio();
+
+  const isMtech = (s: any) => {
+    const prog = (s.program || '').toLowerCase();
+    return prog.includes('tech') || prog.includes('postgrad') || prog.includes('master');
+  };
+
+  const phdScholars = supervision.filter((s: any) => !isMtech(s));
+  const mtechTheses = supervision.filter((s: any) => isMtech(s));
+
   return (
     <div className="section-content-wrapper">
       <div className="content-header">
@@ -14,7 +24,7 @@ export const PhdSupervision: React.FC = () => {
         <div className="content-eyebrow">Doctoral Mentorship</div>
         <h2 className="content-title">Ph.D. Supervision & Mentorship</h2>
         <div className="content-subtitle">
-          Supervision of 09 successfully defended and awarded Ph.D. dissertations and 19 M.Tech. postgraduate theses
+          Supervision of successfully defended and awarded Ph.D. dissertations and M.Tech. postgraduate theses
         </div>
       </div>
 
@@ -22,61 +32,79 @@ export const PhdSupervision: React.FC = () => {
       <div style={{ marginBottom: '2.5rem' }}>
         <h3 style={{ fontSize: '1.35rem', color: 'var(--color-crimson-900)', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <GraduationCap size={20} />
-          <span>Doctor of Philosophy (Ph.D.) Scholars (Awarded: 09)</span>
+          <span>Doctor of Philosophy (Ph.D.) Scholars (Awarded: {String(phdScholars.length).padStart(2, '0')})</span>
         </h3>
 
         <div className="phd-grid">
-          {phdScholarsList.map((scholar) => (
-            <div key={scholar.id} className="phd-card">
-              <h4 className="phd-scholar-name">{scholar.scholarName}</h4>
-              <div className="phd-award-date">
-                Awarded: {scholar.awardDate} • {scholar.institution}
-              </div>
+          {phdScholars.map((scholar: any, i: number) => {
+            const name = scholar.scholar || scholar.scholarName;
+            const thesis = scholar.thesis || scholar.thesisTitle;
+            const year = scholar.awardDate || scholar.enrolledYear || 'Awarded';
+            const impact = scholar.progress || scholar.impactSummary;
+            const domain = scholar.domain || 'Photonics & Wireless Communications';
 
-              <div className="phd-thesis-title">
-                "{scholar.thesisTitle}"
-              </div>
+            return (
+              <div key={scholar.id || i} className="phd-card">
+                <h4 className="phd-scholar-name">{name}</h4>
+                <div className="phd-award-date">
+                  Awarded: {year}
+                </div>
 
-              <div className="phd-domain-tag">
-                <span className="badge badge-navy">{scholar.domain}</span>
-              </div>
+                {thesis && (
+                  <div className="phd-thesis-title">
+                    "{thesis}"
+                  </div>
+                )}
 
-              <p className="phd-impact">{scholar.impactSummary}</p>
-            </div>
-          ))}
+                <div className="phd-domain-tag">
+                  <span className="badge badge-navy">{domain}</span>
+                </div>
+
+                {impact && <p className="phd-impact">{impact}</p>}
+              </div>
+            );
+          })}
         </div>
       </div>
 
       {/* M.Tech Theses Supervised */}
-      <div>
-        <h3 style={{ fontSize: '1.35rem', color: 'var(--color-crimson-900)', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <BookOpen size={19} />
-          <span>M.Tech. Postgraduate Theses Supervised (19 Theses)</span>
-        </h3>
+      {mtechTheses.length > 0 && (
+        <div>
+          <h3 style={{ fontSize: '1.35rem', color: 'var(--color-crimson-900)', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <BookOpen size={19} />
+            <span>M.Tech. Postgraduate Theses Supervised ({mtechTheses.length} Theses)</span>
+          </h3>
 
-        <div className="mtech-table-wrapper">
-          <table className="academic-table">
-            <thead>
-              <tr>
-                <th style={{ width: '60px' }}>#</th>
-                <th style={{ width: '220px' }}>Candidate Name</th>
-                <th>M.Tech. Thesis Title</th>
-                <th style={{ width: '100px', textAlign: 'center' }}>Year</th>
-              </tr>
-            </thead>
-            <tbody>
-              {mtechSupervisionList.map((item) => (
-                <tr key={item.id}>
-                  <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>{item.id.toString().padStart(2, '0')}</td>
-                  <td style={{ fontWeight: 600, color: 'var(--color-crimson-900)' }}>{item.scholarName}</td>
-                  <td>{item.thesisTitle}</td>
-                  <td style={{ textAlign: 'center', fontFamily: 'var(--font-mono)' }}>{item.year}</td>
+          <div className="mtech-table-wrapper">
+            <table className="academic-table">
+              <thead>
+                <tr>
+                  <th style={{ width: '60px' }}>#</th>
+                  <th style={{ width: '220px' }}>Candidate Name</th>
+                  <th>M.Tech. Thesis Title</th>
+                  <th style={{ width: '100px', textAlign: 'center' }}>Year</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {mtechTheses.map((item: any, idx: number) => {
+                  const name = item.scholar || item.scholarName;
+                  const thesis = item.thesis || item.thesisTitle;
+                  const year = item.enrolledYear || item.year;
+
+                  return (
+                    <tr key={item.id || idx}>
+                      <td style={{ fontFamily: 'var(--font-mono)', fontWeight: 600 }}>{String(idx + 1).padStart(2, '0')}</td>
+                      <td style={{ fontWeight: 600, color: 'var(--color-crimson-900)' }}>{name}</td>
+                      <td>{thesis}</td>
+                      <td style={{ textAlign: 'center', fontFamily: 'var(--font-mono)' }}>{year || '—'}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

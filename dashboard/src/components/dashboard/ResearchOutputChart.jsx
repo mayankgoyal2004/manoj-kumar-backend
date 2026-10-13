@@ -1,17 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import SectionCard from "@/components/kit/SectionCard";
-
-const DATA = [
-  { year: "2019", publications: 9, citations: 210 },
-  { year: "2020", publications: 11, citations: 320 },
-  { year: "2021", publications: 14, citations: 430 },
-  { year: "2022", publications: 17, citations: 560 },
-  { year: "2023", publications: 19, citations: 690 },
-  { year: "2024", publications: 22, citations: 880 },
-  { year: "2025", publications: 26, citations: 1120 },
-  { year: "2026", publications: 24, citations: 1290 },
-];
+import { useData } from "@/lib/DataStore";
 
 const tooltipStyle = {
   borderRadius: 12,
@@ -23,6 +13,11 @@ const tooltipStyle = {
 };
 
 export default function ResearchOutputChart() {
+  const { dashboardStats } = useData();
+
+  const data = useMemo(() => {
+    return dashboardStats?.researchOutputTrends || [];
+  }, [dashboardStats?.researchOutputTrends]);
   return (
     <SectionCard
       title="Research output"
@@ -40,7 +35,7 @@ export default function ResearchOutputChart() {
     >
       <div className="h-[264px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={DATA} margin={{ top: 6, right: 8, left: -18, bottom: 0 }}>
+          <AreaChart data={data} margin={{ top: 6, right: 8, left: -18, bottom: 0 }}>
             <defs>
               <linearGradient id="fillPublications" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="hsl(var(--chart-1))" stopOpacity={0.32} />

@@ -10,11 +10,11 @@ import { formatRelative } from "@/lib/format";
 import { MODULE_ROUTES } from "@/lib/navConfig";
 
 export default function PortfolioActivity() {
-  const { collections } = useData();
+  const { collections, dashboardStats } = useData();
 
   const timelineItems = useMemo(
     () =>
-      (collections.activity || []).slice(0, 6).map((entry) => ({
+      (dashboardStats?.recentActivity || collections.activity || []).slice(0, 6).map((entry) => ({
         id: entry.id,
         actor: entry.actor,
         action: entry.action,
@@ -23,27 +23,15 @@ export default function PortfolioActivity() {
         timeLabel: formatRelative(entry.time),
         meta: entry.module,
       })),
-    [collections.activity]
+    [dashboardStats?.recentActivity, collections.activity]
   );
 
   const recentlyUpdated = useMemo(() => {
-    const records = [];
-    CONTENT_KEYS.forEach((key) => {
-      (collections[key] || []).forEach((row) => {
-        records.push({
-          id: row.id,
-          key,
-          title: recordTitle(key, row),
-          module: MODULES[key].short || MODULES[key].title,
-          status: row.status,
-          updated: row.updated_date,
-        });
-      });
-    });
-    return records
-      .sort((a, b) => new Date(b.updated) - new Date(a.updated))
-      .slice(0, 6);
-  }, [collections]);
+    if (dashboardStats?.recentlyUpdated && Array.isArray(dashboardStats.recentlyUpdated)) {
+      return dashboardStats.recentlyUpdated;
+    }
+    return [];
+  }, [dashboardStats?.recentlyUpdated]);
 
   return (
     <div className="space-y-5">

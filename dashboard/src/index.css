@@ -172,3 +172,48 @@
 .animate-fade {
   animation: fade 0.24s ease-out both;
 }
+
+@keyframes loader-spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes loader-spin-reverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes loader-pulse-glow {
+  0%, 100% { opacity: 0.35; transform: scale(0.95); }
+  50% { opacity: 0.8; transform: scale(1.08); }
+}
+
+@keyframes loader-shimmer {
+  0% { transform: translateX(-150%); }
+  100% { transform: translateX(250%); }
+}
+
+@keyframes loader-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+
+.animate-loader-spin {
+  animation: loader-spin-slow 14s linear infinite;
+}
+
+.animate-loader-spin-reverse {
+  animation: loader-spin-reverse 20s linear infinite;
+}
+
+.animate-loader-glow {
+  animation: loader-pulse-glow 3.5s ease-in-out infinite;
+}
+
+.animate-loader-shimmer {
+  animation: loader-shimmer 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-loader-float {
+  animation: loader-float 4s ease-in-out infinite;
+}

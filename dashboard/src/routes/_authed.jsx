@@ -1,9 +1,27 @@
-import React, { useEffect } from "react";
-import { Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
+import React, { useEffect, Suspense } from "react";
+import { Outlet, createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import AppShell from "@/components/layout/AppShell";
+import FullPageLoader from "@/components/layout/FullPageLoader";
+import RouteContentLoader from "@/components/layout/RouteContentLoader";
 import { useAuth } from "@/lib/AuthContext";
+import { getAuthToken } from "@/api/backendClient";
 
 export const Route = createFileRoute("/_authed")({
+  ssr: false,
+  beforeLoad: ({ location }) => {
+    if (typeof window !== "undefined") {
+      const token = getAuthToken();
+      if (!token) {
+        throw redirect({
+          to: "/login",
+          search: {
+            redirect: location.href,
+          },
+        });
+      }
+    }
+  },
+  pendingComponent: FullPageLoader,
   component: AuthedLayout,
 });
 
@@ -12,25 +30,21 @@ function AuthedLayout() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isLoadingAuth && !user) {
+    const token = getAuthToken();
+    if (!token || (!isLoadingAuth && !user)) {
       navigate({ to: "/login", replace: true });
     }
   }, [user, isLoadingAuth, navigate]);
 
-  if (!user) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0a192f] text-white">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-7 w-7 animate-spin rounded-full border-2 border-white/20 border-t-white" />
-          <span className="text-xs text-slate-300 font-medium tracking-wide">Signing out...</span>
-        </div>
-      </div>
-    );
+  if (isLoadingAuth || !user) {
+    return <FullPageLoader message={isLoadingAuth ? "Authenticating session..." : "Preparing console..."} />;
   }
 
   return (
     <AppShell>
-      <Outlet />
+      <Suspense fallback={<RouteContentLoader />}>
+        <Outlet />
+      </Suspense>
     </AppShell>
   );
 }

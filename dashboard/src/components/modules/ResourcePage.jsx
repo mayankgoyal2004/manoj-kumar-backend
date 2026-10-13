@@ -6,6 +6,7 @@ import ConfirmDialog from "@/components/kit/ConfirmDialog";
 import DataTable from "@/components/kit/DataTable";
 import DetailList from "@/components/kit/DetailList";
 import Drawer from "@/components/kit/Drawer";
+import EmptyState from "@/components/kit/EmptyState";
 import Modal from "@/components/kit/Modal";
 import Pagination from "@/components/kit/Pagination";
 import PageHeader from "@/components/kit/PageHeader";
@@ -21,6 +22,7 @@ import { MODULES, recordTitle } from "@/lib/data/modules";
 import { formatDate } from "@/lib/format";
 import { findNavItem } from "@/lib/navConfig";
 import { cn } from "@/lib/utils";
+import api from "@/api/backendClient";
 
 const PAGE_SIZE = 8;
 
@@ -34,7 +36,9 @@ function defaultsFor(config) {
 
 export default function ResourcePage({ moduleKey }) {
   const config = MODULES[moduleKey];
-  const { collections, create, update, remove } = useData();
+  const { collections, create, update, remove, fetchModule, loadingModules, loadedKeys } = useData();
+  const isLoaded = loadedKeys?.has(moduleKey);
+  const isLoading = Boolean(loadingModules?.[moduleKey] || !isLoaded);
   const rows = collections[moduleKey] || [];
   const navItem = findNavItem(`/${moduleKey}`);
 
@@ -47,6 +51,13 @@ export default function ResourcePage({ moduleKey }) {
   const [editingId, setEditingId] = useState(null);
   const [formValues, setFormValues] = useState(() => defaultsFor(config));
   const [deleteTarget, setDeleteTarget] = useState(null);
+
+  // Lazy load this specific module from backend PostgreSQL
+  useEffect(() => {
+    if (moduleKey && fetchModule) {
+      fetchModule(moduleKey);
+    }
+  }, [moduleKey, fetchModule]);
 
   useEffect(() => {
     setQuery("");
@@ -62,22 +73,39 @@ export default function ResourcePage({ moduleKey }) {
     setFormOpen(true);
   };
 
-  const handleUpload = (event) => {
+  const handleUpload = async (event) => {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
     const megabytes = file.size / 1048576;
     const size = megabytes >= 1 ? `${megabytes.toFixed(1)} MB` : `${Math.max(1, Math.round(file.size / 1024))} KB`;
-    const record = {
-      name: file.name.replace(/\.[^.]+$/, ""),
-      kind: file.type.startsWith("video") ? "Video" : file.type.startsWith("image") ? "Image" : "Document",
-      folder: "Brand",
-      image: URL.createObjectURL(file),
-      size,
-      status: "Draft",
-    };
-    create(moduleKey, record);
-    toast.success("Asset added to the library", { description: `${record.name} · ${size}` });
+
+    try {
+      toast.info("Uploading asset to server...");
+      const uploaded = await api.upload(file);
+      const record = {
+        name: uploaded?.originalName?.replace(/\.[^.]+$/, "") || file.name.replace(/\.[^.]+$/, ""),
+        kind: uploaded?.asset?.kind || (file.type.startsWith("video") ? "Video" : file.type.startsWith("image") ? "Image" : "Document"),
+        folder: "Brand",
+        image: uploaded?.url || URL.createObjectURL(file),
+        size: uploaded?.size || size,
+        status: "Draft",
+      };
+      create(moduleKey, record);
+      toast.success("Asset uploaded and saved", { description: `${record.name} · ${record.size}` });
+    } catch (err) {
+      console.warn("Backend upload failed, saving local preview:", err);
+      const record = {
+        name: file.name.replace(/\.[^.]+$/, ""),
+        kind: file.type.startsWith("video") ? "Video" : file.type.startsWith("image") ? "Image" : "Document",
+        folder: "Brand",
+        image: URL.createObjectURL(file),
+        size,
+        status: "Draft",
+      };
+      create(moduleKey, record);
+      toast.success("Asset added to the library (local)", { description: `${record.name} · ${size}` });
+    }
   };
 
   const filters = useMemo(() => {
@@ -209,6 +237,23 @@ export default function ResourcePage({ moduleKey }) {
 
   const breadcrumb = [navItem?.section || "Console", config.short || config.title];
 
+  if (isLoading && rows.length === 0) {
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          eyebrow="Loading live records…"
+          title={config.title}
+          description={config.description}
+          breadcrumb={breadcrumb}
+        />
+        <div className="surface rounded-xl p-16 text-center flex flex-col items-center justify-center gap-3">
+          <div className="h-7 w-7 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
+          <span className="text-xs text-muted-foreground font-medium">Loading {config.short || config.title} from database…</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <PageHeader
@@ -263,10 +308,18 @@ export default function ResourcePage({ moduleKey }) {
         />
 
         {config.view === "grid" ? (
-          <div className="p-5">
-            <CardGrid
-              items={paged}
-              columns={3}
+          paged.length === 0 ? (
+            <div className="p-8">
+              <EmptyState
+                title={`No ${config.short?.toLowerCase() || "records"} found`}
+                description="Adjust your search and filters, or upload the first item for this module."
+              />
+            </div>
+          ) : (
+            <div className="p-5">
+              <CardGrid
+                items={paged}
+                columns={3}
               renderCard={(row) => (
                 <button
                   type="button"
@@ -295,6 +348,7 @@ export default function ResourcePage({ moduleKey }) {
               )}
             />
           </div>
+          )
         ) : (
           <DataTable
             columns={config.columns}

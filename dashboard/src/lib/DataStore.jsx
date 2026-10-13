@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { MODULES, recordTitle } from "@/lib/data/modules";
-import { SEED, SEED_ACTIVITY } from "@/lib/data/seed";
+import api, { getAuthToken } from "@/api/backendClient";
 
 const DataContext = createContext(null);
 
@@ -10,23 +10,96 @@ const nextId = (key) => `${key}_${++sequence}`;
 function buildInitial() {
   const state = {};
   Object.keys(MODULES).forEach((key) => {
-    state[key] = (SEED[key] || []).map((row, index) => ({
-      id: `${key}_${index + 1}`,
-      updated_date: row.updated_date || new Date(Date.UTC(2026, 8, 30)).toISOString(),
-      ...row,
-    }));
+    state[key] = [];
   });
-  state.activity = SEED_ACTIVITY.map((row, index) => ({
-    id: `activity_${index + 1}`,
-    moduleKey: null,
-    ...row,
-  }));
+  state.activity = [];
   return state;
 }
 
 export function DataProvider({ children }) {
   const [collections, setCollections] = useState(buildInitial);
+  const [dashboardStats, setDashboardStats] = useState(null);
+  const [loadingModules, setLoadingModules] = useState({});
+  const [loadedKeys, setLoadedKeys] = useState(new Set());
+  const loadedModules = useRef(new Set());
   const [actor, setActor] = useState({ name: "Prof. (Dr.) Manoj Kumar", email: "vc@davuniversity.org" });
+
+  // On initial auth load: ONLY fetch single lightweight dashboard stats/activity API
+  useEffect(() => {
+    let active = true;
+    async function loadOverview() {
+      const token = getAuthToken();
+      if (!token) return;
+
+      try {
+        const stats = await api.stats.getDashboardStats();
+        if (!active || !stats) return;
+
+        setDashboardStats(stats);
+
+        if (stats.recentActivity && Array.isArray(stats.recentActivity) && stats.recentActivity.length > 0) {
+          setCollections((prev) => ({
+            ...prev,
+            activity: stats.recentActivity.map((log) => ({
+              id: log.id,
+              actor: log.actor || "System",
+              action: log.action || "updated",
+              module: log.module || "System",
+              target: log.target || "",
+              time: log.time || log.createdAt || new Date().toISOString(),
+              ip: log.ip || "10.24.6.18",
+              kind: log.kind || "system",
+            })),
+          }));
+        }
+      } catch (err) {
+        console.warn("Overview stats fetch failed:", err);
+      }
+    }
+
+    loadOverview();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Fetch individual module data on-demand (lazy load when navigated to)
+  const fetchModule = useCallback(async (key, force = false) => {
+    const token = getAuthToken();
+    if (!token || !key || !MODULES[key]) return;
+    if (!force && loadedModules.current.has(key)) return;
+
+    setLoadingModules((prev) => ({ ...prev, [key]: true }));
+    try {
+      const res = await api.modules.getAll(key, { pageSize: 100 });
+      if (res && Array.isArray(res)) {
+        setCollections((prev) => ({
+          ...prev,
+          [key]: res.map((item) => ({
+            ...item,
+            updated_date: item.updatedAt || item.updated_date || new Date().toISOString(),
+          })),
+        }));
+      } else {
+        setCollections((prev) => ({
+          ...prev,
+          [key]: [],
+        }));
+      }
+      loadedModules.current.add(key);
+      setLoadedKeys((prev) => new Set([...prev, key]));
+    } catch (err) {
+      console.warn(`Failed to lazy load module "${key}":`, err);
+      setCollections((prev) => ({
+        ...prev,
+        [key]: prev[key] || [],
+      }));
+      loadedModules.current.add(key);
+      setLoadedKeys((prev) => new Set([...prev, key]));
+    } finally {
+      setLoadingModules((prev) => ({ ...prev, [key]: false }));
+    }
+  }, []);
 
   const value = useMemo(() => {
     const logActivity = (action, moduleKey, target, kind) => {
@@ -53,6 +126,12 @@ export function DataProvider({ children }) {
       const record = { id: nextId(key), updated_date: now, ...data };
       setCollections((prev) => ({ ...prev, [key]: [record, ...prev[key]] }));
       logActivity("created", key, recordTitle(key, record), "create");
+
+      // Asynchronously persist to backend PostgreSQL
+      api.modules.create(key, data).catch((err) => {
+        console.warn(`Backend persist failed for ${key}:`, err);
+      });
+
       return record;
     };
 
@@ -69,6 +148,11 @@ export function DataProvider({ children }) {
         }),
       }));
       logActivity("updated", key, title, "update");
+
+      // Asynchronously update in backend PostgreSQL
+      api.modules.update(key, id, patch).catch((err) => {
+        console.warn(`Backend update failed for ${key}:`, err);
+      });
     };
 
     const remove = (key, id) => {
@@ -81,10 +165,27 @@ export function DataProvider({ children }) {
         }).filter((row) => row.id !== id),
       }));
       logActivity("deleted", key, title, "delete");
+
+      // Asynchronously remove in backend PostgreSQL
+      api.modules.remove(key, id).catch((err) => {
+        console.warn(`Backend delete failed for ${key}:`, err);
+      });
     };
 
-    return { collections, actor, setActor, create, update, remove, logActivity };
-  }, [collections, actor]);
+    return {
+      collections,
+      actor,
+      setActor,
+      create,
+      update,
+      remove,
+      logActivity,
+      dashboardStats,
+      fetchModule,
+      loadingModules,
+      loadedKeys,
+    };
+  }, [collections, actor, dashboardStats, fetchModule, loadingModules, loadedKeys]);
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 }

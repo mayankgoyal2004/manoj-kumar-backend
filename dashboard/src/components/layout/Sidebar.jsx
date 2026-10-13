@@ -1,11 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { ChevronLeft, X } from "lucide-react";
 import { NAV_SECTIONS } from "@/lib/navConfig";
-import { cn } from "@/lib/utils";
+import { cn, resolveImageUrl } from "@/lib/utils";
+import { useAuth } from "@/lib/AuthContext";
+import { useData } from "@/lib/DataStore";
+import { initials } from "@/lib/format";
 
 export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }) {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const { user } = useAuth();
+  const { actor } = useData();
+  const [photoError, setPhotoError] = useState(false);
+  const photo = user?.avatar || "/images/prof_manoj_kumar.jpg";
+  const name = user?.full_name || actor?.name || "Manoj Kumar";
+  const role = user?.department || "Vice-Chancellor";
 
   const isActive = (item) =>
     pathname === item.to || (item.to !== "/" && pathname.startsWith(`${item.to}/`));
@@ -29,16 +38,27 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
         )}
       >
         <div className="flex h-16 shrink-0 items-center gap-3 px-4">
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white/10 text-[11px] font-bold tracking-wider text-[hsl(var(--gold))] ring-1 ring-white/15">
-            MK
-          </span>
+          <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg bg-white/10 ring-1 ring-white/15">
+            {!photoError && photo ? (
+              <img
+                src={resolveImageUrl(photo)}
+                alt={name}
+                onError={() => setPhotoError(true)}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <span className="grid h-full w-full place-items-center text-[11px] font-bold tracking-wider text-[hsl(var(--gold))]">
+                {initials(name)}
+              </span>
+            )}
+          </div>
           {!collapsed && (
             <div className="min-w-0 flex-1">
               <p className="truncate font-heading text-sm font-semibold leading-tight text-white">
-                Manoj Kumar
+                {name}
               </p>
               <p className="truncate text-[10px] uppercase tracking-[0.16em] text-white/45">
-                Vice-Chancellor
+                {role}
               </p>
             </div>
           )}

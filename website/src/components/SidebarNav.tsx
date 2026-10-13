@@ -17,111 +17,143 @@ import {
   Mail,
   Download,
   Globe,
-  ExternalLink,
 } from "lucide-react";
-import { executiveProfile } from "../data/profileData";
+import { usePortfolio } from "../context/PortfolioContext";
 
 interface SidebarNavProps {
   activeSection: string;
   onSelectSection: (sectionId: string) => void;
 }
 
-export const navItems = [
-  { id: "overview", label: "About Biosketch", icon: User, count: null },
-  {
-    id: "positions",
-    label: "Academic & Executive Positions",
-    icon: Briefcase,
-    count: null,
-  },
-  {
-    id: "education",
-    label: "Education & Credentials",
-    icon: GraduationCap,
-    count: null,
-  },
-  { id: "awards", label: "Awards & Recognitions", icon: Award, count: "26+" },
-  {
-    id: "patents",
-    label: "Patents & Intellectual Property",
-    icon: Lightbulb,
-    count: "04",
-  },
-  {
-    id: "publications",
-    label: "Research Publications",
-    icon: FileText,
-    count: "151",
-  },
-  {
-    id: "phd",
-    label: "Ph.D. Supervision & Mentorship",
-    icon: Users,
-    count: "09",
-  },
-  {
-    id: "books",
-    label: "Books Authored & Chapters",
-    icon: BookOpen,
-    count: "13",
-  },
-  {
-    id: "grants",
-    label: "Research Grants & Funding",
-    icon: IndianRupee,
-    count: "11",
-  },
-  {
-    id: "mous",
-    label: "MoUs & Strategic Alliances",
-    icon: Globe2,
-    count: "26",
-  },
-  {
-    id: "affiliations",
-    label: "Affiliations & Governance",
-    icon: ShieldCheck,
-    count: null,
-  },
-  {
-    id: "events",
-    label: "Conferences & Keynotes",
-    icon: Calendar,
-    count: "50+",
-  },
-  {
-    id: "gallery",
-    label: "Campus & Leadership Gallery",
-    icon: ImageIcon,
-    count: null,
-  },
-  {
-    id: "news",
-    label: "News & Media Coverage",
-    icon: Newspaper,
-    count: "10+",
-  },
-  { id: "contact", label: "Contact & Secretariat", icon: Mail, count: null },
-];
-
 export const SidebarNav: React.FC<SidebarNavProps> = ({
   activeSection,
   onSelectSection,
 }) => {
+  const { profile, settings, liveMetrics, documents, resolveDocumentUrl } = usePortfolio();
+
+  const navItems = [
+    { id: "overview", label: "About Biosketch", icon: User, count: null },
+    {
+      id: "positions",
+      label: "Academic & Executive Positions",
+      icon: Briefcase,
+      count: null,
+    },
+    {
+      id: "education",
+      label: "Education & Credentials",
+      icon: GraduationCap,
+      count: null,
+    },
+    { id: "awards", label: "Awards & Recognitions", icon: Award, count: `${liveMetrics.awardsCount || profile.metrics?.awardsCount || "26+"}` },
+    {
+      id: "patents",
+      label: "Patents & Intellectual Property",
+      icon: Lightbulb,
+      count: String(liveMetrics.patentsCount || profile.metrics?.patentsCount || 4).padStart(2, "0"),
+    },
+    {
+      id: "publications",
+      label: "Research Publications",
+      icon: FileText,
+      count: String(liveMetrics.publicationsCount || profile.metrics?.publicationsCount || "151"),
+    },
+    {
+      id: "phd",
+      label: "Ph.D. Supervision & Mentorship",
+      icon: Users,
+      count: String(liveMetrics.supervisionCount || profile.metrics?.phdSupervisedCount || 9).padStart(2, "0"),
+    },
+    {
+      id: "books",
+      label: "Books Authored & Chapters",
+      icon: BookOpen,
+      count: String(liveMetrics.booksCount || profile.metrics?.booksCount || 13),
+    },
+    {
+      id: "grants",
+      label: "Research Grants & Funding",
+      icon: IndianRupee,
+      count: String(liveMetrics.grantsCount || 11),
+    },
+    {
+      id: "mous",
+      label: "MoUs & Strategic Alliances",
+      icon: Globe2,
+      count: String(liveMetrics.mousCount || profile.metrics?.mousCount || 26),
+    },
+    {
+      id: "affiliations",
+      label: "Affiliations & Governance",
+      icon: ShieldCheck,
+      count: null,
+    },
+    {
+      id: "events",
+      label: "Conferences & Keynotes",
+      icon: Calendar,
+      count: "50+",
+    },
+    {
+      id: "gallery",
+      label: "Campus & Leadership Gallery",
+      icon: ImageIcon,
+      count: null,
+    },
+    {
+      id: "news",
+      label: "News & Media Coverage",
+      icon: Newspaper,
+      count: "10+",
+    },
+    { id: "contact", label: "Contact & Secretariat", icon: Mail, count: null },
+  ];
+
+  const cvDocObj = documents.find(
+    (d: any) =>
+      d.category === 'Curriculum Vitae' ||
+      d.name?.toLowerCase().includes('vitae') ||
+      d.name?.toLowerCase().includes('cv')
+  );
+  const cvDoc = resolveDocumentUrl(
+    cvDocObj?.fileUrl || cvDocObj?.file_url || '/documents/Prof_Manoj_Kumar_Curriculum_Vitae.pdf'
+  );
+  const cvDocName = cvDocObj?.name || 'Curriculum Vitae (PDF)';
+
+  const briefDocObj = documents.find(
+    (d: any) =>
+      d.name?.toLowerCase().includes('brief') ||
+      d.name?.toLowerCase().includes('profile')
+  );
+  const briefDoc = resolveDocumentUrl(
+    briefDocObj?.fileUrl || briefDocObj?.file_url || '/documents/Prof_Manoj_Kumar_Brief_Profile.pdf'
+  );
+  const briefDocName = briefDocObj?.name || 'Brief Profile (PDF)';
+
+  const photoUrl = profile.sidebarPhoto || profile.photo || "/images/unnamed.webp";
+
+  const socialLinkedIn = settings?.linkedin || profile.contact?.linkedIn;
+  const socialTwitter = settings?.x || profile.contact?.twitter;
+  const socialYouTube = settings?.youtube || profile.contact?.youtube;
+  const socialScholar = profile.contact?.scholar;
+  const socialOrcid = profile.contact?.orcid;
+  const websiteUrl = profile.contact?.website || "https://www.davuniversity.org";
+  const contactEmail = profile.contact?.officialEmail || settings?.contactEmail || "vc@davuniversity.org";
+
   return (
     <aside className="academic-sidebar">
       {/* Profile Card */}
       <div className="sidebar-profile-card">
         <div className="profile-avatar-container">
           <img
-            src="/images/prof_manoj_kumar.jpg"
-            alt={executiveProfile.fullName}
+            src={photoUrl}
+            alt={profile.fullName}
             className="profile-avatar-img"
           />
         </div>
-        <h3 className="profile-card-name">{executiveProfile.fullName}</h3>
-        <div className="profile-card-role">{executiveProfile.designation}</div>
-        <div className="profile-card-org">DAV University, Jalandhar</div>
+        <h3 className="profile-card-name">{profile.fullName}</h3>
+        <div className="profile-card-role">{profile.designation}</div>
+        <div className="profile-card-org">{profile.institution}</div>
       </div>
 
       {/* Navigation List */}
@@ -151,52 +183,69 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
       {/* Official Dossiers & Downloads */}
       <div className="sidebar-footer">
         <a
-          href="/documents/Prof_Manoj_Kumar_Curriculum_Vitae.pdf"
+          href={cvDoc}
           target="_blank"
           rel="noopener noreferrer"
           className="sidebar-download-btn"
+          title={cvDocName}
           download
         >
           <Download size={14} />
-          <span>Curriculum Vitae (PDF)</span>
+          <span>{cvDocName.length > 28 ? 'Curriculum Vitae (PDF)' : cvDocName}</span>
         </a>
         <a
-          href="/documents/Prof_Manoj_Kumar_Brief_Profile.pdf"
+          href={briefDoc}
           target="_blank"
           rel="noopener noreferrer"
           className="sidebar-download-btn sidebar-download-alt"
+          title={briefDocName}
           download
         >
           <Download size={14} />
-          <span>Brief Profile (PDF)</span>
+          <span>{briefDocName.length > 28 ? 'Brief Profile (PDF)' : briefDocName}</span>
         </a>
 
-        {/* Social & Official Links */}
+        {/* Dynamic Social & Official Links */}
         <div className="sidebar-social-row">
-          <a
-            href={executiveProfile.contact.linkedIn}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="sidebar-social-link"
-            title="LinkedIn Profile"
-          >
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+          {socialLinkedIn && (
+            <a
+              href={socialLinkedIn}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="sidebar-social-link"
+              title="LinkedIn Profile"
             >
-              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-              <rect x="2" y="9" width="4" height="12" />
-              <circle cx="4" cy="4" r="2" />
-            </svg>
-          </a>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                <rect x="2" y="9" width="4" height="12" />
+                <circle cx="4" cy="4" r="2" />
+              </svg>
+            </a>
+          )}
+          {socialTwitter && (
+            <a
+              href={socialTwitter}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="sidebar-social-link"
+              title="X (Twitter) Profile"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+            </a>
+          )}
           <a
-            href="https://www.davuniversity.org"
+            href={websiteUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="sidebar-social-link"
@@ -205,7 +254,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
             <Globe size={15} />
           </a>
           <a
-            href={`mailto:${executiveProfile.contact.officialEmail}`}
+            href={`mailto:${contactEmail}`}
             className="sidebar-social-link"
             title="Email Vice-Chancellor Secretariat"
           >

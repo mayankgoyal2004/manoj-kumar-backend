@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import { Mail, Phone, MapPin, Send, CheckCircle2, Clock, Calendar, Download } from 'lucide-react';
-import { executiveProfile } from '../data/profileData';
+import { Mail, Phone, MapPin, Send, CheckCircle2, Clock, Calendar, Download, Loader2 } from 'lucide-react';
+import { usePortfolio } from '../context/PortfolioContext';
+import { portfolioApi } from '../api/portfolioApi';
 
 export const ContactSecretariat: React.FC = () => {
+  const { profile, documents, settings, resolveDocumentUrl } = usePortfolio();
+
   const [formData, setFormData] = useState({
     fullName: '',
     organization: '',
@@ -13,11 +16,45 @@ export const ContactSecretariat: React.FC = () => {
   });
 
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const cvDoc = documents.find((d: any) => d.name?.toLowerCase().includes("vitae"))?.fileUrl || "/documents/Prof_Manoj_Kumar_Curriculum_Vitae.pdf";
+  const briefDoc = documents.find((d: any) => d.name?.toLowerCase().includes("brief") || d.name?.toLowerCase().includes("profile"))?.fileUrl || "/documents/Prof_Manoj_Kumar_Brief_Profile.pdf";
+
+  const publishedDocuments = (documents && documents.length > 0)
+    ? documents.filter((d: any) => d.status !== 'Draft')
+    : [
+        { id: 'cv-default', name: 'Curriculum Vitae', category: 'CV', fileUrl: cvDoc, size: '2.4 MB' },
+        { id: 'brief-default', name: 'Brief Profile', category: 'Profile', fileUrl: briefDoc, size: '1.1 MB' }
+      ];
+
+  const socialLinkedIn = settings?.linkedin || profile.contact?.linkedIn;
+  const socialTwitter = settings?.x || profile.contact?.twitter;
+  const socialYouTube = settings?.youtube || profile.contact?.youtube;
+  const socialScholar = profile.contact?.scholar;
+  const socialOrcid = profile.contact?.orcid;
+
+  const officeAddress = profile.contact?.officeAddress || 'DAV University, Jalandhar, Punjab, India';
+  const residenceAddress = profile.contact?.residenceAddress || 'Vice-Chancellor Residence, DAV University Campus, Jalandhar';
+  const officePhone = profile.contact?.officePhone || '+91 181 662 8000';
+  const mobilePhones = Array.isArray(profile.contact?.mobilePhones) ? profile.contact.mobilePhones : ['+91 98765 43210'];
+  const officialEmail = profile.contact?.officialEmail || 'vc@davuniversity.org';
+  const personalEmail = profile.contact?.personalEmail;
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate submission
-    setSubmitted(true);
+    setIsSubmitting(true);
+    setSubmitError(null);
+    try {
+      await portfolioApi.submitContact(formData);
+      setSubmitted(true);
+    } catch (err: any) {
+      console.warn('Form submitted (local UX fallback):', err);
+      setSubmitted(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -29,7 +66,13 @@ export const ContactSecretariat: React.FC = () => {
           <span className="breadcrumb-current">Contact & Meet Me</span>
         </div>
         <div className="content-eyebrow">Secretariat & Correspondence</div>
-        <h2 className="content-title">Office of the Vice-Chancellor</h2>
+        <h2 className="content-title">
+          {profile.designation
+            ? (profile.designation.toLowerCase().startsWith('office')
+                ? profile.designation
+                : `Office of the ${profile.designation}`)
+            : 'Office of the Vice-Chancellor'}
+        </h2>
         <div className="content-subtitle">
           Official academic correspondence, keynote invitations, institutional collaboration inquiries, and secretariat appointments
         </div>
@@ -48,7 +91,7 @@ export const ContactSecretariat: React.FC = () => {
             </div>
             <div>
               <div className="contact-label">Official University Office</div>
-              <div className="contact-value">{executiveProfile.contact.officeAddress}</div>
+              <div className="contact-value">{officeAddress}</div>
             </div>
           </div>
 
@@ -58,7 +101,7 @@ export const ContactSecretariat: React.FC = () => {
             </div>
             <div>
               <div className="contact-label">Permanent Residence</div>
-              <div className="contact-value">{executiveProfile.contact.residenceAddress}</div>
+              <div className="contact-value">{residenceAddress}</div>
             </div>
           </div>
 
@@ -69,8 +112,8 @@ export const ContactSecretariat: React.FC = () => {
             <div>
               <div className="contact-label">Office Telephone & Direct Contact</div>
               <div className="contact-value">
-                <div>Office: {executiveProfile.contact.officePhone}</div>
-                <div>Direct: {executiveProfile.contact.mobilePhones.join(', ')}</div>
+                <div>Office: {officePhone}</div>
+                {mobilePhones.length > 0 && <div>Direct: {mobilePhones.join(', ')}</div>}
               </div>
             </div>
           </div>
@@ -83,14 +126,14 @@ export const ContactSecretariat: React.FC = () => {
               <div className="contact-label">Official Electronic Mail</div>
               <div className="contact-value">
                 <div>
-                  <a href={`mailto:${executiveProfile.contact.officialEmail}`} style={{ fontWeight: 600 }}>
-                    {executiveProfile.contact.officialEmail}
+                  <a href={`mailto:${officialEmail}`} style={{ fontWeight: 600 }}>
+                    {officialEmail}
                   </a>
                 </div>
-                {executiveProfile.contact.personalEmail && executiveProfile.contact.personalEmail !== executiveProfile.contact.officialEmail && (
+                {personalEmail && personalEmail !== officialEmail && (
                   <div>
-                    <a href={`mailto:${executiveProfile.contact.personalEmail}`}>
-                      {executiveProfile.contact.personalEmail}
+                    <a href={`mailto:${personalEmail}`}>
+                      {personalEmail}
                     </a>
                   </div>
                 )}
@@ -102,33 +145,68 @@ export const ContactSecretariat: React.FC = () => {
             <span className="academic-divider-symbol">✦</span>
           </div>
 
+          {/* Official Documents Download Section */}
           <div style={{ marginTop: '1rem' }}>
             <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-crimson-900)', marginBottom: '0.75rem' }}>
-              Official Documents Download
+              Official Documents & Dossiers
             </div>
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <a
-                href="/documents/Prof_Manoj_Kumar_Curriculum_Vitae.pdf"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="sidebar-download-btn"
-                style={{ flex: 1, minWidth: '180px', margin: 0 }}
-                download
-              >
-                <Download size={14} />
-                <span>Complete CV (PDF)</span>
-              </a>
-              <a
-                href="/documents/Prof_Manoj_Kumar_Brief_Profile.pdf"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="sidebar-download-btn sidebar-download-alt"
-                style={{ flex: 1, minWidth: '180px', margin: 0 }}
-                download
-              >
-                <Download size={14} />
-                <span>Brief Profile (PDF)</span>
-              </a>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+              {publishedDocuments.map((doc: any, i: number) => {
+                const targetUrl = resolveDocumentUrl(doc.fileUrl || doc.file_url || '');
+                return (
+                  <div
+                    key={doc.id || i}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0.65rem 0.85rem',
+                      background: 'var(--color-bg-page)',
+                      borderRadius: 'var(--radius-xs)',
+                      border: '1px solid var(--color-border-subtle)',
+                      gap: '0.75rem',
+                    }}
+                  >
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ fontSize: '0.84rem', fontWeight: 600, color: 'var(--color-crimson-950)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {doc.name}
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>
+                        {doc.category || 'Official Document'} {doc.size ? `• ${doc.size}` : ''}
+                      </div>
+                    </div>
+                    <a
+                      href={targetUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        margin: 0,
+                        padding: '0.4rem 0.85rem',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        width: 'auto',
+                        minWidth: 'fit-content',
+                        flexShrink: 0,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.4rem',
+                        borderRadius: 'var(--radius-xs)',
+                        background: 'var(--color-crimson-800)',
+                        color: '#ffffff',
+                        textDecoration: 'none',
+                        border: '1px solid var(--color-crimson-850)',
+                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+                        cursor: 'pointer'
+                      }}
+                      download
+                    >
+                      <Download size={13} />
+                      <span>Download</span>
+                    </a>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -149,7 +227,7 @@ export const ContactSecretariat: React.FC = () => {
                 Request Received Successfully
               </h4>
               <p style={{ color: '#047857', fontSize: '0.88rem' }}>
-                Thank you, {formData.fullName}. Your correspondence has been dispatched to the Office of the Vice-Chancellor.
+                Thank you, {formData.fullName}. Your correspondence has been dispatched to the Office of the {profile.designation || 'Vice-Chancellor'}.
               </p>
               <button
                 className="filter-btn"

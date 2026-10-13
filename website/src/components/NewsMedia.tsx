@@ -18,27 +18,74 @@ import {
   ArrowRight,
   TrendingUp
 } from 'lucide-react';
-import { newsMediaItems, NewsMediaItem } from '../data/newsMediaData';
+import { usePortfolio } from '../context/PortfolioContext';
+
+export interface NewsMediaItem {
+  id: string;
+  title: string;
+  headline: string;
+  source: string;
+  category: string;
+  date: string;
+  readTime?: string;
+  location?: string;
+  excerpt: string;
+  fullContent?: string[];
+  keyHighlights?: string[];
+  imageUrl?: string;
+  sourceUrl?: string;
+  tags: string[];
+  isFeatured?: boolean;
+}
 
 interface NewsMediaProps {
   onNavigate?: (sectionId: string) => void;
 }
 
 export const NewsMedia: React.FC<NewsMediaProps> = () => {
+  const { news: rawNews } = usePortfolio();
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedArticle, setSelectedArticle] = useState<NewsMediaItem | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  const newsMediaItems: NewsMediaItem[] = useMemo(() => {
+    return rawNews.map((item: any, idx: number) => {
+      const title = item.headline || item.title || 'News Update';
+      const excerpt = item.summary || item.excerpt || title;
+      const source = item.outlet || item.source || 'Institutional Media';
+      const category = item.category || 'Press Release';
+      const date = item.date || '2026';
+      const imageUrl = item.image || item.imageUrl || 'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=800&q=75';
+      const sourceUrl = item.link || item.sourceUrl || 'https://www.davuniversity.org';
+      const tags = Array.isArray(item.tags) && item.tags.length ? item.tags : ['DAV University', 'Academic Excellence'];
+
+      return {
+        id: item.id || `news-${idx}`,
+        title,
+        headline: item.headline || title,
+        source,
+        category,
+        date,
+        readTime: item.readTime || '3 min read',
+        location: item.location || 'Jalandhar / New Delhi',
+        excerpt,
+        fullContent: Array.isArray(item.fullContent) && item.fullContent.length ? item.fullContent : [excerpt],
+        keyHighlights: Array.isArray(item.keyHighlights) ? item.keyHighlights : [],
+        imageUrl,
+        sourceUrl,
+        tags,
+        isFeatured: item.isFeatured || idx === 0,
+      };
+    });
+  }, [rawNews]);
+
   // Categories list
-  const categories = [
-    'All',
-    'Print Media',
-    'Press Release',
-    'Institutional',
-    'Interviews',
-    'Digital News'
-  ];
+  const categoriesSet = new Set<string>();
+  newsMediaItems.forEach((i) => {
+    if (i.category) categoriesSet.add(i.category);
+  });
+  const categories = ['All', ...Array.from(categoriesSet)];
 
   // Filter items based on Category & Search
   const filteredItems = useMemo(() => {

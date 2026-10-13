@@ -21,34 +21,27 @@ const tooltipStyle = {
 };
 
 export default function ContentOverview() {
-  const { collections } = useData();
+  const { collections, dashboardStats } = useData();
 
   const { pieData, total, statusRows, statusTotal } = useMemo(() => {
-    const pie = CONTENT_KEYS.map((key, index) => ({
-      name: MODULES[key].short || MODULES[key].title,
-      value: (collections[key] || []).length,
-      fill: CHART_COLORS[index % CHART_COLORS.length],
-    })).filter((entry) => entry.value > 0);
+    const pie = (dashboardStats?.contentDistribution || [])
+      .filter((entry) => CONTENT_KEYS.includes(entry.key) && entry.count > 0)
+      .map((entry, index) => ({
+        name: MODULES[entry.key]?.short || MODULES[entry.key]?.title || entry.label,
+        value: entry.count,
+        fill: CHART_COLORS[index % CHART_COLORS.length],
+      }));
 
-    const counts = {};
-    CONTENT_KEYS.forEach((key) => {
-      (collections[key] || []).forEach((row) => {
-        const status = row.status || "Unspecified";
-        counts[status] = (counts[status] || 0) + 1;
-      });
-    });
-    const rows = Object.entries(counts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 6)
-      .map(([status, count]) => ({ status, count }));
+    const rows = (dashboardStats?.statusBreakdown || []).slice(0, 6);
+    const statusSum = rows.reduce((acc, curr) => acc + curr.count, 0);
 
     return {
       pieData: pie,
       total: pie.reduce((sum, entry) => sum + entry.value, 0),
       statusRows: rows,
-      statusTotal: Object.values(counts).reduce((sum, value) => sum + value, 0),
+      statusTotal: statusSum,
     };
-  }, [collections]);
+  }, [dashboardStats]);
 
   return (
     <div className="space-y-5">

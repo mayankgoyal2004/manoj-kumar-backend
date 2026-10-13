@@ -19,7 +19,6 @@ import {
   ScrollText,
   Bell,
   Globe,
-  Search,
   Settings2,
   ShieldCheck,
 } from "lucide-react";
@@ -74,7 +73,6 @@ export const NAV_SECTIONS = [
     label: "Configuration",
     items: [
       { label: "Website Settings", to: "/website-settings", icon: Globe },
-      { label: "SEO Settings", to: "/seo-settings", icon: Search },
       { label: "Account Settings", to: "/account-settings", icon: Settings2 },
     ],
   },

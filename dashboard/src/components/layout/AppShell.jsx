@@ -1,8 +1,25 @@
 import React, { useState } from "react";
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
-import { DataProvider } from "@/lib/DataStore";
+import { DataProvider, PROFILE } from "@/lib/DataStore";
+import { useAuth } from "@/lib/AuthContext";
 import { cn } from "@/lib/utils";
+
+function AppShellFooter() {
+  const { user } = useAuth();
+  const name = user?.full_name || PROFILE.name;
+  const role = user?.department || PROFILE.honorific;
+  const currentYear = new Date().getFullYear();
+
+  return (
+    <footer className="border-t border-border px-4 py-5 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-1 text-[11px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+        <p>© {currentYear} {name} · {role}</p>
+        <p>Executive Academic Portfolio Console</p>
+      </div>
+    </footer>
+  );
+}
 
 export default function AppShell({ children }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -30,12 +47,7 @@ export default function AppShell({ children }) {
             <div className="mx-auto w-full max-w-[1440px] animate-rise">{children}</div>
           </main>
 
-          <footer className="border-t border-border px-4 py-5 sm:px-6 lg:px-8">
-            <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-1 text-[11px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-              <p>© 2026 DAV University, Jalandhar · Office of the Vice-Chancellor</p>
-              <p>Portfolio Console · Front-end preview with sample records</p>
-            </div>
-          </footer>
+          <AppShellFooter />
         </div>
       </div>
     </DataProvider>

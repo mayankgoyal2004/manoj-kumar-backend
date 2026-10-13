@@ -1,0 +1,42 @@
+import { z } from 'zod';
+
+export const profileUpdateSchema = z.object({
+  name: z.string().min(2, 'Name is required').optional(),
+  salutation: z.string().optional(),
+  designation: z.string().optional(),
+  institution: z.string().optional(),
+  location: z.string().optional(),
+  academicRank: z.string().optional(),
+  tagline: z.string().optional(),
+  quote: z.string().optional(),
+  bioSummary: z.string().optional(),
+  fullBio: z.array(z.string()).optional(),
+  officeAddress: z.string().optional(),
+  residenceAddress: z.string().optional(),
+  officePhone: z.string().optional(),
+  mobilePhones: z.array(z.string()).optional(),
+  officialEmail: z.string().email().optional().or(z.literal('')),
+  personalEmail: z.string().email().optional().or(z.literal('')),
+  linkedIn: z.string().optional(),
+  orcid: z.string().optional(),
+  scopus: z.string().optional(),
+  scholar: z.string().optional(),
+  twitter: z.string().optional(),
+  youtube: z.string().optional(),
+  website: z.string().optional(),
+  photo: z.string().optional().nullable(),
+  headerPhoto: z.string().optional().nullable(),
+  sidebarPhoto: z.string().optional().nullable(),
+  bioPhoto: z.string().optional().nullable(),
+  expertise: z.array(z.string()).optional(),
+  metrics: z.record(z.any()).optional(),
+  leadershipPillars: z.array(
+    z.object({
+      title: z.string(),
+      subtitle: z.string(),
+      description: z.string(),
+      icon: z.string().optional(),
+    })
+  ).optional(),
+  headerPositions: z.array(z.string()).optional(),
+});

@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { Search, FileText, ExternalLink, Copy, Check, Filter, BookOpen } from 'lucide-react';
-import { allPublications, journalPublications, conferencePublications, Publication } from '../data/publicationsData';
+import { Search, ExternalLink, Copy, Check } from 'lucide-react';
+import { usePortfolio } from '../context/PortfolioContext';
 
 export const PublicationsRepository: React.FC = () => {
+  const { publications: rawPublications } = usePortfolio();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
   const [selectedYear, setSelectedYear] = useState<string>('all');
@@ -11,18 +12,52 @@ export const PublicationsRepository: React.FC = () => {
 
   const itemsPerPage = 12;
 
+  // Normalized publications list
+  const allPublications = useMemo(() => {
+    return rawPublications.map((p: any, idx: number) => {
+      const category = p.category || p.publicationType || 'Journal';
+      const isSci = Boolean(p.isSci || (p.indexing && p.indexing.toUpperCase().includes('SCI')));
+      const isScopus = Boolean(p.isScopus || (p.indexing && p.indexing.toUpperCase().includes('SCOPUS')));
+      const isUgc = Boolean(p.isUgc || (p.indexing && p.indexing.toUpperCase().includes('UGC')));
+      const rawCitation = p.rawCitation || p.abstract || `${p.authors || 'Prof. (Dr.) Manoj Kumar et al.'}, "${p.title}", ${p.journal || p.venue || ''} (${p.year || ''})`;
+      const isIeee = Boolean(p.isIeee || (rawCitation && rawCitation.includes('IEEE')));
+
+      return {
+        id: p.id || `PUB-${idx + 1}`,
+        rawCitation,
+        year: p.year ? parseInt(String(p.year)) : null,
+        category,
+        isSci,
+        isScopus,
+        isUgc,
+        isIeee,
+        doi: p.doi || null,
+        issn: p.issn || null,
+        url: p.url || null,
+      };
+    });
+  }, [rawPublications]);
+
+  const journalPublications = useMemo(() => {
+    return allPublications.filter((p) => p.category === 'Journal');
+  }, [allPublications]);
+
+  const conferencePublications = useMemo(() => {
+    return allPublications.filter((p) => p.category === 'Conference');
+  }, [allPublications]);
+
   // Extract unique years
   const availableYears = useMemo(() => {
     const years = new Set<number>();
-    allPublications.forEach(p => {
+    allPublications.forEach((p) => {
       if (p.year) years.add(p.year);
     });
     return Array.from(years).sort((a, b) => b - a);
-  }, []);
+  }, [allPublications]);
 
   // Filter logic
   const filteredPublications = useMemo(() => {
-    return allPublications.filter(pub => {
+    return allPublications.filter((pub) => {
       // Filter category
       if (selectedFilter === 'journal' && pub.category !== 'Journal') return false;
       if (selectedFilter === 'conference' && pub.category !== 'Conference') return false;
@@ -37,12 +72,15 @@ export const PublicationsRepository: React.FC = () => {
       // Filter query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
-        return pub.rawCitation.toLowerCase().includes(q) || (pub.doi && pub.doi.toLowerCase().includes(q));
+        return (
+          pub.rawCitation.toLowerCase().includes(q) ||
+          (pub.doi && pub.doi.toLowerCase().includes(q))
+        );
       }
 
       return true;
     });
-  }, [searchQuery, selectedFilter, selectedYear]);
+  }, [allPublications, searchQuery, selectedFilter, selectedYear]);
 
   // Pagination
   const totalPages = Math.ceil(filteredPublications.length / itemsPerPage) || 1;
@@ -104,7 +142,7 @@ export const PublicationsRepository: React.FC = () => {
             }}
           >
             <option value="all">All Years</option>
-            {availableYears.map(y => (
+            {availableYears.map((y) => (
               <option key={y} value={y.toString()}>{y}</option>
             ))}
           </select>
@@ -169,10 +207,10 @@ export const PublicationsRepository: React.FC = () => {
             No publications found matching your search criteria.
           </div>
         ) : (
-          paginatedList.map((pub) => (
-            <div key={pub.id} className="pub-item-card">
+          paginatedList.map((pub, idx) => (
+            <div key={pub.id || idx} className="pub-item-card">
               <div className="pub-item-top">
-                <span className="pub-id-badge">{pub.id}</span>
+                <span className="pub-id-badge">#{pub.id.slice(0, 8)}</span>
                 <div className="pub-badges-group">
                   {pub.year && <span className="badge badge-gold">{pub.year}</span>}
                   <span className={`badge ${pub.category === 'Journal' ? 'badge-crimson' : 'badge-navy'}`}>
@@ -239,61 +277,19 @@ export const PublicationsRepository: React.FC = () => {
           <button
             className="pagination-btn"
             disabled={currentPage === 1}
-            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
           >
             Previous
           </button>
 
-          {(() => {
-            const pages: (number | string)[] = [];
-            if (totalPages <= 7) {
-              for (let i = 1; i <= totalPages; i++) pages.push(i);
-            } else if (currentPage <= 4) {
-              for (let i = 1; i <= 5; i++) pages.push(i);
-              pages.push('...');
-              pages.push(totalPages);
-            } else if (currentPage >= totalPages - 3) {
-              pages.push(1);
-              pages.push('...');
-              for (let i = totalPages - 4; i <= totalPages; i++) pages.push(i);
-            } else {
-              pages.push(1);
-              pages.push('...');
-              pages.push(currentPage - 1);
-              pages.push(currentPage);
-              pages.push(currentPage + 1);
-              pages.push('...');
-              pages.push(totalPages);
-            }
-
-            return pages.map((page, idx) => {
-              if (page === '...') {
-                return (
-                  <span
-                    key={`ellipsis-${idx}`}
-                    style={{ padding: '0.45rem 0.6rem', color: 'var(--color-text-muted)', fontSize: '0.85rem' }}
-                  >
-                    ...
-                  </span>
-                );
-              }
-              const pageNum = page as number;
-              return (
-                <button
-                  key={`page-${pageNum}`}
-                  className={`pagination-btn ${currentPage === pageNum ? 'active' : ''}`}
-                  onClick={() => setCurrentPage(pageNum)}
-                >
-                  {pageNum}
-                </button>
-              );
-            });
-          })()}
+          <span className="pagination-info">
+            Page {currentPage} of {totalPages}
+          </span>
 
           <button
             className="pagination-btn"
             disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
           >
             Next
           </button>

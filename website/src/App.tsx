@@ -20,8 +20,9 @@ import { ContactSecretariat } from './components/ContactSecretariat';
 import { SearchModal } from './components/SearchModal';
 import { Footer } from './components/Footer';
 import { ScrollToTop } from './components/ScrollToTop';
+import { PortfolioProvider } from './context/PortfolioContext';
 
-export const App: React.FC = () => {
+export const AppContent: React.FC = () => {
   const [activeSection, setActiveSection] = useState<string>('overview');
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
 
@@ -125,6 +126,14 @@ export const App: React.FC = () => {
       {/* Floating Scroll To Top Button */}
       <ScrollToTop />
     </div>
+  );
+};
+
+export const App: React.FC = () => {
+  return (
+    <PortfolioProvider>
+      <AppContent />
+    </PortfolioProvider>
   );
 };
 

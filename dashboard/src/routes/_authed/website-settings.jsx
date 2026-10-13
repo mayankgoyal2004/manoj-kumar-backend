@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { ExternalLink, Globe, Save } from "lucide-react";
 import { toast } from "sonner";
@@ -7,6 +7,8 @@ import PageHeader from "@/components/kit/PageHeader";
 import SectionCard from "@/components/kit/SectionCard";
 import Toggle from "@/components/kit/Toggle";
 import { btnPrimary, chipCls } from "@/components/kit/styles";
+import api from "@/api/backendClient";
+import { updateFavicon } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authed/website-settings")({
   head: () => ({ meta: [{ title: "Website Settings · Portfolio Console" }] }),
@@ -16,8 +18,9 @@ export const Route = createFileRoute("/_authed/website-settings")({
 const IDENTITY_FIELDS = [
   { name: "site_title", label: "Site title", type: "text" },
   { name: "tagline", label: "Tagline", type: "text" },
+  { name: "favicon", label: "Website Favicon", type: "image", full: true, hint: "Upload an official favicon (SVG, PNG, ICO, JPG) to display in browser tabs" },
   { name: "description", label: "Site description", type: "textarea", full: true },
-];
+]; 
 
 const CONTACT_FIELDS = [
   { name: "contact_email", label: "Public email", type: "text" },
@@ -35,6 +38,7 @@ const SOCIAL_FIELDS = [
 const INITIAL = {
   site_title: "Prof. (Dr.) Manoj Kumar",
   tagline: "Vice-Chancellor · DAV University, Jalandhar",
+  favicon: "/favicon.svg",
   description:
     "The academic portfolio of Prof. (Dr.) Manoj Kumar — research in machine learning systems, computational intelligence and technology for sustainable agriculture.",
   contact_email: "vc@davuniversity.org",
@@ -57,9 +61,79 @@ function WebsiteSettingsPage() {
     contactForm: true,
   });
 
-  const update = (name, value) => setValues((prev) => ({ ...prev, [name]: value }));
-  const save = () =>
-    toast.success("Website settings saved", { description: "Changes will apply on next publish." });
+  useEffect(() => {
+    let active = true;
+    async function loadSettings() {
+      try {
+        const remote = await api.settings.getWebsiteSettings();
+        if (active && remote) {
+          const effectiveFavicon = remote.favicon || INITIAL.favicon;
+          setValues({
+            site_title: remote.siteTitle || INITIAL.site_title,
+            tagline: remote.tagline || INITIAL.tagline,
+            favicon: effectiveFavicon,
+            description: remote.description || INITIAL.description,
+            contact_email: remote.contactEmail || INITIAL.contact_email,
+            phone: remote.phone || INITIAL.phone,
+            address: remote.address || INITIAL.address,
+            footer: remote.footer || INITIAL.footer,
+            linkedin: remote.linkedin || INITIAL.linkedin,
+            x: remote.x || INITIAL.x,
+            youtube: remote.youtube || INITIAL.youtube,
+          });
+          if (effectiveFavicon) {
+            updateFavicon(effectiveFavicon);
+          }
+          if (remote.sections && typeof remote.sections === "object") {
+            setSections((prev) => ({ ...prev, ...remote.sections }));
+          }
+        }
+      } catch (err) {
+        console.warn("Could not fetch remote website settings:", err);
+      }
+    }
+    loadSettings();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const update = (name, value) => {
+    setValues((prev) => ({ ...prev, [name]: value }));
+    if (name === "favicon" && value) {
+      updateFavicon(value);
+      window.dispatchEvent(new CustomEvent("favicon:updated", { detail: value }));
+    }
+  };
+
+  const save = async () => {
+    toast.info("Saving settings to database...");
+    try {
+      await api.settings.updateWebsiteSettings({
+        siteTitle: values.site_title,
+        tagline: values.tagline,
+        favicon: values.favicon,
+        description: values.description,
+        contactEmail: values.contact_email,
+        phone: values.phone,
+        address: values.address,
+        footer: values.footer,
+        linkedin: values.linkedin,
+        x: values.x,
+        youtube: values.youtube,
+        sections,
+      });
+
+      if (values.favicon) {
+        updateFavicon(values.favicon);
+        window.dispatchEvent(new CustomEvent("favicon:updated", { detail: values.favicon }));
+      }
+
+      toast.success("Website settings saved", { description: "Your configuration and favicon are live across the platform." });
+    } catch (err) {
+      toast.error(err.message || "Failed to save settings to server");
+    }
+  };
 
   return (
     <>

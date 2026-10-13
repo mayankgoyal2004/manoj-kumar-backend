@@ -1,18 +1,28 @@
 import React from 'react';
-import { Landmark, Lightbulb, Globe2, Award, CheckCircle2, ChevronRight } from 'lucide-react';
-import { executiveProfile } from '../data/profileData';
+import { Landmark, Lightbulb, Globe2, Award, CheckCircle2, Cpu } from 'lucide-react';
+import { usePortfolio } from '../context/PortfolioContext';
 
 interface ExecutiveSummaryProps {
   onNavigate: (sectionId: string) => void;
 }
 
-export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({ onNavigate }) => {
+export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = () => {
+  const { profile } = usePortfolio();
+
   const pillarIcons: Record<string, React.ReactNode> = {
     Landmark: <Landmark size={22} />,
     Lightbulb: <Lightbulb size={22} />,
     Globe2: <Globe2 size={22} />,
-    Award: <Award size={22} />
+    Globe: <Globe2 size={22} />,
+    Award: <Award size={22} />,
+    Cpu: <Cpu size={22} />,
   };
+
+  const bioSummary = profile.bioSummary;
+  const fullBioParagraphs = Array.isArray(profile.fullBio) ? profile.fullBio : [];
+  const pillars = Array.isArray(profile.leadershipPillars) ? profile.leadershipPillars : [];
+  const specializations = Array.isArray(profile.specializations) ? profile.specializations : [];
+  const photoUrl = profile.bioPhoto || profile.photo || '/images/iamge-2.webp';
 
   return (
     <div className="section-content-wrapper">
@@ -25,7 +35,7 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({ onNavigate }
         <div className="content-eyebrow">Academic & Leadership Profile</div>
         <h2 className="content-title">Executive Biosketch</h2>
         <div className="content-subtitle">
-          Vice-Chancellor, DAV University | Dean's Visiting Scholar, Univ of Memphis (USA) | President, JMA (AIMA)
+          {profile.designation}, {profile.institution} | Dean's Visiting Scholar, Univ of Memphis (USA) | President, JMA (AIMA)
         </div>
       </div>
 
@@ -33,9 +43,9 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({ onNavigate }
       <div className="overview-grid">
         <div className="bio-text-column">
           <p className="bio-paragraph bio-lead">
-            {executiveProfile.bioSummary}
+            {bioSummary}
           </p>
-          {executiveProfile.fullBio.slice(1).map((para, i) => (
+          {fullBioParagraphs.map((para: string, i: number) => (
             <p key={i} className="bio-paragraph">
               {para}
             </p>
@@ -45,17 +55,17 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({ onNavigate }
         <div className="executive-portrait-card">
           <div className="portrait-frame">
             <img
-              src="/images/prof_manoj_kumar.jpg"
-              alt={executiveProfile.fullName}
+              src={photoUrl}
+              alt={profile.fullName}
               className="portrait-img"
             />
           </div>
 
           <div className="quote-academic-card">
             <blockquote>
-              "{executiveProfile.quote}"
+              "{profile.quote}"
             </blockquote>
-            <cite>— {executiveProfile.fullName}</cite>
+            <cite>— {profile.fullName}</cite>
           </div>
         </div>
       </div>
@@ -67,7 +77,7 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({ onNavigate }
       </h3>
 
       <div className="pillars-grid">
-        {executiveProfile.leadershipPillars.map((pillar, idx) => (
+        {pillars.map((pillar: any, idx: number) => (
           <div key={idx} className="pillar-card">
             <div className="pillar-icon-box">
               {pillarIcons[pillar.icon] || <Landmark size={22} />}
@@ -86,7 +96,7 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({ onNavigate }
           <span>Fields of Academic & Technological Specialization</span>
         </h4>
         <div className="specializations-tags">
-          {executiveProfile.specializations.map((spec, idx) => (
+          {specializations.map((spec: string, idx: number) => (
             <span key={idx} className="specialization-tag">
               <span>•</span>
               <span>{spec}</span>
@@ -97,3 +107,4 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({ onNavigate }
     </div>
   );
 };
+

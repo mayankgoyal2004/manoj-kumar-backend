@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { routeTree } from "./routeTree.gen";
 import { DefaultCatchBoundary } from "@/components/DefaultCatchBoundary";
 import { NotFound } from "@/components/NotFound";
+import FullPageLoader from "@/components/layout/FullPageLoader";
 import { createQueryClient } from "@/lib/query-client";
 
 export function getRouter() {
@@ -13,6 +14,9 @@ export function getRouter() {
     context: { queryClient },
     defaultPreload: "intent",
     defaultPreloadStaleTime: 0,
+    defaultPendingMs: 0,
+    defaultPendingMinMs: 0,
+    defaultPendingComponent: FullPageLoader,
     defaultErrorComponent: DefaultCatchBoundary,
     defaultNotFoundComponent: () => <NotFound />,
     scrollRestoration: true,

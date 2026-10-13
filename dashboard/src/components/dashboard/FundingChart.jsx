@@ -1,16 +1,8 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import SectionCard from "@/components/kit/SectionCard";
 import { chipCls } from "@/components/kit/styles";
-
-const DATA = [
-  { year: "2021", funding: 0.56 },
-  { year: "2022", funding: 2.16 },
-  { year: "2023", funding: 1.28 },
-  { year: "2024", funding: 4.67 },
-  { year: "2025", funding: 0.68 },
-  { year: "2026", funding: 1.42 },
-];
+import { useData } from "@/lib/DataStore";
 
 const tooltipStyle = {
   borderRadius: 12,
@@ -22,6 +14,12 @@ const tooltipStyle = {
 };
 
 export default function FundingChart() {
+  const { dashboardStats } = useData();
+
+  const data = useMemo(() => {
+    return dashboardStats?.fundingTrends || [];
+  }, [dashboardStats?.fundingTrends]);
+
   return (
     <SectionCard
       title="Sponsored research funding"
@@ -30,7 +28,7 @@ export default function FundingChart() {
     >
       <div className="h-[220px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={DATA} margin={{ top: 6, right: 8, left: -20, bottom: 0 }}>
+          <BarChart data={data} margin={{ top: 6, right: 8, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
             <XAxis
               dataKey="year"
@@ -47,7 +45,7 @@ export default function FundingChart() {
             />
             <Tooltip contentStyle={tooltipStyle} formatter={(value) => [`₹${value} Cr`, "Sanctioned"]} />
             <Bar dataKey="funding" radius={[8, 8, 2, 2]} maxBarSize={44}>
-              {DATA.map((entry) => (
+              {data.map((entry) => (
                 <Cell key={entry.year} fill="hsl(var(--chart-3))" />
               ))}
             </Bar>

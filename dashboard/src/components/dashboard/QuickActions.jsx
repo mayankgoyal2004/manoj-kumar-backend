@@ -5,8 +5,8 @@ import {
   Bell,
   BookOpenText,
   FolderOpen,
+  Globe,
   Newspaper,
-  Search,
   ShieldCheck,
 } from "lucide-react";
 import SectionCard from "@/components/kit/SectionCard";
@@ -43,10 +43,10 @@ const ACTIONS = [
     icon: Bell,
   },
   {
-    to: "/seo-settings",
-    label: "Tune SEO metadata",
-    hint: "Titles, descriptions and sharing",
-    icon: Search,
+    to: "/website-settings",
+    label: "Website settings",
+    hint: "Identity, themes and branding",
+    icon: Globe,
   },
 ];
 
