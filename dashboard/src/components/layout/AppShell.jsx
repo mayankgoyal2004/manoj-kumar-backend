@@ -1,21 +1,50 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
 import { DataProvider, PROFILE } from "@/lib/DataStore";
 import { useAuth } from "@/lib/AuthContext";
 import { cn } from "@/lib/utils";
 
+import api from "@/api/backendClient";
+
 function AppShellFooter() {
   const { user } = useAuth();
-  const name = user?.full_name || PROFILE.name;
-  const role = user?.department || PROFILE.honorific;
   const currentYear = new Date().getFullYear();
+  const fallbackFooter = `© ${currentYear} ${user?.full_name || PROFILE.name} · ${user?.department || PROFILE.honorific}`;
+  const [footerNote, setFooterNote] = useState(fallbackFooter);
+
+  useEffect(() => {
+    let active = true;
+    const fetchFooter = async () => {
+      try {
+        const settings = await api.settings.getWebsiteSettings();
+        if (active && settings?.footer) {
+          setFooterNote(settings.footer);
+        }
+      } catch (err) {
+        // Fallback already set
+      }
+    };
+    fetchFooter();
+
+    const handleSettingsUpdated = (e) => {
+      if (e?.detail?.footer) {
+        setFooterNote(e.detail.footer);
+      } else {
+        fetchFooter();
+      }
+    };
+    window.addEventListener("settings:updated", handleSettingsUpdated);
+    return () => {
+      active = false;
+      window.removeEventListener("settings:updated", handleSettingsUpdated);
+    };
+  }, []);
 
   return (
-    <footer className="border-t border-border px-4 py-5 sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-1 text-[11px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-        <p>© {currentYear} {name} · {role}</p>
-        <p>Executive Academic Portfolio Console</p>
+    <footer className="border-t border-border px-4 py-4 sm:px-6 lg:px-8 bg-card/40">
+      <div className="mx-auto flex w-full max-w-[1440px] items-center justify-between text-xs text-muted-foreground">
+        <p className="font-medium text-foreground/80">{footerNote}</p>
       </div>
     </footer>
   );

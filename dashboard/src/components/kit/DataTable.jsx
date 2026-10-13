@@ -11,7 +11,7 @@ function renderValue(column, row) {
   if (column.type === "status") return <StatusBadge value={value} />;
   if (column.type === "money") return <span className="font-medium tabular-nums">{formatINR(value)}</span>;
   if (column.type === "date") return <span className="text-muted-foreground">{formatDate(value)}</span>;
-  if (column.type === "number") return <span className="tabular-nums">{value === "" || value === undefined ? "—" : value}</span>;
+  if (column.type === "number") return <span className="tabular-nums">{value === "" || value === undefined || value === null ? "—" : value}</span>;
   if (Array.isArray(value)) return value.join(", ");
   if (value === "" || value === undefined || value === null) return <span className="text-muted-foreground">—</span>;
   return value;

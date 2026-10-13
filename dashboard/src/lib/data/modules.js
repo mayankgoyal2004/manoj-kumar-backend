@@ -38,12 +38,15 @@ export const MODULES = {
     columns: [
       { key: "degree", label: "Degree / Credential" },
       { key: "institution", label: "Institution" },
+      { key: "category", label: "Type" },
       { key: "specialization", label: "Specialisation" },
       { key: "year", label: "Year", type: "number" },
       { key: "status", label: "Status", type: "status" },
     ],
+    filters: ["category"],
     fields: [
       { name: "degree", label: "Degree / Credential", type: "text", required: true },
+      { name: "category", label: "Type / Classification", type: "select", options: ["Academic Degree", "Executive Certification"], required: true },
       { name: "institution", label: "Institution", type: "text", required: true },
       { name: "specialization", label: "Specialisation", type: "text" },
       { name: "year", label: "Year of award", type: "number" },
@@ -67,10 +70,11 @@ export const MODULES = {
       { key: "year", label: "Year", type: "number" },
       { key: "status", label: "Status", type: "status" },
     ],
+    filters: ["category"],
     fields: [
       { name: "title", label: "Award title", type: "text", required: true },
       { name: "organisation", label: "Awarding body", type: "text" },
-      { name: "category", label: "Category", type: "select", options: ["National", "International", "Institutional", "Professional Body"] },
+      { name: "category", label: "Category", type: "select", options: ["Personal", "Institutional", "Government", "National", "International", "Professional Body"] },
       { name: "year", label: "Year", type: "number" },
       { name: "status", label: "Status", type: "select", options: ["Awarded", "Nominated"] },
       { name: "citation", label: "Citation", type: "textarea", full: true },
@@ -86,6 +90,7 @@ export const MODULES = {
     statusOptions: ["Granted", "Published", "Filed", "Expired"],
     columns: [
       { key: "title", label: "Invention" },
+      { key: "domain", label: "Domain / Technology Area" },
       { key: "patent_number", label: "Application No." },
       { key: "country", label: "Jurisdiction" },
       { key: "filing_date", label: "Filed", type: "date" },
@@ -93,6 +98,7 @@ export const MODULES = {
     ],
     fields: [
       { name: "title", label: "Invention title", type: "text", required: true },
+      { name: "domain", label: "Domain / Technological Area", type: "text", placeholder: "e.g. Communications & IoT, Computer Vision, Biomedical IoT" },
       { name: "patent_number", label: "Application / Patent no.", type: "text" },
       { name: "country", label: "Jurisdiction", type: "text" },
       { name: "filing_date", label: "Filing date", type: "date" },

@@ -91,6 +91,7 @@ model Education {
   degree         String
   institution    String
   specialization String?
+  category       String?  @default("Academic Degree") // "Academic Degree", "Executive Certification"
   year           Int?
   grade          String?
   status         String   @default("Verified") // "Verified", "Pending"
@@ -117,6 +118,7 @@ model Patent {
   id           String   @id @default(uuid())
   title        String
   patentNumber String?
+  domain       String?  @default("Communications & IoT")
   country      String?  @default("India")
   filingDate   String?
   grantDate    String?

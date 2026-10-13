@@ -46,15 +46,15 @@ export const portfolioApi = {
   },
 
   getEducation: async () => {
-    return fetchJson<any[]>('/education');
+    return fetchJson<any[]>('/education?pageSize=100');
   },
 
   getAwards: async () => {
-    return fetchJson<any[]>('/awards');
+    return fetchJson<any[]>('/awards?pageSize=100');
   },
 
   getPatents: async () => {
-    return fetchJson<any[]>('/patents');
+    return fetchJson<any[]>('/patents?pageSize=100');
   },
 
   getPublications: async (params?: Record<string, string>) => {

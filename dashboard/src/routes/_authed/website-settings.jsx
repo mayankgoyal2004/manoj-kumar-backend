@@ -129,6 +129,8 @@ function WebsiteSettingsPage() {
         window.dispatchEvent(new CustomEvent("favicon:updated", { detail: values.favicon }));
       }
 
+      window.dispatchEvent(new CustomEvent("settings:updated", { detail: { footer: values.footer } }));
+
       toast.success("Website settings saved", { description: "Your configuration and favicon are live across the platform." });
     } catch (err) {
       toast.error(err.message || "Failed to save settings to server");

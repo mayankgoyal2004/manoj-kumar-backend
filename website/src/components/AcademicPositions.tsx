@@ -26,13 +26,23 @@ export const AcademicPositions: React.FC = () => {
 
   const formatPeriod = (pos: any) => {
     if (pos.period) return pos.period;
-    if (pos.startYear && pos.endYear) return `${pos.startYear} – ${pos.endYear}`;
-    if (pos.startYear && !pos.endYear) return `${pos.startYear} – Present`;
+    const start = pos.startYear || pos.start_year;
+    const end = pos.endYear || pos.end_year;
+    if (start && end) return `${start} – ${end}`;
+    if (start && !end) return `${start} – Present`;
+    if (!start && end) return `Until ${end}`;
     return 'Present';
   };
 
-  const currentPositions = positions.filter((p: any) => p.status === 'Current' || p.isCurrent);
-  const pastPositions = positions.filter((p: any) => p.status !== 'Current' && !p.isCurrent);
+  const isPositionCurrent = (p: any) => {
+    if (p.status !== undefined && p.status !== null) {
+      return String(p.status).trim().toLowerCase() === 'current';
+    }
+    return Boolean(p.isCurrent);
+  };
+
+  const currentPositions = positions.filter((p: any) => isPositionCurrent(p));
+  const pastPositions = positions.filter((p: any) => !isPositionCurrent(p));
 
   return (
     <div className="section-content-wrapper">

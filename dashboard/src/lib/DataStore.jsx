@@ -63,6 +63,42 @@ export function DataProvider({ children }) {
     };
   }, []);
 
+function normalizeLoadedItem(item) {
+  if (!item || typeof item !== 'object') return item;
+  return {
+    ...item,
+    // Positions & Grants
+    start_year: item.start_year ?? item.startYear ?? null,
+    end_year: item.end_year ?? item.endYear ?? null,
+    startYear: item.startYear ?? item.start_year ?? null,
+    endYear: item.endYear ?? item.end_year ?? null,
+
+    // Patents
+    patent_number: item.patent_number ?? item.patentNumber ?? null,
+    patentNumber: item.patentNumber ?? item.patent_number ?? null,
+    filing_date: item.filing_date ?? item.filingDate ?? null,
+    filingDate: item.filingDate ?? item.filing_date ?? null,
+    grant_date: item.grant_date ?? item.grantDate ?? null,
+    grantDate: item.grantDate ?? item.grant_date ?? null,
+
+    // Books
+    co_authors: item.co_authors ?? item.coAuthors ?? null,
+    coAuthors: item.coAuthors ?? item.co_authors ?? null,
+
+    // Supervision
+    enrolled_year: item.enrolled_year ?? item.enrolledYear ?? null,
+    enrolledYear: item.enrolledYear ?? item.enrolled_year ?? null,
+    co_supervisor: item.co_supervisor ?? item.coSupervisor ?? null,
+    coSupervisor: item.coSupervisor ?? item.co_supervisor ?? null,
+
+    // MoUs
+    signed_date: item.signed_date ?? item.signedDate ?? null,
+    signedDate: item.signedDate ?? item.signed_date ?? null,
+
+    updated_date: item.updatedAt || item.updated_date || new Date().toISOString(),
+  };
+}
+
   // Fetch individual module data on-demand (lazy load when navigated to)
   const fetchModule = useCallback(async (key, force = false) => {
     const token = getAuthToken();
@@ -75,10 +111,7 @@ export function DataProvider({ children }) {
       if (res && Array.isArray(res)) {
         setCollections((prev) => ({
           ...prev,
-          [key]: res.map((item) => ({
-            ...item,
-            updated_date: item.updatedAt || item.updated_date || new Date().toISOString(),
-          })),
+          [key]: res.map(normalizeLoadedItem),
         }));
       } else {
         setCollections((prev) => ({
@@ -123,12 +156,13 @@ export function DataProvider({ children }) {
 
     const create = (key, data) => {
       const now = new Date().toISOString();
-      const record = { id: nextId(key), updated_date: now, ...data };
+      const normalized = normalizeLoadedItem(data);
+      const record = { id: nextId(key), ...normalized, updated_date: now };
       setCollections((prev) => ({ ...prev, [key]: [record, ...prev[key]] }));
       logActivity("created", key, recordTitle(key, record), "create");
 
       // Asynchronously persist to backend PostgreSQL
-      api.modules.create(key, data).catch((err) => {
+      api.modules.create(key, normalized).catch((err) => {
         console.warn(`Backend persist failed for ${key}:`, err);
       });
 
@@ -137,12 +171,13 @@ export function DataProvider({ children }) {
 
     const update = (key, id, patch) => {
       const now = new Date().toISOString();
+      const normalizedPatch = normalizeLoadedItem(patch);
       let title = "";
       setCollections((prev) => ({
         ...prev,
         [key]: prev[key].map((row) => {
           if (row.id !== id) return row;
-          const next = { ...row, ...patch, updated_date: now };
+          const next = { ...row, ...normalizedPatch, updated_date: now };
           title = recordTitle(key, next);
           return next;
         }),
@@ -150,7 +185,7 @@ export function DataProvider({ children }) {
       logActivity("updated", key, title, "update");
 
       // Asynchronously update in backend PostgreSQL
-      api.modules.update(key, id, patch).catch((err) => {
+      api.modules.update(key, id, normalizedPatch).catch((err) => {
         console.warn(`Backend update failed for ${key}:`, err);
       });
     };

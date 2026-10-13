@@ -42,7 +42,21 @@ const FIELDS = [
     full: true,
     hint: "Displayed in the About Biosketch overview section next to your quote",
   },
-  { name: "bio", label: "Biography", type: "textarea", full: true },
+  {
+    name: "tagline",
+    label: "Executive Tagline",
+    type: "text",
+    full: true,
+    hint: "Displayed under your title in leadership sections",
+  },
+  {
+    name: "quote",
+    label: "Leadership Quote",
+    type: "text",
+    full: true,
+    hint: "Displayed in the academic quote card next to your Executive Biosketch portrait",
+  },
+  { name: "bio", label: "Executive Lead Summary", type: "textarea", full: true, hint: "Highlighted lead paragraph at the beginning of the Executive Biosketch" },
   { name: "orcid", label: "ORCID", type: "text" },
   { name: "scopus", label: "Scopus author ID", type: "text" },
   { name: "scholar", label: "Google Scholar", type: "text" },
@@ -129,6 +143,9 @@ function ProfilePage() {
             ...remote,
             honorific: remote.designation || remote.salutation || PROFILE.honorific,
             bio: remote.bioSummary || PROFILE.bio,
+            quote: remote.quote || PROFILE.quote || "",
+            tagline: remote.tagline || PROFILE.tagline || "",
+            fullBioList: Array.isArray(remote.fullBio) ? remote.fullBio : (PROFILE.fullBio || []),
             expertiseList: expertiseArr,
             headerPositionsList: headerPositionsArr,
             cvUrl: cvDoc?.fileUrl || "/documents/Prof_Manoj_Kumar_Curriculum_Vitae.pdf",
@@ -182,6 +199,11 @@ function ProfilePage() {
         sidebarPhoto: source.sidebarPhoto,
         bioPhoto: source.bioPhoto,
         bioSummary: source.bio,
+        quote: source.quote,
+        tagline: source.tagline,
+        fullBio: Array.isArray(source.fullBioList)
+          ? source.fullBioList.map((s) => String(s).trim()).filter(Boolean)
+          : (Array.isArray(values.fullBioList) ? values.fullBioList.map((s) => String(s).trim()).filter(Boolean) : []),
         expertise: expertiseArr,
         headerPositions: headerPositionsArr,
         orcid: source.orcid,
@@ -292,9 +314,21 @@ function ProfilePage() {
                 </div>
               ))}
               <div className="sm:col-span-2">
-                <dt className="label-caps">Biography</dt>
-                <dd className="mt-1.5 text-sm leading-relaxed text-foreground">{values.bio}</dd>
+                <dt className="label-caps">Lead Biography</dt>
+                <dd className="mt-1.5 text-sm leading-relaxed text-foreground">{values.bio || "—"}</dd>
               </div>
+              {values.tagline && (
+                <div className="sm:col-span-2">
+                  <dt className="label-caps">Executive Tagline</dt>
+                  <dd className="mt-1.5 text-sm italic text-foreground">{values.tagline}</dd>
+                </div>
+              )}
+              {values.quote && (
+                <div className="sm:col-span-2">
+                  <dt className="label-caps">Leadership Quote</dt>
+                  <dd className="mt-1.5 text-sm italic text-foreground">&quot;{values.quote}&quot;</dd>
+                </div>
+              )}
               <div className="sm:col-span-2">
                 <dt className="label-caps">Areas of expertise</dt>
                 <dd className="mt-2 flex flex-wrap gap-2">
@@ -306,6 +340,94 @@ function ProfilePage() {
                 </dd>
               </div>
             </dl>
+          </SectionCard>
+
+          {/* Dedicated Executive Biosketch Paragraphs Card */}
+          <SectionCard
+            title="Executive Biosketch Full Paragraphs (About Section)"
+            description="Manage each paragraph of your detailed About Biosketch biography individually. Add, edit, reorder or remove paragraphs."
+          >
+            <div className="space-y-4">
+              {(values.fullBioList || []).length === 0 ? (
+                <div className="rounded-lg border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
+                  No full biography paragraphs added yet. Click &quot;Add Bio Paragraph&quot; below.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {(values.fullBioList || []).map((para, idx) => (
+                    <div key={idx} className="rounded-xl border border-border bg-card p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-foreground">Paragraph {idx + 1}</span>
+                        <button
+                          type="button"
+                          title="Remove paragraph"
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border bg-muted/40 text-muted-foreground hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition"
+                          onClick={() => {
+                            const updated = (values.fullBioList || []).filter((_, i) => i !== idx);
+                            setValues((prev) => ({ ...prev, fullBioList: updated }));
+                          }}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                      <textarea
+                        rows={3}
+                        value={para}
+                        placeholder="Write paragraph narrative..."
+                        className={inputCls}
+                        onChange={(e) => {
+                          const updated = [...(values.fullBioList || [])];
+                          updated[idx] = e.target.value;
+                          setValues((prev) => ({ ...prev, fullBioList: updated }));
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                <button
+                  type="button"
+                  className={btnSecondary}
+                  onClick={() => {
+                    const current = values.fullBioList || [];
+                    setValues((prev) => ({
+                      ...prev,
+                      fullBioList: [...current, ""],
+                    }));
+                  }}
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Add Bio Paragraph
+                </button>
+
+                <button
+                  type="button"
+                  className={btnPrimary}
+                  onClick={async () => {
+                    const cleanList = (values.fullBioList || [])
+                      .map((s) => s.trim())
+                      .filter(Boolean);
+                    toast.info("Saving full biography paragraphs to database...");
+                    try {
+                      await api.profile.update({
+                        fullBio: cleanList,
+                      });
+                      setValues((prev) => ({ ...prev, fullBioList: cleanList }));
+                      toast.success("Biography paragraphs saved!", {
+                        description: `${cleanList.length} paragraph(s) are now live on your Executive Biosketch.`,
+                      });
+                    } catch (err) {
+                      toast.error(err.message || "Failed to update full biography");
+                    }
+                  }}
+                >
+                  <Save className="h-3.5 w-3.5" />
+                  Save Bio Paragraphs
+                </button>
+              </div>
+            </div>
           </SectionCard>
 
           {/* Dedicated Areas of Expertise Columns Card */}
@@ -696,6 +818,65 @@ function ProfilePage() {
             onCancel={() => setEditing(false)}
             submitLabel="Save profile"
           />
+
+          {/* Executive Biosketch Full Paragraphs in Edit Modal */}
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="mb-3">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground">
+                Executive Biosketch Full Paragraphs (About Section)
+              </h4>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">
+                Add each narrative paragraph of your About Biosketch individually. They appear sequentially under your lead summary.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              {(draft.fullBioList || []).map((para, idx) => (
+                <div key={idx} className="rounded-xl border border-border bg-muted/20 p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-foreground">Paragraph {idx + 1}</span>
+                    <button
+                      type="button"
+                      title="Remove paragraph"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border bg-card text-muted-foreground hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition"
+                      onClick={() => {
+                        const updated = (draft.fullBioList || []).filter((_, i) => i !== idx);
+                        setDraft((prev) => ({ ...prev, fullBioList: updated }));
+                      }}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                  <textarea
+                    rows={3}
+                    value={para}
+                    placeholder="Write paragraph narrative..."
+                    className={inputCls}
+                    onChange={(e) => {
+                      const updated = [...(draft.fullBioList || [])];
+                      updated[idx] = e.target.value;
+                      setDraft((prev) => ({ ...prev, fullBioList: updated }));
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              className={`mt-3 ${btnSecondary}`}
+              onClick={() => {
+                const current = draft.fullBioList || [];
+                setDraft((prev) => ({
+                  ...prev,
+                  fullBioList: [...current, ""],
+                }));
+              }}
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add Bio Paragraph
+            </button>
+          </div>
 
           {/* Areas of Expertise Columns in Edit Modal */}
           <div className="rounded-xl border border-border bg-card p-4">

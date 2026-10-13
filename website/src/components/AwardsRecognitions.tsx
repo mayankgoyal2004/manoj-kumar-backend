@@ -6,12 +6,21 @@ export const AwardsRecognitions: React.FC = () => {
   const { awards } = usePortfolio();
   const [activeCategory, setActiveCategory] = useState<string>('All');
 
-  // Dynamically extract categories
+  // Dynamically extract categories with preferred ordering
+  const preferredOrder = ['Personal', 'Institutional', 'Government', 'National', 'International'];
   const categoriesSet = new Set<string>();
   awards.forEach((a: any) => {
     if (a.category) categoriesSet.add(a.category);
   });
-  const categories = ['All', ...Array.from(categoriesSet)];
+  const sortedCategories = Array.from(categoriesSet).sort((a, b) => {
+    const idxA = preferredOrder.indexOf(a);
+    const idxB = preferredOrder.indexOf(b);
+    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+    if (idxA !== -1) return -1;
+    if (idxB !== -1) return 1;
+    return a.localeCompare(b);
+  });
+  const categories = ['All', ...sortedCategories];
 
   const filteredAwards = activeCategory === 'All'
     ? awards

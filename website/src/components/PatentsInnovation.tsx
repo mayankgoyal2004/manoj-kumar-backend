@@ -58,12 +58,14 @@ export const PatentsInnovation: React.FC = () => {
 
               <h4 className="patent-title">{patent.title}</h4>
 
-              <div className="patent-domain-badge">
-                <span className="badge badge-navy">
-                  <Cpu size={12} />
-                  <span>{patent.domain || 'Communications & IoT'}</span>
-                </span>
-              </div>
+              {patent.domain && (
+                <div className="patent-domain-badge">
+                  <span className="badge badge-navy">
+                    <Cpu size={12} />
+                    <span>{patent.domain}</span>
+                  </span>
+                </div>
+              )}
 
               {desc && <p className="patent-desc">{desc}</p>}
 

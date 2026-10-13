@@ -94,7 +94,7 @@ export const getPublicOverview = async (req: Request, res: Response) => {
       settings,
     ] = await Promise.all([
       rawProfilePromise,
-      prisma.position.findMany({ where: { status: 'Current' }, orderBy: { orderIndex: 'asc' }, take: 4 }),
+      prisma.position.findMany({ where: { status: 'Current' }, orderBy: [{ orderIndex: 'asc' }, { startYear: 'desc' }], take: 50 }),
       prisma.education.findMany({ orderBy: { year: 'desc' }, take: 4 }),
       prisma.publication.findMany({ where: { status: 'Published' }, orderBy: { year: 'desc' }, take: 6 }),
       prisma.news.findMany({ where: { status: 'Published' }, orderBy: { date: 'desc' }, take: 4 }),

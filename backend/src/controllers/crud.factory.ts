@@ -12,6 +12,49 @@ export interface CrudOptions {
   defaultSort?: { field: string; order: 'asc' | 'desc' };
 }
 
+const FIELD_ALIAS_MAP: Record<string, string> = {
+  start_year: 'startYear',
+  end_year: 'endYear',
+  patent_number: 'patentNumber',
+  filing_date: 'filingDate',
+  grant_date: 'grantDate',
+  co_authors: 'coAuthors',
+  enrolled_year: 'enrolledYear',
+  co_supervisor: 'coSupervisor',
+  signed_date: 'signedDate',
+};
+
+function normalizeCrudData(raw: any): any {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return raw;
+  const result: any = {};
+
+  for (const [key, value] of Object.entries(raw)) {
+    // Convert snake_case key to camelCase if known
+    const targetKey = FIELD_ALIAS_MAP[key] || key;
+
+    // Convert empty strings to null for nullable fields
+    if (value === '') {
+      result[targetKey] = null;
+    } else {
+      result[targetKey] = value;
+    }
+  }
+
+  // Remove temporary or redundant snake_case keys if mapped
+  for (const snakeKey of Object.keys(FIELD_ALIAS_MAP)) {
+    if (snakeKey in result && FIELD_ALIAS_MAP[snakeKey] in result) {
+      delete result[snakeKey];
+    }
+  }
+
+  // Strip id or auto fields if passed in update/create payload
+  delete result.id;
+  delete result.createdAt;
+  delete result.updatedAt;
+
+  return result;
+}
+
 export function createCrudController(options: CrudOptions) {
   const { modelName, moduleTitle, searchFields = ['title', 'name'], filterFields = ['status'], titleField = 'title', defaultSort = { field: 'createdAt', order: 'desc' } } = options;
 
@@ -164,8 +207,9 @@ export function createCrudController(options: CrudOptions) {
     // Create a new record
     create: async (req: Request, res: Response) => {
       try {
+        const data = normalizeCrudData(req.body);
         const record = await model.create({
-          data: req.body,
+          data,
         });
 
         const targetTitle = record[titleField] || record.name || record.caption || record.id;
@@ -188,9 +232,10 @@ export function createCrudController(options: CrudOptions) {
     update: async (req: Request, res: Response) => {
       try {
         const { id } = req.params;
+        const data = normalizeCrudData(req.body);
         const record = await model.update({
           where: { id },
-          data: req.body,
+          data,
         });
 
         const targetTitle = record[titleField] || record.name || record.caption || record.id;

@@ -12,8 +12,8 @@ export const positionsController = createCrudController({
 export const educationController = createCrudController({
   modelName: 'education',
   moduleTitle: 'Education & Credentials',
-  searchFields: ['degree', 'institution', 'specialization', 'notes'],
-  filterFields: ['status'],
+  searchFields: ['degree', 'institution', 'specialization', 'category', 'notes'],
+  filterFields: ['status', 'category'],
   titleField: 'degree',
   defaultSort: { field: 'year', order: 'desc' },
 });
@@ -30,8 +30,8 @@ export const awardsController = createCrudController({
 export const patentsController = createCrudController({
   modelName: 'patent',
   moduleTitle: 'Patents & Intellectual Property',
-  searchFields: ['title', 'patentNumber', 'inventors', 'abstract'],
-  filterFields: ['status', 'country'],
+  searchFields: ['title', 'patentNumber', 'domain', 'inventors', 'abstract'],
+  filterFields: ['status', 'domain', 'country'],
   titleField: 'title',
   defaultSort: { field: 'createdAt', order: 'desc' },
 });

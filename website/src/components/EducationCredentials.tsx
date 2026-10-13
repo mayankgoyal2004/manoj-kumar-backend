@@ -6,6 +6,11 @@ export const EducationCredentials: React.FC = () => {
   const { education } = usePortfolio();
 
   const isCert = (item: any) => {
+    if (item.category) {
+      const cat = String(item.category).trim().toLowerCase();
+      if (cat.includes('cert') || cat.includes('executive')) return true;
+      if (cat.includes('degree') || cat.includes('academic')) return false;
+    }
     const d = (item.degree || item.title || '').toLowerCase();
     const g = (item.grade || '').toLowerCase();
     return d.includes('certificate') || d.includes('certified') || d.includes('diploma') || g === 'certified';

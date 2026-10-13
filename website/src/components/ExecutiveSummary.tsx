@@ -35,7 +35,9 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = () => {
         <div className="content-eyebrow">Academic & Leadership Profile</div>
         <h2 className="content-title">Executive Biosketch</h2>
         <div className="content-subtitle">
-          {profile.designation}, {profile.institution} | Dean's Visiting Scholar, Univ of Memphis (USA) | President, JMA (AIMA)
+          {Array.isArray(profile.headerPositions) && profile.headerPositions.length > 0
+            ? profile.headerPositions.filter(Boolean).join(' | ')
+            : `${profile.designation || 'Vice-Chancellor'}, ${profile.institution || 'DAV University'}`}
         </div>
       </div>
 

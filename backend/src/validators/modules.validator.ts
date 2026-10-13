@@ -16,13 +16,28 @@ export const paginationQuerySchema = z.object({
   order: z.enum(['asc', 'desc']).optional().default('desc'),
 });
 
+// Helper for numeric inputs that may be empty strings "" or numbers
+const optionalInt = z.preprocess((val) => {
+  if (val === '' || val === null || val === undefined) return null;
+  const num = Number(val);
+  return isNaN(num) ? val : num;
+}, z.number().int().optional().nullable());
+
+const optionalFloat = z.preprocess((val) => {
+  if (val === '' || val === null || val === undefined) return null;
+  const num = Number(val);
+  return isNaN(num) ? val : num;
+}, z.number().optional().nullable());
+
 // Positions
 export const positionSchema = z.object({
   role: z.string().min(1, 'Role / Designation is required'),
   organisation: z.string().min(1, 'Organisation is required'),
   location: z.string().optional().nullable(),
-  startYear: z.coerce.number().int().optional().nullable(),
-  endYear: z.coerce.number().int().optional().nullable(),
+  startYear: optionalInt,
+  start_year: optionalInt,
+  endYear: optionalInt,
+  end_year: optionalInt,
   status: z.enum(['Current', 'Completed']).optional().default('Current'),
   description: z.string().optional().nullable(),
   orderIndex: z.coerce.number().int().optional().default(0),
@@ -33,7 +48,8 @@ export const educationSchema = z.object({
   degree: z.string().min(1, 'Degree is required'),
   institution: z.string().min(1, 'Institution is required'),
   specialization: z.string().optional().nullable(),
-  year: z.coerce.number().int().optional().nullable(),
+  category: z.enum(['Academic Degree', 'Executive Certification']).optional().default('Academic Degree'),
+  year: optionalInt,
   grade: z.string().optional().nullable(),
   status: z.enum(['Verified', 'Pending']).optional().default('Verified'),
   notes: z.string().optional().nullable(),
@@ -44,8 +60,8 @@ export const educationSchema = z.object({
 export const awardSchema = z.object({
   title: z.string().min(1, 'Award title is required'),
   organisation: z.string().optional().nullable(),
-  category: z.enum(['National', 'International', 'Institutional', 'Professional Body']).optional().default('National'),
-  year: z.coerce.number().int().optional().nullable(),
+  category: z.enum(['Personal', 'Institutional', 'Government', 'National', 'International', 'Professional Body']).optional().default('Personal'),
+  year: optionalInt,
   status: z.enum(['Awarded', 'Nominated']).optional().default('Awarded'),
   citation: z.string().optional().nullable(),
   orderIndex: z.coerce.number().int().optional().default(0),
@@ -55,9 +71,13 @@ export const awardSchema = z.object({
 export const patentSchema = z.object({
   title: z.string().min(1, 'Patent title is required'),
   patentNumber: z.string().optional().nullable(),
+  patent_number: z.string().optional().nullable(),
+  domain: z.string().optional().nullable(),
   country: z.string().optional().default('India'),
   filingDate: z.string().optional().nullable(),
+  filing_date: z.string().optional().nullable(),
   grantDate: z.string().optional().nullable(),
+  grant_date: z.string().optional().nullable(),
   inventors: z.string().optional().nullable(),
   status: z.enum(['Granted', 'Published', 'Filed', 'Expired']).optional().default('Published'),
   abstract: z.string().optional().nullable(),
@@ -70,7 +90,7 @@ export const publicationSchema = z.object({
   journal: z.string().optional().nullable(),
   venue: z.string().optional().nullable(),
   authors: z.string().optional().nullable(),
-  year: z.coerce.number().int().optional().nullable(),
+  year: optionalInt,
   citations: z.coerce.number().int().optional().default(0),
   doi: z.string().optional().nullable(),
   indexing: z.enum(['SCI', 'Scopus', 'UGC-CARE', 'Web of Science', 'Conference', 'Other']).optional().default('SCI'),
@@ -87,8 +107,9 @@ export const bookSchema = z.object({
   publisher: z.string().optional().nullable(),
   kind: z.enum(['Authored Book', 'Edited Volume', 'Chapter', 'Monograph']).optional().default('Authored Book'),
   isbn: z.string().optional().nullable(),
-  year: z.coerce.number().int().optional().nullable(),
+  year: optionalInt,
   coAuthors: z.string().optional().nullable(),
+  co_authors: z.string().optional().nullable(),
   status: z.enum(['Published', 'In Press', 'Draft']).optional().default('Published'),
   abstract: z.string().optional().nullable(),
   orderIndex: z.coerce.number().int().optional().default(0),
@@ -98,9 +119,11 @@ export const bookSchema = z.object({
 export const grantSchema = z.object({
   project: z.string().min(1, 'Project title is required'),
   agency: z.string().optional().nullable(),
-  amount: z.coerce.number().optional().default(0),
-  startYear: z.coerce.number().int().optional().nullable(),
-  endYear: z.coerce.number().int().optional().nullable(),
+  amount: optionalFloat,
+  startYear: optionalInt,
+  start_year: optionalInt,
+  endYear: optionalInt,
+  end_year: optionalInt,
   role: z.enum(['Principal Investigator', 'Co-Investigator', 'Mentor']).optional().default('Principal Investigator'),
   status: z.enum(['Active', 'Sanctioned', 'Completed']).optional().default('Active'),
   outcomes: z.string().optional().nullable(),
@@ -112,8 +135,10 @@ export const supervisionSchema = z.object({
   scholar: z.string().min(1, 'Scholar name is required'),
   thesis: z.string().optional().nullable(),
   program: z.enum(['PhD', 'M.Tech', 'M.Phil', 'Post-Doctoral']).optional().default('PhD'),
-  enrolledYear: z.coerce.number().int().optional().nullable(),
+  enrolledYear: optionalInt,
+  enrolled_year: optionalInt,
   coSupervisor: z.string().optional().nullable(),
+  co_supervisor: z.string().optional().nullable(),
   status: z.enum(['Ongoing', 'Awarded', 'Submitted']).optional().default('Ongoing'),
   progress: z.string().optional().nullable(),
   orderIndex: z.coerce.number().int().optional().default(0),
@@ -136,7 +161,7 @@ export const affiliationSchema = z.object({
   body: z.string().min(1, 'Body / Council name is required'),
   position: z.string().optional().nullable(),
   kind: z.enum(['Governing Council', 'Professional Body', 'Statutory Committee', 'Academic Senate']).optional().default('Governing Council'),
-  since: z.coerce.number().int().optional().nullable(),
+  since: optionalInt,
   status: z.enum(['Current', 'Completed']).optional().default('Current'),
   notes: z.string().optional().nullable(),
   orderIndex: z.coerce.number().int().optional().default(0),
@@ -148,6 +173,7 @@ export const mouSchema = z.object({
   country: z.string().optional().nullable(),
   scope: z.string().optional().nullable(),
   signedDate: z.string().optional().nullable(),
+  signed_date: z.string().optional().nullable(),
   validity: z.string().optional().nullable(),
   status: z.enum(['Active', 'Signed', 'Expired']).optional().default('Active'),
   notes: z.string().optional().nullable(),
