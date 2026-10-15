@@ -1,3 +1,60 @@
+export interface PressClipping {
+  id: string;
+  title: string;
+  newspaper: string;
+  date: string;
+  edition?: string;
+  imageUrl: string;
+  headline: string;
+  subheadline: string;
+  description: string;
+  language: string;
+  highlights: string[];
+  tags: string[];
+}
+
+export const pressClippings: PressClipping[] = [
+  {
+    id: 'clip-bhaskar-2017',
+    title: 'MHRD Commission for Scientific & Technical Terminology Seminar',
+    newspaper: 'Dainik Bhaskar',
+    date: '14 September 2017',
+    edition: 'Jalandhar Edition',
+    imageUrl: '/images/news/dainik-bhaskar-2017.jpg',
+    headline: 'जो इंग्लिश में कंफर्टेबल नहीं, उनके पास अपनी भाषा में साइंस पढ़ने की ऑप्शन हो : डॉ. मनोज',
+    subheadline: 'डेविएट में एमएचआरडी के "कमीशन फॉर साइंटिफिक एंड टेक्नोलॉजी टर्मिनोलॉजी" ने करवाया दो दिवसीय राष्ट्रीय सेमिनार',
+    language: 'Hindi (हिंदी)',
+    description: 'Special coverage in Dainik Bhaskar on the two-day National Seminar organized by DAVIET under the auspices of the Commission for Scientific and Technical Terminology (CSTT), Ministry of Human Resource Development (MHRD), Govt. of India. Principal Dr. Manoj Kumar strongly advocated that students should have the choice to study science, technology, and engineering in their mother tongue / regional languages so that language never becomes a barrier to scientific innovation.',
+    highlights: [
+      'Organized in coordination with MHRD Commission for Scientific & Technical Terminology',
+      'Chief Guest DC Varinder Kumar Sharma (IAS) and NIT Jalandhar Director Prof. Lalit Awasthi joined Principal Dr. Manoj Kumar',
+      'Er. Jai Singh Rawat (Senior Incharge) & Er. Shiv Kumar Choudhary (Assistant Director) emphasized expanding scientific vocabulary in Hindi and regional languages',
+      'Dr. Manoj Kumar championed indigenous language technical curriculum for higher education'
+    ],
+    tags: ['Dainik Bhaskar', 'MHRD Seminar', 'DAVIET', 'Technical Terminology', 'Higher Education']
+  },
+  {
+    id: 'clip-jagran-2016',
+    title: 'The Trailblazer Principal: Special Feature in "Navian Rahaan"',
+    newspaper: 'Punjabi Jagran',
+    date: '02 March 2016',
+    edition: 'State Edition (Jalandhar)',
+    imageUrl: '/images/news/punjabi-jagran-2016.jpg',
+    headline: 'ਨਵੀਆਂ ਪੈੜਾਂ ਪਾਉਣ ਵਾਲਾ ਪ੍ਰਿੰਸੀਪਲ ਡਾ. ਮਨੋਜ ਕੁਮਾਰ (Navian Pairan Paun Wala)',
+    subheadline: 'ਸਪੈਸ਼ਲ ਫੀਚਰ "ਨਵੀਆਂ ਰਾਹਾਂ" — ਉੱਚ ਤਕਨੀਕੀ ਸਿੱਖਿਆ, ਅਕਾਦਮਿਕ ਖੋਜ ਅਤੇ ਪ੍ਰਸ਼ਾਸਨਿਕ ਨਵਚਾਰਾਂ ਦੇ ਖੇਤਰ ਵਿੱਚ ਉੱਤਮ ਪ੍ਰਾਪਤੀਆਂ',
+    language: 'Punjabi (ਪੰਜਾਬੀ)',
+    description: 'Prominent full-page biographical feature in Punjabi Jagran\'s celebrated column "ਨਵੀਆਂ ਰਾਹਾਂ" (Pioneering Paths) celebrating the visionary career and achievements of Principal Dr. Manoj Kumar. Tracing his journey from Mehar Chand Polytechnic (1991) to heading Electronics & Communication Engineering at DAVIET (2001), serving as Group Director of CT Group (2010–2015), and returning to lead DAVIET as Principal in 2015.',
+    highlights: [
+      'Honored in prestigious Punjabi Jagran special series "ਨਵੀਆਂ ਰਾਹਾਂ" (New Paths)',
+      'Highlights M.Tech Silver Medal and doctorate in Optical Fiber Communications',
+      'Documented 75+ research publications in national/international journals and 8 technical books',
+      'International academic alliances established across USA, France, Italy, and UK',
+      'Ranked among Top 25 Leaders in India for higher technical education'
+    ],
+    tags: ['Punjabi Jagran', 'Navian Rahaan', 'Leadership Feature', 'DAVIET', 'Academic Excellence']
+  }
+];
+
 export interface NewsMediaItem {
   id: string;
   title: string;
@@ -155,25 +212,49 @@ export const newsMediaItems: NewsMediaItem[] = [
   },
   {
     id: 'news-07',
-    title: 'Dainik Bhaskar Feature: "Research with Societal Value is the Hallmark of Top Universities" — Dr. Manoj Kumar',
-    headline: 'Regional Media Highlights Dr. Manoj Kumar\'s Dual Focus on Vedic Values and Frontier Photonics Research',
+    title: 'Dainik Bhaskar: "जो इंग्लिश में कंफर्टेबल नहीं, उनके पास अपनी भाषा में साइंस पढ़ने की ऑप्शन हो : डॉ. मनोज"',
+    headline: 'डेविएट में एमएचआरडी के "कमीशन फॉर साइंटिफिक एंड टेक्नोलॉजी टर्मिनोलॉजी" ने करवाया राष्ट्रीय सेमिनार',
     source: 'Dainik Bhaskar',
     category: 'Print Media',
-    date: 'May 2025',
-    readTime: '4 min read',
-    location: 'Punjab Region',
-    excerpt: 'In a prominent full-column feature, Dainik Bhaskar highlighted the visionary leadership of Vice-Chancellor Dr. Manoj Kumar in steering DAV University to new heights while upholding the timeless values of Swami Dayanand Saraswati and Mahatma Hansraj.',
+    date: '14 September 2017',
+    readTime: '3 min read',
+    location: 'Jalandhar',
+    imageUrl: '/images/news/dainik-bhaskar-2017.jpg',
+    excerpt: 'Dainik Bhaskar reported on the national seminar at DAVIET organized with MHRD Commission for Scientific & Technical Terminology, where Principal Dr. Manoj Kumar stressed the need for regional language science and technical education options.',
     fullContent: [
-      'The feature traced Dr. Manoj Kumar\'s 35-year illustrious academic career from a young gold/silver medalist researcher to holding key leadership roles as Director CT Group, Principal DAVIET, and Vice-Chancellor DAV University.',
-      'Special attention was drawn to his prolific research portfolio comprising 151+ research papers, 4 published patents, 13 books, and 9 Ph.D. scholars successfully guided in the field of optical wireless communication and dispersion compensation.',
-      'The article commended Dr. Kumar\'s community outreach initiatives, including tree-planting drives, free rural literacy campaigns, and green campus sustainability certifications at DAV University.'
+      'In a widely circulated report by Dainik Bhaskar, DAVIET hosted a high-level National Seminar in association with the Commission for Scientific and Technical Terminology (CSTT), Ministry of Human Resource Development (MHRD), Government of India.',
+      'Principal Dr. Manoj Kumar asserted: "Science and technological education must be democratized for every aspiring student. Those who are not comfortable with English should have genuine options to study science and engineering in their mother tongue with standard technical lexicons."',
+      'Chief Guest DC Varinder Kumar Sharma (IAS), NIT Jalandhar Director Prof. Lalit Awasthi, CSTT Senior Incharge Er. Jai Singh Rawat, and Assistant Director Er. Shiv Kumar Choudhary lauded the initiative and recognized DAVIET\'s leadership.'
     ],
     keyHighlights: [
-      'Spotlight on 35+ years of distinguished academic and administrative stewardship',
-      'Harmonious integration of Arya Samaj educational ideals with modern science & technology',
-      'Highlight of 151+ SCI/Scopus publications, 4 patents, and 13 authored textbooks'
+      'National Seminar conducted by MHRD Commission for Scientific and Technical Terminology at DAVIET',
+      'Addressed by DC Varinder Kumar Sharma (IAS), NIT Director Prof. Lalit Awasthi & Dr. Manoj Kumar',
+      'Strong advocacy for mother-tongue technical textbooks and engineering terminologies'
     ],
-    tags: ['Print Feature', 'Dainik Bhaskar', 'Vedic Values', 'Academic Leadership']
+    tags: ['Print Feature', 'Dainik Bhaskar', 'MHRD CSTT', 'Technical Education', 'DAVIET']
+  },
+  {
+    id: 'news-pj-2016',
+    title: 'Punjabi Jagran Feature: "ਨਵੀਆਂ ਪੈੜਾਂ ਪਾਉਣ ਵਾਲਾ ਪ੍ਰਿੰਸੀਪਲ ਡਾ. ਮਨੋਜ ਕੁਮਾਰ" (The Trailblazer Principal)',
+    headline: 'ਸਪੈਸ਼ਲ ਫੀਚਰ "ਨਵੀਆਂ ਰਾਹਾਂ" — ਉੱਚ ਤਕਨੀਕੀ ਸਿੱਖਿਆ, ਖੋਜ ਅਤੇ ਪ੍ਰਸ਼ਾਸਨਿਕ ਨਵਚਾਰਾਂ ਦੇ ਖੇਤਰ ਵਿੱਚ ਉੱਤਮ ਯੋਗਦਾਨ',
+    source: 'Punjabi Jagran',
+    category: 'Print Media',
+    date: '02 March 2016',
+    readTime: '4 min read',
+    location: 'Jalandhar / Punjab',
+    imageUrl: '/images/news/punjabi-jagran-2016.jpg',
+    excerpt: 'Prominent full-page profile in Punjabi Jagran celebrating Dr. Manoj Kumar\'s inspiring academic journey, 75+ research publications, 8 books, and international collaborations in USA, France, and Italy.',
+    fullContent: [
+      'In an exclusive full-page biographical feature under "ਨਵੀਆਂ ਰਾਹਾਂ" (Pioneering Paths), Punjabi Jagran chronicled the inspiring academic trajectory of Principal Dr. Manoj Kumar.',
+      'From serving as Lecturer at Mehar Chand Polytechnic in 1991 to leading the Electronics & Communication Engineering department at DAVIET in 2001, heading CT Group as Group Director, and returning to steer DAVIET as Principal in 2015.',
+      'The feature lauded his prolific scholarship with 75+ research publications, 8 authored books, M.Tech Silver Medal, and pioneering global MoUs with universities across USA, France, Italy, and UK.'
+    ],
+    keyHighlights: [
+      'Full-page feature in prestigious "ਨਵੀਆਂ ਰਾਹਾਂ" series in Punjabi Jagran',
+      'Traced 35-year academic evolution from young lecturer to institution builder',
+      'Over 75 research publications, 8 books, and global MoUs across 4 countries'
+    ],
+    tags: ['Print Feature', 'Punjabi Jagran', 'Navian Rahaan', 'Academic Profile', 'DAVIET']
   },
   {
     id: 'news-08',

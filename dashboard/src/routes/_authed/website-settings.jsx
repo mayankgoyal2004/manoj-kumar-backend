@@ -41,9 +41,9 @@ const INITIAL = {
   favicon: "/favicon.svg",
   description:
     "The academic portfolio of Prof. (Dr.) Manoj Kumar — research in machine learning systems, computational intelligence and technology for sustainable agriculture.",
-  contact_email: "vc@davuniversity.org",
-  phone: "+91 181 662 8000",
-  address: "Office of the Vice-Chancellor, Administrative Block, DAV University, Jalandhar, Punjab 144012",
+  contact_email: "drmanojkumarindia@gmail.com",
+  phone: "+91-181-2708844",
+  address: "Office of the Vice-Chancellor, DAV University, Sarmastpur, Jalandhar - Pathankot National Highway (NH 44), Jalandhar, Punjab (India) - 144012",
   footer: "© 2026 DAV University, Jalandhar. All rights reserved.",
   linkedin: "https://linkedin.com/in/manojkumar-vc",
   x: "https://x.com/davuniversity",

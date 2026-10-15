@@ -63,39 +63,39 @@ export const portfolioApi = {
   },
 
   getBooks: async () => {
-    return fetchJson<any[]>('/books');
+    return fetchJson<any[]>('/books?pageSize=500');
   },
 
   getGrants: async () => {
-    return fetchJson<any[]>('/grants');
+    return fetchJson<any[]>('/grants?pageSize=500');
   },
 
   getSupervision: async () => {
-    return fetchJson<any[]>('/supervision');
+    return fetchJson<any[]>('/supervision?pageSize=500');
   },
 
   getConferences: async () => {
-    return fetchJson<any[]>('/conferences');
+    return fetchJson<any[]>('/conferences?pageSize=500');
   },
 
   getAffiliations: async () => {
-    return fetchJson<any[]>('/affiliations');
+    return fetchJson<any[]>('/affiliations?pageSize=500');
   },
 
   getMous: async () => {
-    return fetchJson<any[]>('/mous');
+    return fetchJson<any[]>('/mous?pageSize=500');
   },
 
   getNews: async () => {
-    return fetchJson<any[]>('/news');
+    return fetchJson<any[]>('/news?pageSize=500');
   },
 
   getGallery: async () => {
-    return fetchJson<any[]>('/gallery');
+    return fetchJson<any[]>('/gallery?pageSize=500');
   },
 
   getDocuments: async () => {
-    return fetchJson<any[]>('/documents');
+    return fetchJson<any[]>('/documents?pageSize=500');
   },
 
   getSettings: async () => {

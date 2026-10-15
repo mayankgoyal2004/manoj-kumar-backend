@@ -1,7 +1,8 @@
 export interface StrategicMoU {
   id: string;
   partnerName: string;
-  type: 'International' | 'Corporate' | 'National Institute';
+  category?: string;
+  type?: 'International' | 'Corporate' | 'National Institute';
   country: string;
   scope: string;
   institutionAtSigning: string;

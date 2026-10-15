@@ -65,9 +65,9 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [settings, setSettings] = useState<any>({
     siteTitle: 'Prof. (Dr.) Manoj Kumar — Academic Portfolio',
     tagline: 'Vice-Chancellor · DAV University, Jalandhar, Punjab, India',
-    contactEmail: fallbackProfile.contact?.officialEmail || 'vc@davuniversity.org',
-    phone: fallbackProfile.contact?.officePhone || '+91 181 662 8000',
-    address: fallbackProfile.contact?.officeAddress || 'DAV University, Jalandhar, Punjab, India',
+    contactEmail: fallbackProfile.contact?.officialEmail || 'drmanojkumarindia@gmail.com',
+    phone: fallbackProfile.contact?.officePhone || '+91-181-2708844',
+    address: fallbackProfile.contact?.officeAddress || 'Office of the Vice-Chancellor, DAV University, Sarmastpur, Jalandhar - Pathankot National Highway (NH 44), Jalandhar, Punjab (India) - 144012',
     footer: '© 2026 DAV University, Jalandhar. All rights reserved.',
   });
   const [liveMetrics, setLiveMetrics] = useState<Record<string, any>>(fallbackProfile.metrics || {});
@@ -83,9 +83,9 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [mous, setMous] = useState<any[]>(fallbackMous);
   const [affiliations, setAffiliations] = useState<any[]>(fallbackAffiliations);
   const [conferences, setConferences] = useState<any[]>([
-    ...fallbackEvents,
-    ...fallbackKeynotes,
-    ...fallbackTrainings,
+    ...fallbackEvents.map((e: any) => ({ ...e, role: 'Convener / Organizer', category: 'Conferences & FDPs Organized' })),
+    ...fallbackKeynotes.map((e: any) => ({ ...e, role: 'Keynote', category: 'Keynotes & Invited Talks' })),
+    ...fallbackTrainings.map((e: any) => ({ ...e, role: 'Executive Participant', category: 'Advanced Executive Trainings' })),
   ]);
   const [gallery, setGallery] = useState<any[]>(fallbackGallery);
   const [news, setNews] = useState<any[]>(fallbackNews);
@@ -114,6 +114,21 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         if (overview.profile) {
           // Merge dynamic profile with fallback contact structure if needed
           const p = overview.profile;
+          let parsedMobile = fallbackProfile.contact?.mobilePhones || ['+91 9872203898', '+91 9478101102'];
+          if (p.mobilePhones) {
+            if (Array.isArray(p.mobilePhones) && p.mobilePhones.length > 0) {
+              parsedMobile = p.mobilePhones;
+            } else if (typeof p.mobilePhones === 'string' && p.mobilePhones.trim() !== '') {
+              try {
+                const parsed = JSON.parse(p.mobilePhones);
+                if (Array.isArray(parsed) && parsed.length > 0) parsedMobile = parsed;
+                else parsedMobile = p.mobilePhones.split(',').map((ph: string) => ph.trim()).filter(Boolean);
+              } catch {
+                parsedMobile = p.mobilePhones.split(',').map((ph: string) => ph.trim()).filter(Boolean);
+              }
+            }
+          }
+
           setProfile({
             ...fallbackProfile,
             ...p,
@@ -139,6 +154,7 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
               officeAddress: p.officeAddress || s.address || fallbackProfile.contact.officeAddress,
               residenceAddress: p.residenceAddress || fallbackProfile.contact.residenceAddress,
               officePhone: p.officePhone || s.phone || fallbackProfile.contact.officePhone,
+              mobilePhones: parsedMobile,
               officialEmail: p.officialEmail || s.contactEmail || fallbackProfile.contact.officialEmail,
               personalEmail: p.personalEmail || fallbackProfile.contact.personalEmail,
               linkedIn: s.linkedin || p.linkedIn || fallbackProfile.contact.linkedIn,

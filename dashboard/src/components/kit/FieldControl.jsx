@@ -465,6 +465,7 @@ export default function FieldControl({ field, value, onChange }) {
   }
 
   if (type === "select") {
+    const hasCustomValue = Boolean(stringValue && !options.includes(stringValue));
     return (
       <Shell label={label} hint={hint}>
         <div className="relative">
@@ -475,6 +476,11 @@ export default function FieldControl({ field, value, onChange }) {
             onChange={(event) => onChange(name, event.target.value)}
           >
             <option value="">Select…</option>
+            {hasCustomValue && (
+              <option value={stringValue}>
+                {stringValue}
+              </option>
+            )}
             {options.map((option) => (
               <option key={option} value={option}>
                 {option}

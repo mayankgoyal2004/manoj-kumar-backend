@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import prisma from '../config/prisma';
+import { Prisma } from '@prisma/client';
 import { sendError, sendSuccess } from '../utils/response';
 import { logActivity } from '../utils/auditLogger';
 
@@ -10,6 +11,14 @@ export interface CrudOptions {
   filterFields?: string[];
   titleField?: string;
   defaultSort?: { field: string; order: 'asc' | 'desc' };
+}
+
+// Build allowed fields set per model from Prisma DMMF
+const MODEL_FIELDS_MAP: Record<string, Set<string>> = {};
+if (Prisma.dmmf?.datamodel?.models) {
+  for (const m of Prisma.dmmf.datamodel.models) {
+    MODEL_FIELDS_MAP[m.name.toLowerCase()] = new Set(m.fields.map((f: any) => f.name));
+  }
 }
 
 const FIELD_ALIAS_MAP: Record<string, string> = {
@@ -24,7 +33,7 @@ const FIELD_ALIAS_MAP: Record<string, string> = {
   signed_date: 'signedDate',
 };
 
-function normalizeCrudData(raw: any): any {
+function normalizeCrudData(raw: any, modelName?: string): any {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return raw;
   const result: any = {};
 
@@ -51,6 +60,32 @@ function normalizeCrudData(raw: any): any {
   delete result.id;
   delete result.createdAt;
   delete result.updatedAt;
+
+  // Filter against model's schema if modelName is provided
+  if (modelName) {
+    const allowed = MODEL_FIELDS_MAP[modelName.toLowerCase()];
+    if (allowed) {
+      // Handle model-specific aliases:
+      // If model has both kind and category (e.g. Affiliation)
+      if (allowed.has('kind') && allowed.has('category')) {
+        if (result.kind && !result.category) result.category = result.kind;
+        if (result.category && !result.kind) result.kind = result.category;
+      } else if (allowed.has('category') && !allowed.has('kind')) {
+        if (result.kind && !result.category) result.category = result.kind;
+        delete result.kind;
+      } else if (allowed.has('kind') && !allowed.has('category')) {
+        if (result.category && !result.kind) result.kind = result.category;
+        delete result.category;
+      }
+
+      // Strictly strip any field not present in the Prisma model schema!
+      for (const field of Object.keys(result)) {
+        if (!allowed.has(field)) {
+          delete result[field];
+        }
+      }
+    }
+  }
 
   return result;
 }
@@ -118,7 +153,7 @@ export function createCrudController(options: CrudOptions) {
     getPublic: async (req: Request, res: Response) => {
       try {
         const page = Math.max(1, parseInt((req.query.page as string) || '1', 10));
-        const pageSize = Math.min(500, Math.max(1, parseInt((req.query.pageSize as string) || '50', 10)));
+        const pageSize = Math.min(1000, Math.max(1, parseInt((req.query.pageSize as string) || '500', 10)));
         const search = (req.query.search as string)?.trim();
 
         const where: any = {};
@@ -207,7 +242,7 @@ export function createCrudController(options: CrudOptions) {
     // Create a new record
     create: async (req: Request, res: Response) => {
       try {
-        const data = normalizeCrudData(req.body);
+        const data = normalizeCrudData(req.body, String(modelName));
         const record = await model.create({
           data,
         });
@@ -232,7 +267,7 @@ export function createCrudController(options: CrudOptions) {
     update: async (req: Request, res: Response) => {
       try {
         const { id } = req.params;
-        const data = normalizeCrudData(req.body);
+        const data = normalizeCrudData(req.body, String(modelName));
         const record = await model.update({
           where: { id },
           data,

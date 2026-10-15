@@ -1,37 +1,61 @@
-import React, { useState } from 'react';
-import { ShieldCheck } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { ShieldCheck, ExternalLink } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
 
 export const AffiliationsGovernance: React.FC = () => {
   const { affiliations } = usePortfolio();
   const [activeCategory, setActiveCategory] = useState<string>('All');
 
-  const normalized = affiliations.map((item: any, idx: number) => {
-    const role = item.position || item.role;
-    const organization = item.body || item.organization;
-    const category = item.kind || item.category || 'Professional Body';
-    const period = item.since ? `Since ${item.since}` : item.period;
-    const details = item.notes || item.details;
+  const normalized = useMemo(() => {
+    return (affiliations || []).map((item: any, idx: number) => {
+      const role = item.position || item.role || 'Member / Fellow';
+      const organization = item.body || item.organization || 'Academic & Governance Body';
+      const category = (item.kind || item.category || 'Fellowship').trim();
+      const period = item.since ? `Since ${item.since}` : (item.period || '');
+      const details = item.notes || item.details;
 
-    return {
-      id: item.id || idx,
-      role,
-      organization,
-      category,
-      period,
-      details,
-    };
-  });
+      let link = (item.link || '').trim() || null;
+      if (!link && item.notes) {
+        const linkMatch = item.notes.match(/https?:\/\/[^\s|]+/);
+        if (linkMatch) link = linkMatch[0];
+      }
 
-  const categoriesSet = new Set<string>();
-  normalized.forEach((item) => {
-    if (item.category) categoriesSet.add(item.category);
-  });
-  const categories = ['All', ...Array.from(categoriesSet)];
+      return {
+        id: item.id || idx,
+        role,
+        organization,
+        category,
+        period,
+        details,
+        link,
+      };
+    });
+  }, [affiliations]);
 
-  const filteredAffiliations = activeCategory === 'All'
+  // Dynamically compute category counts and tabs
+  const categoryTabs = useMemo(() => {
+    const counts: Record<string, number> = {};
+    normalized.forEach((item) => {
+      counts[item.category] = (counts[item.category] || 0) + 1;
+    });
+
+    const uniqueCategories = Object.keys(counts);
+
+    return [
+      { id: 'All', label: 'All Affiliations & Fellowships', count: normalized.length },
+      ...uniqueCategories.map((cat) => ({
+        id: cat,
+        label: cat,
+        count: counts[cat],
+      })),
+    ];
+  }, [normalized]);
+
+  const currentCategory = categoryTabs.some((t) => t.id === activeCategory) ? activeCategory : 'All';
+
+  const filteredAffiliations = currentCategory === 'All'
     ? normalized
-    : normalized.filter((a) => a.category === activeCategory);
+    : normalized.filter((a) => a.category === currentCategory);
 
   return (
     <div className="section-content-wrapper">
@@ -48,15 +72,15 @@ export const AffiliationsGovernance: React.FC = () => {
         </div>
       </div>
 
-      {/* Category Pills */}
+      {/* Dynamic Category Filter Bar */}
       <div className="awards-filter-bar">
-        {categories.map((cat) => (
+        {categoryTabs.map((tab) => (
           <button
-            key={cat}
-            className={`filter-btn ${activeCategory === cat ? 'active' : ''}`}
-            onClick={() => setActiveCategory(cat)}
+            key={tab.id}
+            className={`filter-btn ${currentCategory === tab.id ? 'active' : ''}`}
+            onClick={() => setActiveCategory(tab.id)}
           >
-            {cat}
+            {tab.label} ({tab.count})
           </button>
         ))}
       </div>
@@ -72,9 +96,22 @@ export const AffiliationsGovernance: React.FC = () => {
             <div className="award-content">
               <div className="award-header-row">
                 <h4 className="award-title">{item.role}</h4>
-                <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', flexWrap: 'wrap' }}>
                   {item.period && <span className="badge badge-gold">{item.period}</span>}
                   <span className="badge badge-navy">{item.category}</span>
+                  {item.link && (
+                    <a
+                      href={item.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mou-official-link"
+                      title="Official Order / Verification Link"
+                      style={{ marginLeft: '0.2rem' }}
+                    >
+                      <span>Official Link</span>
+                      <ExternalLink size={11} />
+                    </a>
+                  )}
                 </div>
               </div>
 
@@ -87,3 +124,4 @@ export const AffiliationsGovernance: React.FC = () => {
     </div>
   );
 };
+

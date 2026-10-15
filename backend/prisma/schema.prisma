@@ -199,7 +199,9 @@ model Conference {
   event      String?
   location   String?
   date       String?
-  role       String?  @default("Keynote") // "Keynote", "Invited Talk", "Panelist", "Session Chair", "Paper Presentation"
+  role       String?  @default("Keynote") // "Keynote", "Convener / Organizer", "Paper Presentation", etc.
+  category   String?
+  link       String?  @db.Text
   status     String   @default("Delivered") // "Delivered", "Scheduled"
   summary    String?  @db.Text
   orderIndex Int      @default(0)
@@ -211,7 +213,9 @@ model Affiliation {
   id         String   @id @default(uuid())
   body       String
   position   String?
-  kind       String?  @default("Governing Council") // "Governing Council", "Professional Body", "Statutory Committee", "Academic Senate"
+  kind       String?  @default("Fellowship") // "Fellowship", "Life Member", "Board of Governors", "Academic Governance", "Editorial & Reviewer"
+  category   String?
+  link       String?  @db.Text
   since      Int?
   status     String   @default("Current") // "Current", "Completed"
   notes      String?  @db.Text
@@ -224,7 +228,9 @@ model Mou {
   id         String   @id @default(uuid())
   partner    String
   country    String?
+  category   String?  @default("International Universities") // "International Universities", "Corporate & National Alliances", etc.
   scope      String?
+  link       String?  @db.Text
   signedDate String?
   validity   String?
   status     String   @default("Active") // "Active", "Signed", "Expired"
@@ -253,7 +259,9 @@ model GalleryItem {
   id         String   @id @default(uuid())
   caption    String
   album      String   @default("Campus") // "Campus", "Convocation", "Leadership", "Research Labs", "Events"
-  image      String   @db.Text
+  image      String?  @db.Text
+  mediaType  String   @default("Image") // "Image", "YouTube Video", "Direct Video"
+  videoUrl   String?  @db.Text
   date       String?
   credit     String?
   status     String   @default("Published") // "Published", "Draft"
@@ -346,3 +354,5 @@ model WebsiteSetting {
   updatedAt    DateTime @updatedAt
   createdAt    DateTime @default(now())
 }
+
+

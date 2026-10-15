@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowUpDown, ChevronDown, ChevronUp, Eye, Pencil, Trash2 } from "lucide-react";
+import { ArrowUpDown, ChevronDown, ChevronUp, Eye, Pencil, Trash2, ExternalLink } from "lucide-react";
 import StatusBadge from "@/components/kit/StatusBadge";
 import EmptyState from "@/components/kit/EmptyState";
 import { btnIcon, thCls, tdCls } from "@/components/kit/styles";
@@ -12,6 +12,21 @@ function renderValue(column, row) {
   if (column.type === "money") return <span className="font-medium tabular-nums">{formatINR(value)}</span>;
   if (column.type === "date") return <span className="text-muted-foreground">{formatDate(value)}</span>;
   if (column.type === "number") return <span className="tabular-nums">{value === "" || value === undefined || value === null ? "—" : value}</span>;
+  if (column.type === "link") {
+    if (!value) return <span className="text-muted-foreground">—</span>;
+    return (
+      <a
+        href={value}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={(e) => e.stopPropagation()}
+        className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+      >
+        <span>Link</span>
+        <ExternalLink className="h-3 w-3" />
+      </a>
+    );
+  }
   if (Array.isArray(value)) return value.join(", ");
   if (value === "" || value === undefined || value === null) return <span className="text-muted-foreground">—</span>;
   return value;

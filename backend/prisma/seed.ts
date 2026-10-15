@@ -63,12 +63,12 @@ async function main() {
         "He has supervised 09 Ph.D. scholars (awarded), 19 M.Tech. theses, authored 09 textbooks, co-authored 04 Springer book chapters, and holds 04 published patents. He has published over 150 research articles in premier international journals (SCI/Scopus) and conference proceedings.",
         "Under his stewardship, DAV University and DAVIET have secured top national ranks (NAAC Grade 'A', MSME Business Incubator status, National Sports and Physical Education Award 2026, SEPC Education Excellence Awards 2024 & 2025, Digii100 Top 100 Higher-Ed Digital Transformation, and ASSOCHAM National Awards)."
       ],
-      officeAddress: 'Office of the Vice-Chancellor, Administrative Block, DAV University, Sarmastpur, Jalandhar - Pathankot National Highway (NH-44), Jalandhar, Punjab 144012, India',
-      residenceAddress: 'Vice-Chancellor\'s Residence, University Campus, DAV University, Jalandhar, Punjab 144012, India',
-      officePhone: '+91 181 662 8000',
-      mobilePhones: ['+91 98765 43210', '+91 94172 12345'],
-      officialEmail: 'vc@davuniversity.org',
-      personalEmail: 'manoj.kumar@ptu.ac.in',
+      officeAddress: 'Office of the Vice-Chancellor, DAV University, Sarmastpur, Jalandhar - Pathankot National Highway (NH 44), Jalandhar, Punjab (India) - 144012',
+      residenceAddress: '251, Lajpat Nagar, Jalandhar, Punjab (India) - 144001',
+      officePhone: '+91-181-2708844',
+      mobilePhones: ['+91 9872203898', '+91 9478101102'],
+      officialEmail: 'drmanojkumarindia@gmail.com',
+      personalEmail: 'drmanojkumarindia@gmail.com',
       linkedIn: 'https://linkedin.com/in/manojkumar-vc',
       orcid: '0000-0002-4471-8823',
       scopus: '57204931882',
@@ -513,9 +513,9 @@ async function main() {
       siteTitle: 'Prof. (Dr.) Manoj Kumar — Academic Portfolio',
       tagline: 'Vice-Chancellor · DAV University, Jalandhar, Punjab, India',
       description: 'Official academic and executive portfolio of Prof. (Dr.) Manoj Kumar, Vice-Chancellor of DAV University. Photonics research, publications, leadership and governance.',
-      contactEmail: 'vc@davuniversity.org',
-      phone: '+91 181 662 8000',
-      address: 'Office of the Vice-Chancellor, Administrative Block, DAV University, Sarmastpur, Jalandhar, Punjab 144012, India',
+      contactEmail: 'drmanojkumarindia@gmail.com',
+      phone: '+91-181-2708844',
+      address: 'Office of the Vice-Chancellor, DAV University, Sarmastpur, Jalandhar - Pathankot National Highway (NH 44), Jalandhar, Punjab (India) - 144012',
       footer: '© 2026 DAV University, Jalandhar. All rights reserved.',
       linkedin: 'https://linkedin.com/in/manojkumar-vc',
       x: 'https://x.com/davuniversity',
@@ -531,26 +531,7 @@ async function main() {
     },
   });
 
-  await prisma.seoSetting.upsert({
-    where: { id: 'default' },
-    update: {},
-    create: {
-      id: 'default',
-      metaTitle: 'Prof. (Dr.) Manoj Kumar — Vice-Chancellor, DAV University, Jalandhar',
-      canonical: 'https://davuniversity.org/vc/manoj-kumar',
-      metaDescription: 'Official portfolio of Prof. (Dr.) Manoj Kumar: Vice-Chancellor, Dean\'s Visiting Scholar (University of Memphis), researcher in optical wireless communications and photonics.',
-      keywords: 'Prof Manoj Kumar, Manoj Kumar DAV, Vice-Chancellor DAV University, Photonics, Optical Wireless Communications, Higher Education Leadership, NAAC A Grade',
-      twitterHandle: '@davuniversity',
-      ogImage: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=1200&q=75',
-      flags: {
-        sitemap: true,
-        structured: true,
-        og: true,
-        noindex: false,
-      },
-    },
-  });
-  console.log('⚙️ Website & SEO settings seeded.');
+  console.log('⚙️ Website settings seeded.');
 
   // 12. Initial Notification
   const existingNotification = await prisma.notification.findFirst({

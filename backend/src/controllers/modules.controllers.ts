@@ -75,8 +75,8 @@ export const grantsController = createCrudController({
 export const mousController = createCrudController({
   modelName: 'mou',
   moduleTitle: 'MoUs & Strategic Alliances',
-  searchFields: ['partner', 'country', 'scope', 'notes'],
-  filterFields: ['status'],
+  searchFields: ['partner', 'country', 'category', 'scope', 'link', 'notes'],
+  filterFields: ['status', 'category'],
   titleField: 'partner',
   defaultSort: { field: 'createdAt', order: 'desc' },
 });
@@ -84,8 +84,8 @@ export const mousController = createCrudController({
 export const affiliationsController = createCrudController({
   modelName: 'affiliation',
   moduleTitle: 'Affiliations & Governance',
-  searchFields: ['body', 'position', 'notes'],
-  filterFields: ['status', 'kind'],
+  searchFields: ['body', 'position', 'kind', 'category', 'link', 'notes'],
+  filterFields: ['status', 'kind', 'category'],
   titleField: 'body',
   defaultSort: { field: 'since', order: 'desc' },
 });
@@ -93,17 +93,17 @@ export const affiliationsController = createCrudController({
 export const conferencesController = createCrudController({
   modelName: 'conference',
   moduleTitle: 'Conferences & Keynotes',
-  searchFields: ['title', 'event', 'location', 'summary'],
-  filterFields: ['status', 'role'],
+  searchFields: ['title', 'event', 'location', 'role', 'category', 'link', 'summary'],
+  filterFields: ['status', 'role', 'category'],
   titleField: 'title',
-  defaultSort: { field: 'date', order: 'desc' },
+  defaultSort: { field: 'createdAt', order: 'desc' },
 });
 
 export const galleryController = createCrudController({
   modelName: 'galleryItem',
   moduleTitle: 'Campus & Leadership Gallery',
-  searchFields: ['caption', 'credit', 'album'],
-  filterFields: ['status', 'album'],
+  searchFields: ['caption', 'credit', 'album', 'mediaType', 'videoUrl'],
+  filterFields: ['status', 'album', 'mediaType'],
   titleField: 'caption',
   defaultSort: { field: 'orderIndex', order: 'asc' },
 });

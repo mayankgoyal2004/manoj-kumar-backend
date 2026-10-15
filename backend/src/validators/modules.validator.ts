@@ -150,7 +150,9 @@ export const conferenceSchema = z.object({
   event: z.string().optional().nullable(),
   location: z.string().optional().nullable(),
   date: z.string().optional().nullable(),
-  role: z.enum(['Keynote', 'Invited Talk', 'Panelist', 'Session Chair', 'Paper Presentation']).optional().default('Keynote'),
+  role: z.string().optional().default('Keynote'),
+  category: z.string().optional().nullable(),
+  link: z.string().optional().nullable(),
   status: z.enum(['Delivered', 'Scheduled']).optional().default('Delivered'),
   summary: z.string().optional().nullable(),
   orderIndex: z.coerce.number().int().optional().default(0),
@@ -160,7 +162,9 @@ export const conferenceSchema = z.object({
 export const affiliationSchema = z.object({
   body: z.string().min(1, 'Body / Council name is required'),
   position: z.string().optional().nullable(),
-  kind: z.enum(['Governing Council', 'Professional Body', 'Statutory Committee', 'Academic Senate']).optional().default('Governing Council'),
+  kind: z.string().optional().default('Fellowship'),
+  category: z.string().optional().nullable(),
+  link: z.string().optional().nullable(),
   since: optionalInt,
   status: z.enum(['Current', 'Completed']).optional().default('Current'),
   notes: z.string().optional().nullable(),
@@ -171,7 +175,9 @@ export const affiliationSchema = z.object({
 export const mouSchema = z.object({
   partner: z.string().min(1, 'Partner organisation is required'),
   country: z.string().optional().nullable(),
+  category: z.string().optional().nullable(),
   scope: z.string().optional().nullable(),
+  link: z.string().optional().nullable(),
   signedDate: z.string().optional().nullable(),
   signed_date: z.string().optional().nullable(),
   validity: z.string().optional().nullable(),
@@ -184,7 +190,7 @@ export const mouSchema = z.object({
 export const newsSchema = z.object({
   headline: z.string().min(1, 'Headline is required'),
   outlet: z.string().optional().nullable(),
-  category: z.enum(['Press Release', 'Interview', 'Feature', 'Announcement', 'Opinion']).optional().default('Press Release'),
+  category: z.string().optional().default('Press Release'),
   date: z.string().optional().nullable(),
   link: z.string().optional().nullable(),
   image: z.string().optional().nullable(),
@@ -196,8 +202,10 @@ export const newsSchema = z.object({
 // Gallery
 export const gallerySchema = z.object({
   caption: z.string().min(1, 'Caption is required'),
-  album: z.enum(['Campus', 'Convocation', 'Leadership', 'Research Labs', 'Events']).optional().default('Campus'),
-  image: z.string().min(1, 'Image URL or path is required'),
+  album: z.string().optional().default('Campus'),
+  image: z.string().optional().nullable(),
+  mediaType: z.string().optional().default('Image'),
+  videoUrl: z.string().optional().nullable(),
   date: z.string().optional().nullable(),
   credit: z.string().optional().nullable(),
   status: z.enum(['Published', 'Draft']).optional().default('Published'),

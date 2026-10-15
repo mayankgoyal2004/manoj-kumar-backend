@@ -35,12 +35,14 @@ export const ContactSecretariat: React.FC = () => {
   const socialScholar = profile.contact?.scholar;
   const socialOrcid = profile.contact?.orcid;
 
-  const officeAddress = profile.contact?.officeAddress || 'DAV University, Jalandhar, Punjab, India';
-  const residenceAddress = profile.contact?.residenceAddress || 'Vice-Chancellor Residence, DAV University Campus, Jalandhar';
-  const officePhone = profile.contact?.officePhone || '+91 181 662 8000';
-  const mobilePhones = Array.isArray(profile.contact?.mobilePhones) ? profile.contact.mobilePhones : ['+91 98765 43210'];
-  const officialEmail = profile.contact?.officialEmail || 'vc@davuniversity.org';
-  const personalEmail = profile.contact?.personalEmail;
+  const officeAddress = profile.contact?.officeAddress || settings?.address || 'Office of the Vice-Chancellor, DAV University, Sarmastpur, Jalandhar - Pathankot National Highway (NH 44), Jalandhar, Punjab (India) - 144012';
+  const residenceAddress = profile.contact?.residenceAddress || '251, Lajpat Nagar, Jalandhar, Punjab (India) - 144001';
+  const officePhone = profile.contact?.officePhone || settings?.phone || '+91-181-2708844';
+  const mobilePhones = Array.isArray(profile.contact?.mobilePhones) && profile.contact.mobilePhones.length > 0 
+    ? profile.contact.mobilePhones 
+    : ['+91 9872203898', '+91 9478101102'];
+  const officialEmail = profile.contact?.officialEmail || settings?.contactEmail || 'drmanojkumarindia@gmail.com';
+  const personalEmail = profile.contact?.personalEmail || 'drmanojkumarindia@gmail.com';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

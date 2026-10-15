@@ -29,8 +29,8 @@ export const Header: React.FC<HeaderProps> = ({ onOpenSearch, activeSection, onN
     { id: 'contact', label: 'Contact' }
   ];
 
-  const officePhone = profile.contact?.officePhone || settings?.phone || '+91 181 662 8000';
-  const officialEmail = profile.contact?.officialEmail || settings?.contactEmail || 'vc@davuniversity.org';
+  const officePhone = profile.contact?.officePhone || settings?.phone || '+91-181-2708844';
+  const officialEmail = profile.contact?.officialEmail || settings?.contactEmail || 'drmanojkumarindia@gmail.com';
   const institutionName = profile.institution || 'DAV University, Jalandhar';
   const photoUrl = profile.headerPhoto || profile.photo || '/images/prof_manoj_kumar.jpg';
   const pillars = Array.isArray(profile.specializations) && profile.specializations.length

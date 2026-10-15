@@ -17,9 +17,12 @@ const FIELDS = [
   { name: "name", label: "Full name", type: "text" },
   { name: "honorific", label: "Designation", type: "text" },
   { name: "institution", label: "Institution", type: "text" },
-  { name: "email", label: "Email address", type: "text" },
-  { name: "phone", label: "Telephone", type: "text" },
-  { name: "office", label: "Office", type: "text" },
+  { name: "email", label: "Official Email address", type: "text" },
+  { name: "personalEmail", label: "Personal / Alternate Email", type: "text" },
+  { name: "phone", label: "Office Telephone", type: "text" },
+  { name: "directPhone", label: "Direct Contact / Mobile Numbers", type: "text", hint: "Comma-separated, e.g. +91 9872203898, +91 9478101102" },
+  { name: "office", label: "Official University Office", type: "textarea", full: true },
+  { name: "residenceAddress", label: "Permanent Residence", type: "textarea", full: true },
   { name: "city", label: "City / Campus", type: "text" },
   {
     name: "headerPhoto",
@@ -138,6 +141,10 @@ function ProfilePage() {
             ? remote.headerPositions
             : (typeof remote.headerPositions === "string" ? remote.headerPositions.split(",").map(s => s.trim()).filter(Boolean) : []);
 
+          const directPhoneStr = Array.isArray(remote.mobilePhones)
+            ? remote.mobilePhones.join(", ")
+            : (typeof remote.mobilePhones === "string" ? remote.mobilePhones : (PROFILE.directPhone || ""));
+
           const synced = {
             ...PROFILE,
             ...remote,
@@ -145,6 +152,12 @@ function ProfilePage() {
             bio: remote.bioSummary || PROFILE.bio,
             quote: remote.quote || PROFILE.quote || "",
             tagline: remote.tagline || PROFILE.tagline || "",
+            office: remote.officeAddress || PROFILE.office,
+            residenceAddress: remote.residenceAddress || PROFILE.residenceAddress,
+            phone: remote.officePhone || PROFILE.phone,
+            email: remote.officialEmail || PROFILE.email,
+            personalEmail: remote.personalEmail || PROFILE.personalEmail,
+            directPhone: directPhoneStr,
             fullBioList: Array.isArray(remote.fullBio) ? remote.fullBio : (PROFILE.fullBio || []),
             expertiseList: expertiseArr,
             headerPositionsList: headerPositionsArr,
@@ -186,13 +199,22 @@ function ProfilePage() {
         ? source.headerPositionsList.map((s) => String(s).trim()).filter(Boolean)
         : (Array.isArray(values.headerPositionsList) ? values.headerPositionsList.map((s) => String(s).trim()).filter(Boolean) : []);
 
+      const mobilePhonesArr = source.directPhone
+        ? (Array.isArray(source.directPhone)
+            ? source.directPhone
+            : String(source.directPhone).split(",").map((s) => s.trim()).filter(Boolean))
+        : [];
+
       await api.profile.update({
         name: source.name,
         designation: source.honorific,
         institution: source.institution,
         officialEmail: source.email,
+        personalEmail: source.personalEmail,
         officePhone: source.phone,
         officeAddress: source.office,
+        residenceAddress: source.residenceAddress,
+        mobilePhones: mobilePhonesArr,
         location: source.city,
         photo: source.photo || source.headerPhoto,
         headerPhoto: source.headerPhoto,
@@ -304,9 +326,12 @@ function ProfilePage() {
                 { label: "Full name", value: values.name },
                 { label: "Designation", value: values.honorific },
                 { label: "Institution", value: values.institution },
-                { label: "Email", value: values.email },
-                { label: "Telephone", value: values.phone },
-                { label: "Office", value: values.office },
+                { label: "Official Email", value: values.email },
+                { label: "Personal Email", value: values.personalEmail },
+                { label: "Office Telephone", value: values.phone },
+                { label: "Direct Contact / Mobile", value: values.directPhone },
+                { label: "Official Office Address", value: values.office },
+                { label: "Permanent Residence", value: values.residenceAddress },
               ].map((row) => (
                 <div key={row.label}>
                   <dt className="label-caps">{row.label}</dt>

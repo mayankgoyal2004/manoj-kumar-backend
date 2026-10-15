@@ -2,9 +2,10 @@ export interface AffiliationItem {
   id: string;
   organization: string;
   role: string;
-  category: 'Fellowship' | 'Life Member' | 'Board of Governors' | 'Academic Governance' | 'Editorial & Reviewer';
+  category: string;
   period?: string;
   details?: string;
+  link?: string;
 }
 
 export const affiliationsList: AffiliationItem[] = [

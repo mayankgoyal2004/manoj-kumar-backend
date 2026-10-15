@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Plus, Upload } from "lucide-react";
+import { Plus, Upload, Video, Play, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import CardGrid from "@/components/kit/CardGrid";
 import ConfirmDialog from "@/components/kit/ConfirmDialog";
@@ -25,6 +25,12 @@ import { cn } from "@/lib/utils";
 import api from "@/api/backendClient";
 
 const PAGE_SIZE = 8;
+
+function extractYoutubeId(url = "") {
+  if (!url) return null;
+  const match = String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+  return match ? match[1] : null;
+}
 
 function defaultsFor(config) {
   const values = {};
@@ -197,7 +203,7 @@ export default function ResourcePage({ moduleKey }) {
     setFormOpen(true);
   };
 
-  const submitForm = () => {
+  const submitForm = async () => {
     const missing = config.fields.find(
       (field) => field.required && !String(formValues[field.name] ?? "").trim()
     );
@@ -205,24 +211,36 @@ export default function ResourcePage({ moduleKey }) {
       toast.error(`${missing.label} is required`);
       return;
     }
-    if (editingId) {
-      update(moduleKey, editingId, formValues);
-      toast.success(`${config.singular} updated`);
-    } else {
-      const title = recordTitle(moduleKey, formValues);
-      create(moduleKey, formValues);
-      toast.success(`${config.singular} created`, { description: title });
+    try {
+      if (editingId) {
+        await update(moduleKey, editingId, formValues);
+        toast.success(`${config.singular} updated`);
+      } else {
+        const title = recordTitle(moduleKey, formValues);
+        await create(moduleKey, formValues);
+        toast.success(`${config.singular} created`, { description: title });
+      }
+      setFormOpen(false);
+      setEditingId(null);
+    } catch (err) {
+      toast.error(`Failed to ${editingId ? "update" : "create"} ${config.singular}`, {
+        description: err.message || "Server error occurred",
+      });
     }
-    setFormOpen(false);
-    setEditingId(null);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!deleteTarget) return;
-    remove(moduleKey, deleteTarget.id);
-    toast.success(`${config.singular} deleted`, { description: recordTitle(moduleKey, deleteTarget) });
-    if (selectedId === deleteTarget.id) setSelectedId(null);
-    setDeleteTarget(null);
+    try {
+      await remove(moduleKey, deleteTarget.id);
+      toast.success(`${config.singular} deleted`, { description: recordTitle(moduleKey, deleteTarget) });
+      if (selectedId === deleteTarget.id) setSelectedId(null);
+      setDeleteTarget(null);
+    } catch (err) {
+      toast.error(`Failed to delete ${config.singular}`, {
+        description: err.message || "Server error occurred",
+      });
+    }
   };
 
   const statCards = [
@@ -320,32 +338,61 @@ export default function ResourcePage({ moduleKey }) {
               <CardGrid
                 items={paged}
                 columns={3}
-              renderCard={(row) => (
-                <button
-                  type="button"
-                  onClick={() => setSelectedId(row.id)}
-                  className="surface surface-shadow group block w-full overflow-hidden rounded-xl text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/25"
-                >
-                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
-                    <ContentImage
-                      src={row[config.imageKey]}
-                      alt={recordTitle(moduleKey, row)}
-                      className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
-                    />
-                    <div className="absolute right-3 top-3">
-                      <StatusBadge value={row.status} className="bg-card/90 backdrop-blur" />
+              renderCard={(row) => {
+                const ytId = extractYoutubeId(row.videoUrl || row.image);
+                const isVideo = row.mediaType === "YouTube Video" || row.mediaType === "Direct Video" || Boolean(ytId || row.videoUrl);
+                const displayImg = row[config.imageKey] || (ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : "");
+
+                return (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedId(row.id)}
+                    className="surface surface-shadow group block w-full overflow-hidden rounded-xl text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/25"
+                  >
+                    <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
+                      {displayImg ? (
+                        <ContentImage
+                          src={displayImg}
+                          alt={recordTitle(moduleKey, row)}
+                          className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-muted text-muted-foreground">
+                          {isVideo ? <Video className="h-10 w-10 opacity-40" /> : null}
+                        </div>
+                      )}
+
+                      {isVideo && (
+                        <div className="absolute inset-0 grid place-items-center bg-black/20 transition group-hover:bg-black/35">
+                          <div className="grid h-11 w-11 place-items-center rounded-full bg-rose-600 text-white shadow-lg transition duration-300 group-hover:scale-110">
+                            <Play className="h-5 w-5 fill-white ml-0.5" />
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="absolute left-3 top-3 flex items-center gap-1.5">
+                        {isVideo && (
+                          <span className="inline-flex items-center gap-1 rounded-md bg-black/75 px-2 py-0.5 text-[10px] font-semibold tracking-wider text-white backdrop-blur uppercase">
+                            <Video className="h-3 w-3" /> Video
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="absolute right-3 top-3">
+                        <StatusBadge value={row.status} className="bg-card/90 backdrop-blur" />
+                      </div>
                     </div>
-                  </div>
-                  <div className="p-4">
-                    <h3 className="line-clamp-2 font-heading text-sm font-semibold leading-snug text-foreground">
-                      {recordTitle(moduleKey, row)}
-                    </h3>
-                    <p className="mt-1.5 text-xs text-muted-foreground">
-                      {row[config.cardMetaKey] || "—"} · {formatDate(row.date)}
-                    </p>
-                  </div>
-                </button>
-              )}
+                    <div className="p-4">
+                      <h3 className="line-clamp-2 font-heading text-sm font-semibold leading-snug text-foreground">
+                        {recordTitle(moduleKey, row)}
+                      </h3>
+                      <p className="mt-1.5 text-xs text-muted-foreground">
+                        {row[config.cardMetaKey] || "—"} · {formatDate(row.date)}
+                      </p>
+                    </div>
+                  </button>
+                );
+              }}
             />
           </div>
           )
@@ -399,26 +446,64 @@ export default function ResourcePage({ moduleKey }) {
           )
         }
       >
-        {selected && (
-          <div className="space-y-6">
-            {config.view === "grid" && selected[config.imageKey] && (
-              <div className="overflow-hidden rounded-xl border border-border">
-                <ContentImage
-                  src={selected[config.imageKey]}
-                  alt={recordTitle(moduleKey, selected)}
-                  className="h-56 w-full object-cover"
-                />
+        {selected && (() => {
+          const ytId = extractYoutubeId(selected.videoUrl || selected.image);
+          const isVideo = selected.mediaType === "YouTube Video" || selected.mediaType === "Direct Video" || Boolean(ytId || selected.videoUrl);
+          const displayImg = selected[config.imageKey] || (ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : "");
+
+          return (
+            <div className="space-y-6">
+              {config.view === "grid" && (
+                ytId ? (
+                  <div className="aspect-video w-full overflow-hidden rounded-xl border border-border shadow-sm">
+                    <iframe
+                      src={`https://www.youtube-nocookie.com/embed/${ytId}?rel=0`}
+                      title={recordTitle(moduleKey, selected)}
+                      className="h-full w-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                ) : displayImg ? (
+                  <div className="overflow-hidden rounded-xl border border-border">
+                    <ContentImage
+                      src={displayImg}
+                      alt={recordTitle(moduleKey, selected)}
+                      className="h-56 w-full object-cover"
+                    />
+                  </div>
+                ) : null
+              )}
+
+              <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-muted/40 px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <span className="label-caps">Status</span>
+                  {isVideo && (
+                    <span className="inline-flex items-center gap-1 rounded bg-rose-500/10 px-2 py-0.5 text-xs font-semibold text-rose-600">
+                      <Video className="h-3 w-3" /> Video / YouTube
+                    </span>
+                  )}
+                </div>
+                <StatusBadge value={selected.status} />
               </div>
-            )}
 
-            <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-muted/40 px-4 py-3">
-              <span className="label-caps">Status</span>
-              <StatusBadge value={selected.status} />
+              {selected.videoUrl && (
+                <div className="rounded-xl border border-border bg-muted/20 p-3">
+                  <a
+                    href={selected.videoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+                  >
+                    Watch video externally <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+              )}
+
+              <DetailList fields={config.fields} record={selected} />
             </div>
-
-            <DetailList fields={config.fields} record={selected} />
-          </div>
-        )}
+          );
+        })()}
       </Drawer>
 
       <Modal

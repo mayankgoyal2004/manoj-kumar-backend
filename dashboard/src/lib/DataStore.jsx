@@ -154,57 +154,65 @@ function normalizeLoadedItem(item) {
       }));
     };
 
-    const create = (key, data) => {
+    const create = async (key, data) => {
       const now = new Date().toISOString();
       const normalized = normalizeLoadedItem(data);
-      const record = { id: nextId(key), ...normalized, updated_date: now };
-      setCollections((prev) => ({ ...prev, [key]: [record, ...prev[key]] }));
-      logActivity("created", key, recordTitle(key, record), "create");
-
-      // Asynchronously persist to backend PostgreSQL
-      api.modules.create(key, normalized).catch((err) => {
-        console.warn(`Backend persist failed for ${key}:`, err);
-      });
-
-      return record;
+      try {
+        const res = await api.modules.create(key, normalized);
+        const serverRecord = res?.data || res;
+        const record = { id: serverRecord?.id || nextId(key), ...normalized, ...serverRecord, updated_date: now };
+        setCollections((prev) => ({
+          ...prev,
+          [key]: [record, ...(prev[key] || []).filter((r) => r.id !== record.id)],
+        }));
+        logActivity("created", key, recordTitle(key, record), "create");
+        return record;
+      } catch (err) {
+        console.error(`Backend create failed for ${key}:`, err);
+        throw err;
+      }
     };
 
-    const update = (key, id, patch) => {
+    const update = async (key, id, patch) => {
       const now = new Date().toISOString();
       const normalizedPatch = normalizeLoadedItem(patch);
-      let title = "";
-      setCollections((prev) => ({
-        ...prev,
-        [key]: prev[key].map((row) => {
-          if (row.id !== id) return row;
-          const next = { ...row, ...normalizedPatch, updated_date: now };
-          title = recordTitle(key, next);
-          return next;
-        }),
-      }));
-      logActivity("updated", key, title, "update");
-
-      // Asynchronously update in backend PostgreSQL
-      api.modules.update(key, id, normalizedPatch).catch((err) => {
-        console.warn(`Backend update failed for ${key}:`, err);
-      });
+      try {
+        const res = await api.modules.update(key, id, normalizedPatch);
+        const serverRecord = res?.data || res;
+        let title = "";
+        setCollections((prev) => ({
+          ...prev,
+          [key]: (prev[key] || []).map((row) => {
+            if (row.id !== id) return row;
+            const next = { ...row, ...normalizedPatch, ...serverRecord, updated_date: now };
+            title = recordTitle(key, next);
+            return next;
+          }),
+        }));
+        logActivity("updated", key, title, "update");
+        return serverRecord;
+      } catch (err) {
+        console.error(`Backend update failed for ${key}:`, err);
+        throw err;
+      }
     };
 
-    const remove = (key, id) => {
-      let title = "";
-      setCollections((prev) => ({
-        ...prev,
-        [key]: prev[key].map((row) => {
-          if (row.id === id) title = recordTitle(key, row);
-          return row;
-        }).filter((row) => row.id !== id),
-      }));
-      logActivity("deleted", key, title, "delete");
-
-      // Asynchronously remove in backend PostgreSQL
-      api.modules.remove(key, id).catch((err) => {
-        console.warn(`Backend delete failed for ${key}:`, err);
-      });
+    const remove = async (key, id) => {
+      try {
+        await api.modules.remove(key, id);
+        let title = "";
+        setCollections((prev) => ({
+          ...prev,
+          [key]: (prev[key] || []).filter((row) => {
+            if (row.id === id) title = recordTitle(key, row);
+            return row.id !== id;
+          }),
+        }));
+        logActivity("deleted", key, title, "delete");
+      } catch (err) {
+        console.error(`Backend delete failed for ${key}:`, err);
+        throw err;
+      }
     };
 
     return {
@@ -235,16 +243,19 @@ export const PROFILE = {
   name: "Prof. (Dr.) Manoj Kumar",
   honorific: "Vice-Chancellor",
   institution: "DAV University, Jalandhar",
-  email: "vc@davuniversity.org",
-  phone: "+91 181 662 8000",
-  office: "Office of the Vice-Chancellor, Administrative Block",
-  city: "Jalandhar, Punjab 144012, India",
-  photo: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=600&q=75",
-  bio: "Prof. (Dr.) Manoj Kumar serves as Vice-Chancellor of DAV University, Jalandhar, where he leads academic strategy, research governance and institutional quality assurance across nine schools. His research spans machine learning systems, computational intelligence and technology for sustainable agriculture, with more than 120 indexed publications and six patents to his name.",
-  expertise: ["Machine Learning Systems", "Computational Intelligence", "Precision Agriculture", "Higher Education Governance", "Data Ethics"],
+  email: "drmanojkumarindia@gmail.com",
+  personalEmail: "drmanojkumarindia@gmail.com",
+  phone: "+91-181-2708844",
+  directPhone: "+91 9872203898, +91 9478101102",
+  office: "Office of the Vice-Chancellor, DAV University, Sarmastpur, Jalandhar - Pathankot National Highway (NH 44), Jalandhar, Punjab (India) - 144012",
+  residenceAddress: "251, Lajpat Nagar, Jalandhar, Punjab (India) - 144001",
+  city: "Jalandhar, Punjab, India",
+  photo: "/images/prof_manoj_kumar.jpg",
+  bio: "Prof. (Dr.) Manoj Kumar is an eminent academician, administrator, and researcher with over 35 years of distinguished experience in engineering education, photonics & optical wireless communications research, and university governance. Currently serving as the Vice-Chancellor of DAV University, Jalandhar, he also serves as Dean's Visiting Scholar at the University of Memphis School of Public Health (USA), President of Jalandhar Management Association (AIMA), and Honorary Colonel Commandant in the National Cadet Corps (NCC).",
+  expertise: ["Photonics & Optical Wireless Communications", "Visible Light Communication (VLC)", "Free Space Optics (FSO)", "Higher Education Governance", "Strategic Leadership"],
   orcid: "0000-0002-4471-8823",
   scopus: "57204931882",
   scholar: "manoj-kumar-dav",
-  linkedin: "in/manojkumar-vc",
-  website: "https://davuniversity.org",
+  linkedin: "https://in.linkedin.com/in/dr-manoj-kumar-56183928",
+  website: "https://www.davuniversity.org",
 };

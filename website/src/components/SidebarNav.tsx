@@ -138,7 +138,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
   const socialScholar = profile.contact?.scholar;
   const socialOrcid = profile.contact?.orcid;
   const websiteUrl = profile.contact?.website || "https://www.davuniversity.org";
-  const contactEmail = profile.contact?.officialEmail || settings?.contactEmail || "vc@davuniversity.org";
+  const contactEmail = profile.contact?.officialEmail || settings?.contactEmail || "drmanojkumarindia@gmail.com";
 
   return (
     <aside className="academic-sidebar">
