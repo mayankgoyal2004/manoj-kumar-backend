@@ -97,6 +97,7 @@ export const getPublicOverview = async (req: Request, res: Response) => {
       grantsCount,
       supervisionCount,
       mousCount,
+      booksCount,
       galleryPreview,
       settings,
     ] = await Promise.all([
@@ -111,6 +112,7 @@ export const getPublicOverview = async (req: Request, res: Response) => {
       prisma.grant.count(),
       prisma.supervision.count(),
       prisma.mou.count({ where: { status: 'Active' } }),
+      prisma.book.count({ where: { status: 'Published' } }),
       prisma.galleryItem.findMany({ where: { status: 'Published' }, take: 6, orderBy: { orderIndex: 'asc' } }),
       prisma.websiteSetting.findFirst(),
     ]);
@@ -134,6 +136,7 @@ export const getPublicOverview = async (req: Request, res: Response) => {
           grantsCount,
           supervisionCount,
           mousCount,
+          booksCount,
         },
       },
       'Public overview retrieved'

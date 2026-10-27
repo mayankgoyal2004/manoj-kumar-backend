@@ -219,7 +219,10 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       if (awData && Array.isArray(awData) && awData.length) setAwards(awData);
       if (patData && Array.isArray(patData) && patData.length) setPatents(patData);
       if (pubData && Array.isArray(pubData) && pubData.length) setPublications(pubData);
-      if (bkData && Array.isArray(bkData) && bkData.length) setBooks(bkData);
+      if (bkData && Array.isArray(bkData) && bkData.length) {
+        setBooks(bkData);
+        setLiveMetrics((prev) => ({ ...prev, booksCount: bkData.length }));
+      }
       if (grData && Array.isArray(grData) && grData.length) setGrants(grData);
       if (supData && Array.isArray(supData) && supData.length) setSupervision(supData);
       if (moData && Array.isArray(moData) && moData.length) setMous(moData);
