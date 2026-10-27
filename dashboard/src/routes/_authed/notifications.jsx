@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import React, { useEffect, useMemo, useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Bell,
   BellOff,
@@ -33,7 +33,13 @@ const KIND_ICON = { System: FileClock, Review: Sparkles, Publishing: Sparkles, S
 const TABS = ["All", "Unread", "Read"];
 
 function NotificationsPage() {
-  const { collections, update, remove } = useData();
+  const { collections, update, remove, fetchModule, loadingModules } = useData();
+
+  useEffect(() => {
+    if (fetchModule) {
+      fetchModule("notifications", true);
+    }
+  }, [fetchModule]);
   const notifications = collections.notifications || [];
 
   const [tab, setTab] = useState("All");
@@ -179,6 +185,17 @@ function NotificationsPage() {
                       {isUnread && <StatusBadge value="Unread" />}
                     </div>
                     <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{item.message}</p>
+                    {item.link && (
+                      <Link
+                        to={item.link.startsWith('/contact-messages') ? '/contact-messages' : item.link}
+                        className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+                        onClick={() => {
+                          if (isUnread) update("notifications", item.id, { status: "Read" });
+                        }}
+                      >
+                        <span>View in Contact Messages &rarr;</span>
+                      </Link>
+                    )}
                     <p className="mt-2 text-[11px] text-muted-foreground">
                       {formatRelative(item.updated_date)} · {item.time}
                     </p>

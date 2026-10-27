@@ -788,7 +788,7 @@ function ProfilePage() {
             </div>
           </SectionCard>
 
-          <SectionCard title="Visibility" description="Control what the public portfolio reveals">
+          {/* <SectionCard title="Visibility" description="Control what the public portfolio reveals">
             <div className="divide-y divide-border">
               <Toggle
                 id="vis-metrics"
@@ -823,7 +823,7 @@ function ProfilePage() {
               <BadgeCheck className="h-3.5 w-3.5 text-[hsl(var(--gold))]" />
               Verified institutional profile · {values.institution || "Executive Leadership"}
             </p>
-          </SectionCard>
+          </SectionCard> */}
         </div>
       </div>
 

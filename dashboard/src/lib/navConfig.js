@@ -18,6 +18,7 @@ import {
   FileText,
   ScrollText,
   Bell,
+  Mail,
   Globe,
   Settings2,
   ShieldCheck,
@@ -64,6 +65,7 @@ export const NAV_SECTIONS = [
   {
     label: "Administration",
     items: [
+      { label: "Contact Messages", to: "/contact-messages", icon: Mail, moduleKey: "contact-messages" },
       { label: "Users & Roles", to: "/users", icon: ShieldCheck, moduleKey: "users" },
       { label: "Activity Logs", to: "/activity-logs", icon: ScrollText },
       { label: "Notifications", to: "/notifications", icon: Bell, moduleKey: "notifications" },

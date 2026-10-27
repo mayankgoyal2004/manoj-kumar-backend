@@ -236,7 +236,7 @@ function AccountSettingsPage() {
             </div>
           </SectionCard>
 
-          <SectionCard title="Notification preferences" description="Choose what reaches your inbox">
+          {/* <SectionCard title="Notification preferences" description="Choose what reaches your inbox">
             <div className="divide-y divide-border">
               <Toggle
                 id="pref-review"
@@ -267,7 +267,7 @@ function AccountSettingsPage() {
                 onChange={(next) => setPrefs((prev) => ({ ...prev, digest: next }))}
               />
             </div>
-          </SectionCard>
+          </SectionCard> */}
 
           <SectionCard title="Session" description="Current access to this console">
             <dl className="space-y-3 text-xs">

@@ -445,6 +445,33 @@ export const MODULES = {
     ],
   },
 
+  "contact-messages": {
+    title: "Contact Messages",
+    short: "Messages",
+    singular: "Contact Message",
+    titleKey: "fullName",
+    description: "Inquiries, meeting requests, and academic collaboration messages submitted via the public portal.",
+    statusOptions: ["Unread", "Read", "Responded", "Archived"],
+    columns: [
+      { key: "fullName", label: "Sender Name" },
+      { key: "organization", label: "Organization / Institution" },
+      { key: "email", label: "Email Address" },
+      { key: "purpose", label: "Interaction Purpose" },
+      { key: "createdAt", label: "Received Date", type: "date" },
+      { key: "status", label: "Status", type: "status" },
+    ],
+    fields: [
+      { name: "fullName", label: "Full Name", type: "text", required: true },
+      { name: "organization", label: "Organization / Institution", type: "text" },
+      { name: "email", label: "Official Email", type: "text", required: true },
+      { name: "phone", label: "Contact Number", type: "text" },
+      { name: "purpose", label: "Purpose of Interaction", type: "text" },
+      { name: "status", label: "Status", type: "select", options: ["Unread", "Read", "Responded", "Archived"] },
+      { name: "message", label: "Correspondence Message", type: "textarea", full: true },
+      { name: "replyNote", label: "Secretariat Notes / Follow-up", type: "textarea", full: true },
+    ],
+  },
+
   notifications: {
     title: "Notifications",
     short: "Notifications",

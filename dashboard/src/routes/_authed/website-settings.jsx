@@ -208,7 +208,7 @@ function WebsiteSettingsPage() {
               </div>
             </div>
           </SectionCard>
-
+{/* 
           <SectionCard title="Homepage sections" description="Toggle which blocks are published">
             <div className="divide-y divide-border">
               <Toggle
@@ -249,8 +249,8 @@ function WebsiteSettingsPage() {
                 onChange={(next) => setSections((prev) => ({ ...prev, maintenance: next }))}
               />
             </div>
-          </SectionCard>
-
+          </SectionCard> */}
+{/* 
           <SectionCard title="Domain" description="Primary address of the public portfolio">
             <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-muted/40 px-4 py-3">
               <div className="min-w-0">
@@ -267,7 +267,7 @@ function WebsiteSettingsPage() {
             >
               Open public site <ExternalLink className="h-3.5 w-3.5" />
             </a>
-          </SectionCard>
+          </SectionCard> */}
         </div>
       </div>
     </>

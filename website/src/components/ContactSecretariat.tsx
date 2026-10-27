@@ -148,32 +148,20 @@ export const ContactSecretariat: React.FC = () => {
           </div>
 
           {/* Official Documents Download Section */}
-          <div style={{ marginTop: '1rem' }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-crimson-900)', marginBottom: '0.75rem' }}>
+          <div style={{ marginTop: '1.25rem' }}>
+            <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--color-crimson-900)', marginBottom: '0.75rem' }}>
               Official Documents & Dossiers
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+            <div className="contact-docs-list">
               {publishedDocuments.map((doc: any, i: number) => {
                 const targetUrl = resolveDocumentUrl(doc.fileUrl || doc.file_url || '');
                 return (
-                  <div
-                    key={doc.id || i}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '0.65rem 0.85rem',
-                      background: 'var(--color-bg-page)',
-                      borderRadius: 'var(--radius-xs)',
-                      border: '1px solid var(--color-border-subtle)',
-                      gap: '0.75rem',
-                    }}
-                  >
-                    <div style={{ minWidth: 0, flex: 1 }}>
-                      <div style={{ fontSize: '0.84rem', fontWeight: 600, color: 'var(--color-crimson-950)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div key={doc.id || i} className="contact-doc-card">
+                    <div className="contact-doc-info">
+                      <div className="contact-doc-name">
                         {doc.name}
                       </div>
-                      <div style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>
+                      <div className="contact-doc-meta">
                         {doc.category || 'Official Document'} {doc.size ? `• ${doc.size}` : ''}
                       </div>
                     </div>
@@ -181,26 +169,7 @@ export const ContactSecretariat: React.FC = () => {
                       href={targetUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{
-                        margin: 0,
-                        padding: '0.4rem 0.85rem',
-                        fontSize: '0.75rem',
-                        fontWeight: 600,
-                        width: 'auto',
-                        minWidth: 'fit-content',
-                        flexShrink: 0,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.4rem',
-                        borderRadius: 'var(--radius-xs)',
-                        background: 'var(--color-crimson-800)',
-                        color: '#ffffff',
-                        textDecoration: 'none',
-                        border: '1px solid var(--color-crimson-850)',
-                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-                        cursor: 'pointer'
-                      }}
+                      className="contact-doc-download-btn"
                       download
                     >
                       <Download size={13} />
@@ -275,7 +244,7 @@ export const ContactSecretariat: React.FC = () => {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="contact-form-row">
                 <div className="form-group">
                   <label className="form-label">Official Email *</label>
                   <input

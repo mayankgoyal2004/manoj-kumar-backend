@@ -24,7 +24,7 @@ export function DataProvider({ children }) {
   const loadedModules = useRef(new Set());
   const [actor, setActor] = useState({ name: "Prof. (Dr.) Manoj Kumar", email: "vc@davuniversity.org" });
 
-  // On initial auth load: ONLY fetch single lightweight dashboard stats/activity API
+  // On initial auth load and focus: fetch dashboard stats, activity, and live notifications
   useEffect(() => {
     let active = true;
     async function loadOverview() {
@@ -32,34 +32,63 @@ export function DataProvider({ children }) {
       if (!token) return;
 
       try {
-        const stats = await api.stats.getDashboardStats();
-        if (!active || !stats) return;
+        const [stats, notifs] = await Promise.all([
+          api.stats.getDashboardStats().catch(() => null),
+          api.modules.getAll("notifications", { pageSize: 50 }).catch(() => null),
+        ]);
+        if (!active) return;
 
-        setDashboardStats(stats);
+        if (stats) {
+          setDashboardStats(stats);
+          if (stats.recentActivity && Array.isArray(stats.recentActivity) && stats.recentActivity.length > 0) {
+            setCollections((prev) => ({
+              ...prev,
+              activity: stats.recentActivity.map((log) => ({
+                id: log.id,
+                actor: log.actor || "System",
+                action: log.action || "updated",
+                module: log.module || "System",
+                target: log.target || "",
+                time: log.time || log.createdAt || new Date().toISOString(),
+                ip: log.ip || "10.24.6.18",
+                kind: log.kind || "system",
+              })),
+            }));
+          }
+        }
 
-        if (stats.recentActivity && Array.isArray(stats.recentActivity) && stats.recentActivity.length > 0) {
+        if (notifs && Array.isArray(notifs)) {
           setCollections((prev) => ({
             ...prev,
-            activity: stats.recentActivity.map((log) => ({
-              id: log.id,
-              actor: log.actor || "System",
-              action: log.action || "updated",
-              module: log.module || "System",
-              target: log.target || "",
-              time: log.time || log.createdAt || new Date().toISOString(),
-              ip: log.ip || "10.24.6.18",
-              kind: log.kind || "system",
-            })),
+            notifications: notifs.map(normalizeLoadedItem),
           }));
+          loadedModules.current.add("notifications");
+          setLoadedKeys((prev) => new Set([...prev, "notifications"]));
         }
       } catch (err) {
-        console.warn("Overview stats fetch failed:", err);
+        console.warn("Overview sync failed:", err);
       }
     }
 
     loadOverview();
+
+    // Refresh when user returns to tab
+    const handleFocus = () => {
+      if (document.visibilityState === "visible") {
+        loadOverview();
+      }
+    };
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleFocus);
+
+    // Periodic heartbeat sync every 25 seconds
+    const interval = setInterval(loadOverview, 25000);
+
     return () => {
       active = false;
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleFocus);
+      clearInterval(interval);
     };
   }, []);
 

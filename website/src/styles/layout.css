@@ -748,11 +748,20 @@
   padding: 2.25rem 2.5rem;
   box-shadow: var(--shadow-sm);
   min-height: 700px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1200px) {
+  .academic-main-content {
+    padding: 1.75rem 1.5rem;
+  }
 }
 
 @media (max-width: 768px) {
   .academic-main-content {
-    padding: 1.35rem 1.15rem;
+    padding: 1.25rem 1rem;
   }
 }
 

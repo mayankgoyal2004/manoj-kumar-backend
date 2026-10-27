@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { Bell, CheckCheck, ShieldAlert, Sparkles, FileClock } from "lucide-react";
 import { useData } from "@/lib/DataStore";
@@ -14,7 +14,13 @@ const KIND_ICON = {
 
 export default function NotificationsMenu() {
   const [open, setOpen] = useState(false);
-  const { collections, update } = useData();
+  const { collections, update, fetchModule } = useData();
+
+  useEffect(() => {
+    if (fetchModule) {
+      fetchModule("notifications");
+    }
+  }, [fetchModule]);
   const notifications = collections.notifications || [];
   const unread = notifications.filter((item) => item.status === "Unread");
 
@@ -65,8 +71,11 @@ export default function NotificationsMenu() {
                 return (
                   <li key={item.id}>
                     <Link
-                      to="/notifications"
-                      onClick={() => setOpen(false)}
+                      to={item.link ? (item.link.startsWith('/contact-messages') ? '/contact-messages' : item.link) : "/notifications"}
+                      onClick={() => {
+                        if (item.status === "Unread") update("notifications", item.id, { status: "Read" });
+                        setOpen(false);
+                      }}
                       className="flex gap-3 px-4 py-3 transition hover:bg-muted/60"
                     >
                       <span
