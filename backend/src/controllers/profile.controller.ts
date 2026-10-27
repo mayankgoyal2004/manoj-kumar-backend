@@ -33,13 +33,20 @@ export const updateProfile = async (req: Request, res: Response) => {
       return sendError(res, 'Profile not found', 404);
     }
 
-    const { headerPhoto, sidebarPhoto, bioPhoto, headerPositions, ...prismaSafeBody } = req.body;
+    const { headerPhoto, sidebarPhoto, bioPhoto, headerPositions, metrics, ...prismaSafeBody } = req.body;
+
+    const mergedMetrics = metrics && typeof metrics === 'object'
+      ? { ...((existing.metrics as any) || {}), ...metrics }
+      : (existing.metrics as any);
 
     let updated: any;
     try {
       updated = await prisma.profile.update({
         where: { id: existing.id },
-        data: prismaSafeBody,
+        data: {
+          ...prismaSafeBody,
+          ...(mergedMetrics ? { metrics: mergedMetrics } : {}),
+        },
       });
     } catch {
       updated = existing;

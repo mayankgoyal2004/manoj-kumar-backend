@@ -296,7 +296,17 @@ export default function ResourcePage({ moduleKey }) {
         }
       />
 
-      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div
+        className={`mb-6 grid gap-4 ${
+          statCards.length === 1
+            ? "grid-cols-1"
+            : statCards.length === 2
+            ? "grid-cols-1 sm:grid-cols-2"
+            : statCards.length === 3
+            ? "grid-cols-1 sm:grid-cols-3"
+            : "grid-cols-1 sm:grid-cols-2 xl:grid-cols-4"
+        }`}
+      >
         {statCards.map((card) => (
           <StatCard key={card.label} {...card} />
         ))}

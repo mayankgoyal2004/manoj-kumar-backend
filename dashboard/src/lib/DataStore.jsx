@@ -136,7 +136,7 @@ function normalizeLoadedItem(item) {
 
     setLoadingModules((prev) => ({ ...prev, [key]: true }));
     try {
-      const res = await api.modules.getAll(key, { pageSize: 100 });
+      const res = await api.modules.getAll(key, { pageSize: 500 });
       if (res && Array.isArray(res)) {
         setCollections((prev) => ({
           ...prev,

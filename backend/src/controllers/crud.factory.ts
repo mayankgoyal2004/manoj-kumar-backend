@@ -100,7 +100,7 @@ export function createCrudController(options: CrudOptions) {
     getAll: async (req: Request, res: Response) => {
       try {
         const page = Math.max(1, parseInt((req.query.page as string) || '1', 10));
-        const pageSize = Math.min(100, Math.max(1, parseInt((req.query.pageSize as string) || '20', 10)));
+        const pageSize = Math.min(1000, Math.max(1, parseInt((req.query.pageSize as string) || '20', 10)));
         const search = (req.query.search as string)?.trim();
         const sortField = (req.query.sort as string) || defaultSort.field;
         const sortOrder = ((req.query.order as string) || defaultSort.order).toLowerCase() === 'asc' ? 'asc' : 'desc';

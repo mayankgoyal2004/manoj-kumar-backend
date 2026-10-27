@@ -25,6 +25,12 @@ const FIELDS = [
   { name: "residenceAddress", label: "Permanent Residence", type: "textarea", full: true },
   { name: "city", label: "City / Campus", type: "text" },
   {
+    name: "experienceYears",
+    label: "Years of Academic Leadership",
+    type: "number",
+    hint: "Displayed as '35+ Years Leadership' on the website homepage banner",
+  },
+  {
     name: "headerPhoto",
     label: "Top Header Portrait",
     type: "image",
@@ -166,6 +172,7 @@ function ProfilePage() {
             linkedin: remote.linkedIn || remote.linkedin || PROFILE.linkedin,
             twitter: remote.twitter || PROFILE.twitter,
             youtube: remote.youtube || PROFILE.youtube,
+            experienceYears: remote.metrics?.experienceYears ?? remote.experienceYears ?? 35,
           };
           setValues(synced);
           setDraft(synced);
@@ -235,6 +242,10 @@ function ProfilePage() {
         twitter: source.twitter,
         youtube: source.youtube,
         website: source.website,
+        metrics: {
+          ...(source.metrics || values.metrics || {}),
+          experienceYears: Number(source.experienceYears) || 35,
+        },
       });
 
       // Synchronize CV Document in database

@@ -22,8 +22,8 @@ export default function RouteContentLoader({ title = "Loading content..." }) {
       </div>
 
       {/* Metric Cards Skeleton */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {[1, 2, 3, 4].map((i) => (
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {[1, 2, 3].map((i) => (
           <div
             key={i}
             className="relative overflow-hidden rounded-xl border border-border/60 bg-card p-5 space-y-3.5 shadow-sm"
