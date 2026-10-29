@@ -5,7 +5,7 @@ export const base44 = {
     me: async () => ({
       id: "usr_admin_1",
       full_name: "Prof. (Dr.) Manoj Kumar",
-      email: "vc@davuniversity.org",
+      email: "drmanojkumarindia@gmail.com",
       role: "Super Admin",
     }),
     loginViaEmailPassword: async () => ({ success: true }),

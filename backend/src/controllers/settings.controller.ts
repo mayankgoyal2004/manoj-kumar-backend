@@ -15,7 +15,7 @@ export const getWebsiteSettings = async (req: Request, res: Response) => {
           tagline: 'Vice-Chancellor · DAV University, Jalandhar',
           description:
             'The academic portfolio of Prof. (Dr.) Manoj Kumar — research in machine learning systems, computational intelligence and technology for sustainable agriculture.',
-          contactEmail: 'vc@davuniversity.org',
+          contactEmail: 'drmanojkumarindia@gmail.com',
           phone: '+91 181 662 8000',
           address: 'Office of the Vice-Chancellor, Administrative Block, DAV University, Jalandhar, Punjab 144012',
           footer: '© 2026 DAV University, Jalandhar. All rights reserved.',

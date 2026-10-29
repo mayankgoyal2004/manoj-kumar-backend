@@ -158,7 +158,7 @@ export const SEED = {
   ],
 
   users: [
-    { name: "Prof. (Dr.) Manoj Kumar", email: "vc@davuniversity.org", role: "Super Admin", department: "Office of the Vice-Chancellor", last_active: "2026-10-12", status: "Active", updated_date: D(0) },
+    { name: "Prof. (Dr.) Manoj Kumar", email: "drmanojkumarindia@gmail.com", role: "Super Admin", department: "Office of the Vice-Chancellor", last_active: "2026-10-12", status: "Active", updated_date: D(0) },
     { name: "Dr. Simran Nanda", email: "simran.nanda@davuniversity.org", role: "Editor", department: "Research Office", last_active: "2026-10-10", status: "Active", updated_date: D(2) },
     { name: "Rahul Gill", email: "rahul.gill@davuniversity.org", role: "Contributor", department: "Department of Computer Science", last_active: "2026-10-08", status: "Active", updated_date: D(4) },
     { name: "Pooja Kaur", email: "pooja.kaur@davuniversity.org", role: "Admin", department: "Academic Affairs", last_active: "2026-10-11", status: "Active", updated_date: D(1) },

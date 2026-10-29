@@ -107,10 +107,6 @@ npm run build
 npm start
 ```
 
-Default credentials seeded:
-- **Email**: `vc@davuniversity.org`
-- **Password**: `AdminPassword@2026`
-- **Role**: `SUPER_ADMIN`
 
 ---
 

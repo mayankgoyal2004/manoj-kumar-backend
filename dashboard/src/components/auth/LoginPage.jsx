@@ -10,8 +10,8 @@ import { toast } from "sonner";
 export function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("vc@davuniversity.org");
-  const [password, setPassword] = useState("AdminPassword@2026");
+  const [email, setEmail] = useState("drmanojkumarindia@gmail.com");
+  const [password, setPassword] = useState("Admin@123");
   const [showPassword, setShowPassword] = useState(false);
   const [keepSignedIn, setKeepSignedIn] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -236,9 +236,9 @@ export function LoginPage() {
                       <Eye className="h-4 w-4" />
                     )}
                   </button>
-                  <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 dark:text-muted-foreground px-1.5 py-0.5 rounded border border-slate-200 dark:border-border bg-slate-50 dark:bg-muted select-none">
+                  {/* <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 dark:text-muted-foreground px-1.5 py-0.5 rounded border border-slate-200 dark:border-border bg-slate-50 dark:bg-muted select-none">
                     ⌘ K
-                  </span>
+                  </span> */}
                 </div>
               </div>
             </div>
@@ -253,12 +253,12 @@ export function LoginPage() {
                 />
                 <span>Keep me signed in</span>
               </label>
-              <Link
+              {/* <Link
                 to="/forgot-password"
                 className="text-[#2563eb] hover:underline font-medium text-xs"
               >
                 Forgot password?
-              </Link>
+              </Link> */}
             </div>
 
             <button
@@ -271,10 +271,10 @@ export function LoginPage() {
             </button>
           </form>
 
-          <div className="flex items-center justify-center gap-1.5 text-xs text-slate-400 dark:text-muted-foreground mt-5">
+          {/* <div className="flex items-center justify-center gap-1.5 text-xs text-slate-400 dark:text-muted-foreground mt-5">
             <Sparkles className="h-3.5 w-3.5 text-slate-400" />
             <span>Demo access is prefilled for your presentation</span>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

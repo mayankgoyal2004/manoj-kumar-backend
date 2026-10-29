@@ -22,7 +22,7 @@ export function DataProvider({ children }) {
   const [loadingModules, setLoadingModules] = useState({});
   const [loadedKeys, setLoadedKeys] = useState(new Set());
   const loadedModules = useRef(new Set());
-  const [actor, setActor] = useState({ name: "Prof. (Dr.) Manoj Kumar", email: "vc@davuniversity.org" });
+  const [actor, setActor] = useState({ name: "Prof. (Dr.) Manoj Kumar", email: "drmanojkumarindia@gmail.com" });
 
   // On initial auth load and focus: fetch dashboard stats, activity, and live notifications
   useEffect(() => {

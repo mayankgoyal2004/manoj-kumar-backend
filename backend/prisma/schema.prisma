@@ -343,7 +343,7 @@ model WebsiteSetting {
   tagline      String   @default("Vice-Chancellor · DAV University, Jalandhar")
   description  String   @db.Text
   favicon      String?  @db.Text
-  contactEmail String   @default("vc@davuniversity.org")
+  contactEmail String   @default("drmanojkumarindia@gmail.com")
   phone        String   @default("+91 181 662 8000")
   address      String   @db.Text
   footer       String   @default("© 2026 DAV University, Jalandhar. All rights reserved.")

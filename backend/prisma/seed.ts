@@ -8,13 +8,13 @@ async function main() {
 
   // 1. Super Admin User
   const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash('AdminPassword@2026', salt);
+  const hashedPassword = await bcrypt.hash('Admin@123', salt);
 
   const admin = await prisma.user.upsert({
-    where: { email: 'vc@davuniversity.org' },
+    where: { email: 'drmanojkumarindia@gmail.com' },
     update: {},
     create: {
-      email: 'vc@davuniversity.org',
+      email: 'drmanojkumarindia@gmail.com',
       password: hashedPassword,
       name: 'Prof. (Dr.) Manoj Kumar',
       role: Role.SUPER_ADMIN,
