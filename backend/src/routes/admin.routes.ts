@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { login, register, getMe, updateAccount, changePassword } from '../controllers/auth.controller';
-import { getProfile, updateProfile } from '../controllers/profile.controller';
+import { getProfile, updateProfile, updateProfileMetrics } from '../controllers/profile.controller';
 import { getDashboardStats } from '../controllers/stats.controller';
 import { getWebsiteSettings, updateWebsiteSettings } from '../controllers/settings.controller';
 import { listContactMessages, updateContactMessage, deleteContactMessage } from '../controllers/contact.controller';
@@ -80,6 +80,7 @@ router.post('/upload', upload.single('file'), handleFileUpload);
 // Executive Profile
 router.get('/profile', getProfile);
 router.put('/profile', validateBody(profileUpdateSchema), updateProfile);
+router.put('/profile/metrics', updateProfileMetrics);
 
 // Website Identity Configuration
 router.get('/website-settings', getWebsiteSettings);

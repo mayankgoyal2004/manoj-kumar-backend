@@ -26,7 +26,7 @@ export default function DetailList({ fields, record }) {
       {fields.map((field) => (
         <div key={field.name} className={field.full || field.type === "textarea" ? "sm:col-span-2" : ""}>
           <dt className="label-caps">{field.label}</dt>
-          <dd className="mt-1.5 whitespace-pre-line text-sm leading-relaxed text-foreground">
+          <dd className="mt-1.5 whitespace-pre-line text-sm leading-relaxed text-foreground break-words max-h-72 overflow-y-auto pr-1">
             {display(record[field.name])}
           </dd>
         </div>

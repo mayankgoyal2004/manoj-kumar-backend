@@ -31,6 +31,12 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
 }) => {
   const { profile, settings, liveMetrics, documents, resolveDocumentUrl } = usePortfolio();
 
+  const rawMetrics = profile?.metrics || {};
+  const useManual = rawMetrics.useManualStats !== false;
+  const metrics = useManual
+    ? { ...liveMetrics, ...rawMetrics }
+    : { ...rawMetrics, ...liveMetrics };
+
   const navItems = [
     { id: "overview", label: "About Biosketch", icon: User, count: null },
     {
@@ -45,42 +51,42 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
       icon: GraduationCap,
       count: null,
     },
-    { id: "awards", label: "Awards & Recognitions", icon: Award, count: `${liveMetrics.awardsCount || profile.metrics?.awardsCount || "26+"}` },
+    { id: "awards", label: "Awards & Recognitions", icon: Award, count: `${metrics.awardsCount ?? "26+"}` },
     {
       id: "patents",
       label: "Patents & Intellectual Property",
       icon: Lightbulb,
-      count: String(liveMetrics.patentsCount || profile.metrics?.patentsCount || 4).padStart(2, "0"),
+      count: String(metrics.patentsCount ?? 4).padStart(2, "0"),
     },
     {
       id: "publications",
       label: "Research Publications",
       icon: FileText,
-      count: String(liveMetrics.publicationsCount || profile.metrics?.publicationsCount || "151"),
+      count: String(metrics.publicationsCount ?? "151"),
     },
     {
       id: "phd",
       label: "Ph.D. Supervision & Mentorship",
       icon: Users,
-      count: String(liveMetrics.supervisionCount || profile.metrics?.phdSupervisedCount || 9).padStart(2, "0"),
+      count: String(metrics.supervisionCount ?? metrics.phdSupervisedCount ?? 9).padStart(2, "0"),
     },
     {
       id: "books",
       label: "Books Authored & Chapters",
       icon: BookOpen,
-      count: String(liveMetrics.booksCount || profile.metrics?.booksCount || 13),
+      count: String(metrics.booksCount ?? 13),
     },
     {
       id: "grants",
       label: "Research Grants & Funding",
       icon: IndianRupee,
-      count: String(liveMetrics.grantsCount || 11),
+      count: String(metrics.grantsCount ?? 11),
     },
     {
       id: "mous",
       label: "MoUs & Strategic Alliances",
       icon: Globe2,
-      count: String(liveMetrics.mousCount || profile.metrics?.mousCount || 26),
+      count: String(metrics.mousCount ?? 26),
     },
     {
       id: "affiliations",

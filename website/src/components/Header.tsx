@@ -11,17 +11,23 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ onOpenSearch, activeSection, onNavigate }) => {
   const { profile, settings, liveMetrics, positions, affiliations } = usePortfolio();
 
+  const rawMetrics = profile?.metrics || {};
+  const useManual = rawMetrics.useManualStats !== false;
+  const metrics = useManual
+    ? { ...liveMetrics, ...rawMetrics }
+    : { ...rawMetrics, ...liveMetrics };
+
   const mobileSections = [
     { id: 'overview', label: 'Biosketch' },
     { id: 'positions', label: 'Positions' },
     { id: 'education', label: 'Education' },
-    { id: 'awards', label: `Awards (${liveMetrics.awardsCount || profile.metrics?.awardsCount || '26+'})` },
-    { id: 'patents', label: `Patents (${String(liveMetrics.patentsCount || profile.metrics?.patentsCount || 4).padStart(2, '0')})` },
-    { id: 'publications', label: `Publications (${liveMetrics.publicationsCount || profile.metrics?.publicationsCount || '150+'})` },
-    { id: 'phd', label: `Ph.D. (${String(liveMetrics.supervisionCount || profile.metrics?.phdSupervisedCount || 9).padStart(2, '0')})` },
-    { id: 'books', label: `Books (${liveMetrics.booksCount || profile.metrics?.booksCount || 13})` },
+    { id: 'awards', label: `Awards (${metrics.awardsCount ?? '26+'})` },
+    { id: 'patents', label: `Patents (${String(metrics.patentsCount ?? 4).padStart(2, '0')})` },
+    { id: 'publications', label: `Publications (${metrics.publicationsCount ?? '150+'})` },
+    { id: 'phd', label: `Ph.D. (${String(metrics.supervisionCount ?? metrics.phdSupervisedCount ?? 9).padStart(2, '0')})` },
+    { id: 'books', label: `Books (${metrics.booksCount ?? 13})` },
     { id: 'grants', label: 'Grants' },
-    { id: 'mous', label: `MoUs (${liveMetrics.mousCount || profile.metrics?.mousCount || 26})` },
+    { id: 'mous', label: `MoUs (${metrics.mousCount ?? 26})` },
     { id: 'affiliations', label: 'Affiliations' },
     { id: 'events', label: 'Events' },
     { id: 'gallery', label: 'Gallery' },

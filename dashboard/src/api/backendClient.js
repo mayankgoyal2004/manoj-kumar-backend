@@ -114,6 +114,13 @@ export const api = {
       });
       return res.data;
     },
+    updateMetrics: async (metrics) => {
+      const res = await request('/admin/profile/metrics', {
+        method: 'PUT',
+        body: JSON.stringify({ metrics }),
+      });
+      return res.data;
+    },
   },
 
   // Generic Module Resource Operations

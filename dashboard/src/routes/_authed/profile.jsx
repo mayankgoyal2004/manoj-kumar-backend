@@ -1,6 +1,32 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Mail, MapPin, Phone, Save, BadgeCheck, Plus, Trash2, Building2, FileText, Download } from "lucide-react";
+import {
+  Mail,
+  MapPin,
+  Phone,
+  Save,
+  BadgeCheck,
+  Plus,
+  Trash2,
+  Building2,
+  FileText,
+  Download,
+  Users,
+  GraduationCap,
+  BookOpen,
+  Lightbulb,
+  Award,
+  Globe,
+  RotateCcw,
+  RefreshCw,
+  TrendingUp,
+  BarChart3,
+  Check,
+  Sparkles,
+  Sliders,
+  Compass,
+  IndianRupee,
+} from "lucide-react";
 import { toast } from "sonner";
 import Modal from "@/components/kit/Modal";
 import PageHeader from "@/components/kit/PageHeader";
@@ -29,6 +55,42 @@ const FIELDS = [
     label: "Years of Academic Leadership",
     type: "number",
     hint: "Displayed as '35+ Years Leadership' on the website homepage banner",
+  },
+  {
+    name: "publicationsCount",
+    label: "Total Publications (SCI / Scopus / IEEE)",
+    type: "number",
+    hint: "Total publications count shown in website StatStrip and header",
+  },
+  {
+    name: "phdSupervisedCount",
+    label: "Ph.D. Scholars Guided",
+    type: "number",
+    hint: "Ph.D. scholars awarded and guided",
+  },
+  {
+    name: "booksCount",
+    label: "Books & Book Chapters Authored",
+    type: "number",
+    hint: "Total books, edited volumes and chapters",
+  },
+  {
+    name: "patentsCount",
+    label: "Patents to Credit",
+    type: "number",
+    hint: "Published and granted patents",
+  },
+  {
+    name: "awardsCount",
+    label: "National Awards & Honors",
+    type: "number",
+    hint: "National awards & global honors count",
+  },
+  {
+    name: "mousCount",
+    label: "MoUs & Strategic Alliances",
+    type: "number",
+    hint: "Industry and university MoUs count",
   },
   {
     name: "headerPhoto",
@@ -100,12 +162,46 @@ function ProfilePage() {
   const [draft, setDraft] = useState(() => ({ ...PROFILE }));
   const [editing, setEditing] = useState(false);
   const [docRecords, setDocRecords] = useState({ cvDoc: null, briefDoc: null });
-  const [visibility, setVisibility] = useState({
-    metrics: true,
-    contact: true,
-    enquiries: false,
-    citations: true,
+
+  // Live database table counts fetched from backend
+  const [dbCounts, setDbCounts] = useState({
+    publicationsCount: 0,
+    supervisionCount: 0,
+    booksCount: 0,
+    patentsCount: 0,
+    awardsCount: 0,
+    mousCount: 0,
+    grantsCount: 0,
   });
+
+  // Dedicated state for Key Metrics & Public Stats Management
+  const [statsValues, setStatsValues] = useState({
+    useManualStats: true,
+    experienceYears: 35,
+    experienceYearsSuffix: "+",
+    publicationsCount: 151,
+    publicationsSuffix: "+",
+    supervisionCount: 9,
+    supervisionSuffix: "",
+    phdSupervisedCount: 9,
+    mtechSupervisedCount: 19,
+    booksCount: 18,
+    booksSuffix: "",
+    bookChaptersCount: 4,
+    reviewedBooksCount: 5,
+    patentsCount: 4,
+    patentsSuffix: "",
+    awardsCount: 26,
+    awardsSuffix: "+",
+    mousCount: 26,
+    mousSuffix: "+",
+    grantsAmountLakhs: 85,
+    grantsCount: 10,
+    countriesVisitedCount: 10,
+    countriesVisitedSuffix: "+",
+  });
+
+  const [savingStats, setSavingStats] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -139,6 +235,39 @@ function ProfilePage() {
         }
 
         if (active && remote) {
+          if (remote.dbCounts) {
+            setDbCounts(remote.dbCounts);
+          }
+
+          const m = remote.metrics || {};
+          const loadedStats = {
+            useManualStats: m.useManualStats !== false,
+            experienceYears: m.experienceYears ?? remote.experienceYears ?? 35,
+            experienceYearsSuffix: m.experienceYearsSuffix ?? "+",
+            publicationsCount: m.publicationsCount ?? remote.dbCounts?.publicationsCount ?? 151,
+            publicationsSuffix: m.publicationsSuffix ?? "+",
+            supervisionCount: m.supervisionCount ?? m.phdSupervisedCount ?? remote.dbCounts?.supervisionCount ?? 9,
+            supervisionSuffix: m.supervisionSuffix ?? "",
+            phdSupervisedCount: m.phdSupervisedCount ?? 9,
+            mtechSupervisedCount: m.mtechSupervisedCount ?? 19,
+            booksCount: m.booksCount ?? remote.dbCounts?.booksCount ?? 18,
+            booksSuffix: m.booksSuffix ?? "",
+            bookChaptersCount: m.bookChaptersCount ?? 4,
+            reviewedBooksCount: m.reviewedBooksCount ?? 5,
+            patentsCount: m.patentsCount ?? remote.dbCounts?.patentsCount ?? 4,
+            patentsSuffix: m.patentsSuffix ?? "",
+            awardsCount: m.awardsCount ?? remote.dbCounts?.awardsCount ?? 26,
+            awardsSuffix: m.awardsSuffix ?? "+",
+            mousCount: m.mousCount ?? remote.dbCounts?.mousCount ?? 26,
+            mousSuffix: m.mousSuffix ?? "+",
+            grantsAmountLakhs: m.grantsAmountLakhs ?? 85,
+            grantsCount: m.grantsCount ?? remote.dbCounts?.grantsCount ?? 10,
+            countriesVisitedCount: m.countriesVisitedCount ?? 10,
+            countriesVisitedSuffix: m.countriesVisitedSuffix ?? "+",
+          };
+
+          setStatsValues(loadedStats);
+
           const expertiseArr = Array.isArray(remote.expertise)
             ? remote.expertise
             : (typeof remote.expertise === "string" ? remote.expertise.split(",").map(s => s.trim()).filter(Boolean) : (Array.isArray(PROFILE.expertise) ? PROFILE.expertise : []));
@@ -172,7 +301,14 @@ function ProfilePage() {
             linkedin: remote.linkedIn || remote.linkedin || PROFILE.linkedin,
             twitter: remote.twitter || PROFILE.twitter,
             youtube: remote.youtube || PROFILE.youtube,
-            experienceYears: remote.metrics?.experienceYears ?? remote.experienceYears ?? 35,
+            metrics: loadedStats,
+            experienceYears: loadedStats.experienceYears,
+            publicationsCount: loadedStats.publicationsCount,
+            phdSupervisedCount: loadedStats.phdSupervisedCount,
+            booksCount: loadedStats.booksCount,
+            patentsCount: loadedStats.patentsCount,
+            awardsCount: loadedStats.awardsCount,
+            mousCount: loadedStats.mousCount,
           };
           setValues(synced);
           setDraft(synced);
@@ -191,6 +327,98 @@ function ProfilePage() {
     const filled = FIELDS.filter((field) => String(values[field.name] ?? "").trim()).length;
     return Math.round((filled / FIELDS.length) * 100);
   }, [values]);
+
+  const handleStatChange = (key, val) => {
+    setStatsValues((prev) => {
+      const next = { ...prev, [key]: val };
+      return next;
+    });
+    setValues((prev) => ({
+      ...prev,
+      [key]: val,
+      metrics: { ...(prev.metrics || {}), [key]: val },
+    }));
+    setDraft((prev) => ({
+      ...prev,
+      [key]: val,
+      metrics: { ...(prev.metrics || {}), [key]: val },
+    }));
+  };
+
+  // Sync inputs with exact live database counts
+  const copyDatabaseCounts = () => {
+    setStatsValues((prev) => ({
+      ...prev,
+      publicationsCount: dbCounts.publicationsCount || prev.publicationsCount,
+      supervisionCount: dbCounts.supervisionCount || prev.supervisionCount,
+      phdSupervisedCount: dbCounts.supervisionCount || prev.phdSupervisedCount,
+      booksCount: dbCounts.booksCount || prev.booksCount,
+      patentsCount: dbCounts.patentsCount || prev.patentsCount,
+      awardsCount: dbCounts.awardsCount || prev.awardsCount,
+      mousCount: dbCounts.mousCount || prev.mousCount,
+      grantsCount: dbCounts.grantsCount || prev.grantsCount,
+    }));
+    toast.info("Copied database table counts to fields", {
+      description: "Click 'Save Stats & Metrics' to persist these values.",
+    });
+  };
+
+  // Reset to executive standard numbers
+  const resetStandardStats = () => {
+    setStatsValues((prev) => ({
+      ...prev,
+      useManualStats: true,
+      experienceYears: 35,
+      experienceYearsSuffix: "+",
+      publicationsCount: 151,
+      publicationsSuffix: "+",
+      supervisionCount: 9,
+      supervisionSuffix: "",
+      phdSupervisedCount: 9,
+      mtechSupervisedCount: 19,
+      booksCount: 18,
+      booksSuffix: "",
+      patentsCount: 4,
+      patentsSuffix: "",
+      awardsCount: 26,
+      awardsSuffix: "+",
+      mousCount: 26,
+      mousSuffix: "+",
+      grantsAmountLakhs: 85,
+      countriesVisitedCount: 10,
+      countriesVisitedSuffix: "+",
+    }));
+    toast.info("Reset to executive standard values", {
+      description: "Click 'Save Stats & Metrics' to persist these values.",
+    });
+  };
+
+  // Save dedicated stats & metrics directly
+  const saveStatsOnly = async () => {
+    setSavingStats(true);
+    toast.info("Saving platform statistics to database...");
+    try {
+      await api.profile.updateMetrics(statsValues);
+      setValues((prev) => ({
+        ...prev,
+        metrics: { ...(prev.metrics || {}), ...statsValues },
+        experienceYears: Number(statsValues.experienceYears) || 35,
+        publicationsCount: Number(statsValues.publicationsCount) || 151,
+        phdSupervisedCount: Number(statsValues.phdSupervisedCount) || 9,
+        booksCount: Number(statsValues.booksCount) || 18,
+        patentsCount: Number(statsValues.patentsCount) || 4,
+        awardsCount: Number(statsValues.awardsCount) || 26,
+        mousCount: Number(statsValues.mousCount) || 26,
+      }));
+      toast.success("Platform statistics updated!", {
+        description: "Your stats are now live across your public website StatStrip, hero header, and navigation counters.",
+      });
+    } catch (err) {
+      toast.error(err.message || "Failed to update statistics");
+    } finally {
+      setSavingStats(false);
+    }
+  };
 
   const save = async () => {
     const source = editing ? draft : values;
@@ -211,6 +439,18 @@ function ProfilePage() {
             ? source.directPhone
             : String(source.directPhone).split(",").map((s) => s.trim()).filter(Boolean))
         : [];
+
+      const mergedMetricsToSave = {
+        ...(source.metrics || values.metrics || {}),
+        ...statsValues,
+        experienceYears: Number(source.experienceYears ?? statsValues.experienceYears) || 35,
+        publicationsCount: Number(source.publicationsCount ?? statsValues.publicationsCount) || 151,
+        phdSupervisedCount: Number(source.phdSupervisedCount ?? statsValues.phdSupervisedCount) || 9,
+        booksCount: Number(source.booksCount ?? statsValues.booksCount) || 18,
+        patentsCount: Number(source.patentsCount ?? statsValues.patentsCount) || 4,
+        awardsCount: Number(source.awardsCount ?? statsValues.awardsCount) || 26,
+        mousCount: Number(source.mousCount ?? statsValues.mousCount) || 26,
+      };
 
       await api.profile.update({
         name: source.name,
@@ -242,10 +482,7 @@ function ProfilePage() {
         twitter: source.twitter,
         youtube: source.youtube,
         website: source.website,
-        metrics: {
-          ...(source.metrics || values.metrics || {}),
-          experienceYears: Number(source.experienceYears) || 35,
-        },
+        metrics: mergedMetricsToSave,
       });
 
       // Synchronize CV Document in database
@@ -296,7 +533,7 @@ function ProfilePage() {
         full_name: source.name,
         avatar: source.sidebarPhoto || source.headerPhoto || source.photo,
       });
-      toast.success("Profile saved to database", { description: "Your profile details and uploaded dossier documents are now live." });
+      toast.success("Profile saved to database", { description: "Your profile details, stats, and dossiers are now live." });
     } catch (err) {
       toast.error(err.message || "Failed to persist profile to server");
     }
@@ -306,8 +543,8 @@ function ProfilePage() {
     <>
       <PageHeader
         eyebrow="Public identity"
-        title="Profile Management"
-        description="The biography, contact details and research identity shown across your public portfolio."
+        title="Profile & Stats Management"
+        description="The biography, contact details, research identity, and headline stats shown across your public portfolio."
         breadcrumb={["Console", "Overview", "Profile Management"]}
         actions={
           <>
@@ -319,11 +556,11 @@ function ProfilePage() {
                 setEditing(true);
               }}
             >
-              Edit profile
+              Edit full profile
             </button>
             <button type="button" className={btnPrimary} onClick={save}>
               <Save className="h-4 w-4" />
-              Save changes
+              Save all changes
             </button>
           </>
         }
@@ -331,6 +568,10 @@ function ProfilePage() {
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         <div className="space-y-5 lg:col-span-2">
+          
+          {/* ========================================================================= */}
+          {/* DEDICATED STATS MANAGEMENT SECTION                                        */}
+          {/* ========================================================================= */}
           <SectionCard title="Biography & contact" description="Core details of your academic profile">
             <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
               {[
@@ -422,7 +663,7 @@ function ProfilePage() {
                 </div>
               )}
 
-              <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
                 <button
                   type="button"
                   className={btnSecondary}
@@ -445,7 +686,7 @@ function ProfilePage() {
                     const cleanList = (values.fullBioList || [])
                       .map((s) => s.trim())
                       .filter(Boolean);
-                    toast.info("Saving full biography paragraphs to database...");
+                    toast.info("Saving full biography to database...");
                     try {
                       await api.profile.update({
                         fullBio: cleanList,
@@ -467,6 +708,549 @@ function ProfilePage() {
           </SectionCard>
 
           {/* Dedicated Areas of Expertise Columns Card */}
+
+          <div id="stats-management-section">
+            <SectionCard
+            title="Platform Stats & Key Metrics Management"
+            description="Manage and update the headline statistics displayed across your public website StatStrip, hero header, and navigation counters."
+          >
+            <div className="space-y-5">
+              
+              {/* Controls Bar: Source Mode Toggle & Action Buttons */}
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted/40 p-3.5">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-foreground">
+                    Display Mode:
+                  </span>
+                  <div className="inline-flex rounded-lg border border-border bg-background p-0.5 shadow-sm">
+                    <button
+                      type="button"
+                      onClick={() => handleStatChange("useManualStats", true)}
+                      className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition ${
+                        statsValues.useManualStats
+                          ? "bg-primary text-primary-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <Sparkles className="h-3 w-3" />
+                      Manual Custom Stats
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleStatChange("useManualStats", false)}
+                      className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition ${
+                        !statsValues.useManualStats
+                          ? "bg-primary text-primary-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <RefreshCw className="h-3 w-3" />
+                      Auto DB Sync
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={copyDatabaseCounts}
+                    className="inline-flex items-center gap-1 rounded-lg border border-border bg-background px-2.5 py-1 text-xs font-medium text-foreground shadow-sm hover:bg-muted transition"
+                    title="Copy numbers directly from database tables"
+                  >
+                    <RefreshCw className="h-3 w-3 text-muted-foreground" />
+                    Copy DB Counts
+                  </button>
+                  <button
+                    type="button"
+                    onClick={resetStandardStats}
+                    className="inline-flex items-center gap-1 rounded-lg border border-border bg-background px-2.5 py-1 text-xs font-medium text-foreground shadow-sm hover:bg-muted transition"
+                    title="Reset to verified standard values"
+                  >
+                    <RotateCcw className="h-3 w-3 text-muted-foreground" />
+                    Reset Standards
+                  </button>
+                  <button
+                    type="button"
+                    onClick={saveStatsOnly}
+                    disabled={savingStats}
+                    className={`${btnPrimary} text-xs py-1 px-3 shadow-sm`}
+                  >
+                    <Save className="h-3 w-3" />
+                    {savingStats ? "Saving..." : "Save Stats"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Real-time Website StatStrip Replica Preview */}
+              <div className="rounded-xl border border-border bg-gradient-to-b from-card to-muted/20 p-4 shadow-sm">
+                <div className="mb-2.5 flex items-center justify-between">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                    <TrendingUp className="h-3.5 w-3.5 text-primary" />
+                    Live Website StatStrip Preview (Real-time)
+                  </span>
+                  <span className="text-[11px] text-muted-foreground">
+                    Updates instantly as you edit numbers below
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 text-center divide-x divide-border/60 bg-background/80 rounded-lg p-2.5 border border-border">
+                  <div className="p-1">
+                    <div className="text-base font-bold text-[hsl(var(--crimson,#8b151a))]">
+                      {statsValues.experienceYears}
+                      <span className="text-xs">{statsValues.experienceYearsSuffix || "+"}</span>
+                    </div>
+                    <div className="text-[10px] font-semibold text-foreground truncate">Years Leadership</div>
+                    <div className="text-[9px] text-muted-foreground truncate">Higher Education</div>
+                  </div>
+
+                  <div className="p-1">
+                    <div className="text-base font-bold text-[hsl(var(--crimson,#8b151a))]">
+                      {statsValues.publicationsCount}
+                      <span className="text-xs">{statsValues.publicationsSuffix || "+"}</span>
+                    </div>
+                    <div className="text-[10px] font-semibold text-foreground truncate">Publications</div>
+                    <div className="text-[9px] text-muted-foreground truncate">SCI / Scopus / IEEE</div>
+                  </div>
+
+                  <div className="p-1">
+                    <div className="text-base font-bold text-[hsl(var(--crimson,#8b151a))]">
+                      {statsValues.supervisionCount ?? statsValues.phdSupervisedCount}
+                      <span className="text-xs">{statsValues.supervisionSuffix || ""}</span>
+                    </div>
+                    <div className="text-[10px] font-semibold text-foreground truncate">Ph.D. Scholars</div>
+                    <div className="text-[9px] text-muted-foreground truncate">Supervised & Guided</div>
+                  </div>
+
+                  <div className="p-1">
+                    <div className="text-base font-bold text-[hsl(var(--gold,#b38e44))]">
+                      {statsValues.booksCount}
+                      <span className="text-xs">{statsValues.booksSuffix || ""}</span>
+                    </div>
+                    <div className="text-[10px] font-semibold text-foreground truncate">Books & Chapters</div>
+                    <div className="text-[9px] text-muted-foreground truncate">Authored & Edited</div>
+                  </div>
+
+                  <div className="p-1">
+                    <div className="text-base font-bold text-[hsl(var(--gold,#b38e44))]">
+                      {statsValues.patentsCount}
+                      <span className="text-xs">{statsValues.patentsSuffix || ""}</span>
+                    </div>
+                    <div className="text-[10px] font-semibold text-foreground truncate">Patents to Credit</div>
+                    <div className="text-[9px] text-muted-foreground truncate">Published & Granted</div>
+                  </div>
+
+                  <div className="p-1">
+                    <div className="text-base font-bold text-[hsl(var(--crimson,#8b151a))]">
+                      {statsValues.awardsCount}
+                      <span className="text-xs">{statsValues.awardsSuffix || "+"}</span>
+                    </div>
+                    <div className="text-[10px] font-semibold text-foreground truncate">National Awards</div>
+                    <div className="text-[9px] text-muted-foreground truncate">& Global Honors</div>
+                  </div>
+
+                  <div className="p-1">
+                    <div className="text-base font-bold text-[#1e3a8a]">
+                      {statsValues.mousCount}
+                      <span className="text-xs">{statsValues.mousSuffix || "+"}</span>
+                    </div>
+                    <div className="text-[10px] font-semibold text-foreground truncate">MoUs & Alliances</div>
+                    <div className="text-[9px] text-muted-foreground truncate">Industry & Global</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 8 Detailed Metric Control Cards */}
+              <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+                
+                {/* 1. Years Leadership */}
+                <div className="rounded-xl border border-border bg-card p-3.5 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="grid h-7 w-7 place-items-center rounded-lg bg-rose-500/10 text-rose-600">
+                        <Users className="h-3.5 w-3.5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-semibold text-foreground">Years Leadership</h4>
+                        <p className="text-[10px] text-muted-foreground">Subtitle: Higher Education</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="col-span-2">
+                      <label className="text-[10px] font-medium text-muted-foreground">Display Number</label>
+                      <input
+                        type="number"
+                        value={statsValues.experienceYears}
+                        onChange={(e) => handleStatChange("experienceYears", Number(e.target.value))}
+                        className={inputCls}
+                        placeholder="35"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-medium text-muted-foreground">Suffix</label>
+                      <input
+                        type="text"
+                        value={statsValues.experienceYearsSuffix}
+                        onChange={(e) => handleStatChange("experienceYearsSuffix", e.target.value)}
+                        className={inputCls}
+                        placeholder="+"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Total Publications */}
+                <div className="rounded-xl border border-border bg-card p-3.5 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="grid h-7 w-7 place-items-center rounded-lg bg-blue-500/10 text-blue-600">
+                        <FileText className="h-3.5 w-3.5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-semibold text-foreground">Total Publications</h4>
+                        <p className="text-[10px] text-muted-foreground">Subtitle: SCI / Scopus / IEEE</p>
+                      </div>
+                    </div>
+                    {dbCounts.publicationsCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => handleStatChange("publicationsCount", dbCounts.publicationsCount)}
+                        className="text-[10px] bg-muted px-2 py-0.5 rounded text-muted-foreground hover:text-foreground"
+                        title="Click to set to database count"
+                      >
+                        DB: {dbCounts.publicationsCount}
+                      </button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="col-span-2">
+                      <label className="text-[10px] font-medium text-muted-foreground">Display Number</label>
+                      <input
+                        type="number"
+                        value={statsValues.publicationsCount}
+                        onChange={(e) => handleStatChange("publicationsCount", Number(e.target.value))}
+                        className={inputCls}
+                        placeholder="151"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-medium text-muted-foreground">Suffix</label>
+                      <input
+                        type="text"
+                        value={statsValues.publicationsSuffix}
+                        onChange={(e) => handleStatChange("publicationsSuffix", e.target.value)}
+                        className={inputCls}
+                        placeholder="+"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Ph.D. Scholars */}
+                <div className="rounded-xl border border-border bg-card p-3.5 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="grid h-7 w-7 place-items-center rounded-lg bg-rose-500/10 text-rose-600">
+                        <GraduationCap className="h-3.5 w-3.5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-semibold text-foreground">Ph.D. Scholars Guided</h4>
+                        <p className="text-[10px] text-muted-foreground">Subtitle: Supervised & Guided</p>
+                      </div>
+                    </div>
+                    {dbCounts.supervisionCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => handleStatChange("supervisionCount", dbCounts.supervisionCount)}
+                        className="text-[10px] bg-muted px-2 py-0.5 rounded text-muted-foreground hover:text-foreground"
+                        title="Click to set to database count"
+                      >
+                        DB: {dbCounts.supervisionCount}
+                      </button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="col-span-2">
+                      <label className="text-[10px] font-medium text-muted-foreground">Display Number</label>
+                      <input
+                        type="number"
+                        value={statsValues.supervisionCount}
+                        onChange={(e) => {
+                          const num = Number(e.target.value);
+                          handleStatChange("supervisionCount", num);
+                          handleStatChange("phdSupervisedCount", num);
+                        }}
+                        className={inputCls}
+                        placeholder="9"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-medium text-muted-foreground">Suffix</label>
+                      <input
+                        type="text"
+                        value={statsValues.supervisionSuffix}
+                        onChange={(e) => handleStatChange("supervisionSuffix", e.target.value)}
+                        className={inputCls}
+                        placeholder=""
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4. Books & Chapters */}
+                <div className="rounded-xl border border-border bg-card p-3.5 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="grid h-7 w-7 place-items-center rounded-lg bg-amber-500/10 text-amber-600">
+                        <BookOpen className="h-3.5 w-3.5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-semibold text-foreground">Books & Book Chapters</h4>
+                        <p className="text-[10px] text-muted-foreground">Subtitle: Authored & Edited</p>
+                      </div>
+                    </div>
+                    {dbCounts.booksCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => handleStatChange("booksCount", dbCounts.booksCount)}
+                        className="text-[10px] bg-muted px-2 py-0.5 rounded text-muted-foreground hover:text-foreground"
+                        title="Click to set to database count"
+                      >
+                        DB: {dbCounts.booksCount}
+                      </button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="col-span-2">
+                      <label className="text-[10px] font-medium text-muted-foreground">Display Number</label>
+                      <input
+                        type="number"
+                        value={statsValues.booksCount}
+                        onChange={(e) => handleStatChange("booksCount", Number(e.target.value))}
+                        className={inputCls}
+                        placeholder="18"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-medium text-muted-foreground">Suffix</label>
+                      <input
+                        type="text"
+                        value={statsValues.booksSuffix}
+                        onChange={(e) => handleStatChange("booksSuffix", e.target.value)}
+                        className={inputCls}
+                        placeholder=""
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 5. Patents to Credit */}
+                <div className="rounded-xl border border-border bg-card p-3.5 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="grid h-7 w-7 place-items-center rounded-lg bg-amber-500/10 text-amber-600">
+                        <Lightbulb className="h-3.5 w-3.5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-semibold text-foreground">Patents to Credit</h4>
+                        <p className="text-[10px] text-muted-foreground">Subtitle: Published & Granted</p>
+                      </div>
+                    </div>
+                    {dbCounts.patentsCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => handleStatChange("patentsCount", dbCounts.patentsCount)}
+                        className="text-[10px] bg-muted px-2 py-0.5 rounded text-muted-foreground hover:text-foreground"
+                        title="Click to set to database count"
+                      >
+                        DB: {dbCounts.patentsCount}
+                      </button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="col-span-2">
+                      <label className="text-[10px] font-medium text-muted-foreground">Display Number</label>
+                      <input
+                        type="number"
+                        value={statsValues.patentsCount}
+                        onChange={(e) => handleStatChange("patentsCount", Number(e.target.value))}
+                        className={inputCls}
+                        placeholder="4"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-medium text-muted-foreground">Suffix</label>
+                      <input
+                        type="text"
+                        value={statsValues.patentsSuffix}
+                        onChange={(e) => handleStatChange("patentsSuffix", e.target.value)}
+                        className={inputCls}
+                        placeholder=""
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 6. National Awards */}
+                <div className="rounded-xl border border-border bg-card p-3.5 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="grid h-7 w-7 place-items-center rounded-lg bg-rose-500/10 text-rose-600">
+                        <Award className="h-3.5 w-3.5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-semibold text-foreground">National Awards</h4>
+                        <p className="text-[10px] text-muted-foreground">Subtitle: & Global Honors</p>
+                      </div>
+                    </div>
+                    {dbCounts.awardsCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => handleStatChange("awardsCount", dbCounts.awardsCount)}
+                        className="text-[10px] bg-muted px-2 py-0.5 rounded text-muted-foreground hover:text-foreground"
+                        title="Click to set to database count"
+                      >
+                        DB: {dbCounts.awardsCount}
+                      </button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="col-span-2">
+                      <label className="text-[10px] font-medium text-muted-foreground">Display Number</label>
+                      <input
+                        type="number"
+                        value={statsValues.awardsCount}
+                        onChange={(e) => handleStatChange("awardsCount", Number(e.target.value))}
+                        className={inputCls}
+                        placeholder="26"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-medium text-muted-foreground">Suffix</label>
+                      <input
+                        type="text"
+                        value={statsValues.awardsSuffix}
+                        onChange={(e) => handleStatChange("awardsSuffix", e.target.value)}
+                        className={inputCls}
+                        placeholder="+"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 7. MoUs & Alliances */}
+                <div className="rounded-xl border border-border bg-card p-3.5 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="grid h-7 w-7 place-items-center rounded-lg bg-blue-500/10 text-blue-600">
+                        <Globe className="h-3.5 w-3.5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-semibold text-foreground">MoUs & Strategic Alliances</h4>
+                        <p className="text-[10px] text-muted-foreground">Subtitle: Industry & Global</p>
+                      </div>
+                    </div>
+                    {dbCounts.mousCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => handleStatChange("mousCount", dbCounts.mousCount)}
+                        className="text-[10px] bg-muted px-2 py-0.5 rounded text-muted-foreground hover:text-foreground"
+                        title="Click to set to database count"
+                      >
+                        DB: {dbCounts.mousCount}
+                      </button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="col-span-2">
+                      <label className="text-[10px] font-medium text-muted-foreground">Display Number</label>
+                      <input
+                        type="number"
+                        value={statsValues.mousCount}
+                        onChange={(e) => handleStatChange("mousCount", Number(e.target.value))}
+                        className={inputCls}
+                        placeholder="26"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-medium text-muted-foreground">Suffix</label>
+                      <input
+                        type="text"
+                        value={statsValues.mousSuffix}
+                        onChange={(e) => handleStatChange("mousSuffix", e.target.value)}
+                        className={inputCls}
+                        placeholder="+"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 8. Research Grants / Delegations */}
+                <div className="rounded-xl border border-border bg-card p-3.5 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="grid h-7 w-7 place-items-center rounded-lg bg-emerald-500/10 text-emerald-600">
+                        <IndianRupee className="h-3.5 w-3.5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-semibold text-foreground">Research Grants & Funding</h4>
+                        <p className="text-[10px] text-muted-foreground">Total Extramural Grants (in Lakhs)</p>
+                      </div>
+                    </div>
+                    {dbCounts.grantsCount > 0 && (
+                      <span className="text-[10px] bg-muted px-2 py-0.5 rounded text-muted-foreground">
+                        {dbCounts.grantsCount} Projects in DB
+                      </span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[10px] font-medium text-muted-foreground">Funding (₹ Lakhs)</label>
+                      <input
+                        type="number"
+                        value={statsValues.grantsAmountLakhs}
+                        onChange={(e) => handleStatChange("grantsAmountLakhs", Number(e.target.value))}
+                        className={inputCls}
+                        placeholder="85"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-medium text-muted-foreground">Countries Visited</label>
+                      <input
+                        type="number"
+                        value={statsValues.countriesVisitedCount}
+                        onChange={(e) => handleStatChange("countriesVisitedCount", Number(e.target.value))}
+                        className={inputCls}
+                        placeholder="10"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Action Footer */}
+              <div className="flex items-center justify-between gap-3 pt-2">
+                <p className="text-[11px] text-muted-foreground">
+                  Saved statistics immediately propagate to your website StatStrip banner, header chips, and sidebar navigation counters.
+                </p>
+                <button
+                  type="button"
+                  onClick={saveStatsOnly}
+                  disabled={savingStats}
+                  className={`${btnPrimary} shadow-sm`}
+                >
+                  <Save className="h-4 w-4" />
+                  {savingStats ? "Saving..." : "Save Stats & Metrics"}
+                </button>
+              </div>
+            </div>
+          </SectionCard>
+
+          {/* ========================================================================= */}
+          {/* CORE BIOGRAPHY & CONTACT                                                  */}
+          {/* ========================================================================= */}
+          </div>
+
           <SectionCard
             title="Areas of Expertise Columns"
             description="Manage each area of expertise individually in separate columns without commas. Add, edit, or remove items easily."
@@ -752,6 +1536,7 @@ function ProfilePage() {
           </SectionCard>
         </div>
 
+        {/* Right Column: Public Preview & Stats Summary */}
         <div className="space-y-5">
           <SectionCard title="Public preview" description="How visitors see your profile card">
             <div className="overflow-hidden rounded-xl border border-border">
@@ -799,49 +1584,49 @@ function ProfilePage() {
             </div>
           </SectionCard>
 
-          {/* <SectionCard title="Visibility" description="Control what the public portfolio reveals">
-            <div className="divide-y divide-border">
-              <Toggle
-                id="vis-metrics"
-                label="Show research metrics"
-                description="Publication counts and citations on your profile card."
-                checked={visibility.metrics}
-                onChange={(next) => setVisibility((prev) => ({ ...prev, metrics: next }))}
-              />
-              <Toggle
-                id="vis-contact"
-                label="Show contact details"
-                description="Office address, telephone and email in the public footer."
-                checked={visibility.contact}
-                onChange={(next) => setVisibility((prev) => ({ ...prev, contact: next }))}
-              />
-              <Toggle
-                id="vis-enquiries"
-                label="Accept media enquiries"
-                description="Displays a press enquiry form to visiting journalists."
-                checked={visibility.enquiries}
-                onChange={(next) => setVisibility((prev) => ({ ...prev, enquiries: next }))}
-              />
-              <Toggle
-                id="vis-citations"
-                label="Link citation profiles"
-                description="Deep links to Scopus and Google Scholar records."
-                checked={visibility.citations}
-                onChange={(next) => setVisibility((prev) => ({ ...prev, citations: next }))}
-              />
+          {/* Key Metrics Quick Summary Box */}
+          <SectionCard title="Current Public Metrics" description="Headline numbers shown to visitors">
+            <div className="space-y-2.5">
+              {[
+                { label: "Leadership", val: `${statsValues.experienceYears}${statsValues.experienceYearsSuffix || "+"}`, desc: "Years Leadership" },
+                { label: "Publications", val: `${statsValues.publicationsCount}${statsValues.publicationsSuffix || "+"}`, desc: "SCI / Scopus / IEEE" },
+                { label: "Ph.D. Scholars", val: `${statsValues.supervisionCount ?? statsValues.phdSupervisedCount}${statsValues.supervisionSuffix || ""}`, desc: "Supervised & Guided" },
+                { label: "Books & Chapters", val: `${statsValues.booksCount}${statsValues.booksSuffix || ""}`, desc: "Authored & Edited" },
+                { label: "Patents", val: `${statsValues.patentsCount}${statsValues.patentsSuffix || ""}`, desc: "Published & Granted" },
+                { label: "Awards", val: `${statsValues.awardsCount}${statsValues.awardsSuffix || "+"}`, desc: "National & Global" },
+                { label: "MoUs", val: `${statsValues.mousCount}${statsValues.mousSuffix || "+"}`, desc: "Industry & Alliances" },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center justify-between border-b border-border/50 pb-2 text-xs">
+                  <div>
+                    <span className="font-medium text-foreground">{item.label}</span>
+                    <span className="ml-1.5 text-[10px] text-muted-foreground hidden sm:inline">({item.desc})</span>
+                  </div>
+                  <span className="font-bold text-primary font-mono">{item.val}</span>
+                </div>
+              ))}
+
+              <div className="pt-2 text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const el = document.getElementById("stats-management-section");
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="text-xs text-primary hover:underline font-medium"
+                >
+                  Manage these numbers above ↑
+                </button>
+              </div>
             </div>
-            <p className="mt-4 flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-[11px] text-muted-foreground">
-              <BadgeCheck className="h-3.5 w-3.5 text-[hsl(var(--gold))]" />
-              Verified institutional profile · {values.institution || "Executive Leadership"}
-            </p>
-          </SectionCard> */}
+          </SectionCard>
         </div>
       </div>
 
+      {/* Edit Profile Modal */}
       <Modal
         open={editing}
         onClose={() => setEditing(false)}
-        title="Edit profile"
+        title="Edit profile & stats"
         description="Update the biography, contact details, photos, and header positions."
         size="xl"
       >
@@ -849,7 +1634,20 @@ function ProfilePage() {
           <RecordForm
             fields={FIELDS}
             values={draft}
-            onChange={(name, value) => setDraft((prev) => ({ ...prev, [name]: value }))}
+            onChange={(name, value) => {
+              setDraft((prev) => ({ ...prev, [name]: value }));
+              if (
+                name === "experienceYears" ||
+                name === "publicationsCount" ||
+                name === "phdSupervisedCount" ||
+                name === "booksCount" ||
+                name === "patentsCount" ||
+                name === "awardsCount" ||
+                name === "mousCount"
+              ) {
+                setStatsValues((prev) => ({ ...prev, [name]: Number(value) }));
+              }
+            }}
             onSubmit={save}
             onCancel={() => setEditing(false)}
             submitLabel="Save profile"
@@ -1033,7 +1831,6 @@ function ProfilePage() {
           </div>
         </div>
       </Modal>
-
     </>
   );
 }

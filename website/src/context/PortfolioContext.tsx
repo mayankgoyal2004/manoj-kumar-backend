@@ -144,11 +144,22 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             specializations: Array.isArray(p.expertise) && p.expertise.length ? p.expertise : fallbackProfile.specializations,
             leadershipPillars: Array.isArray(p.leadershipPillars) && p.leadershipPillars.length ? p.leadershipPillars : fallbackProfile.leadershipPillars,
             headerPositions: Array.isArray(p.headerPositions) ? p.headerPositions : (p.header_positions || []),
-            metrics: {
-              ...fallbackProfile.metrics,
-              ...(p.metrics || {}),
-              ...(overview.liveMetrics || {}),
-            },
+            metrics: (() => {
+              const rawMetrics = p.metrics || {};
+              const dbCounts = overview.dbCounts || overview.liveMetrics || {};
+              const useManual = rawMetrics.useManualStats !== false;
+              return useManual
+                ? {
+                    ...fallbackProfile.metrics,
+                    ...dbCounts,
+                    ...rawMetrics,
+                  }
+                : {
+                    ...fallbackProfile.metrics,
+                    ...rawMetrics,
+                    ...dbCounts,
+                  };
+            })(),
             contact: {
               ...fallbackProfile.contact,
               officeAddress: p.officeAddress || s.address || fallbackProfile.contact.officeAddress,
@@ -176,8 +187,14 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           setPositions(overview.positions);
         }
 
-        if (overview.liveMetrics) {
-          setLiveMetrics(overview.liveMetrics);
+        if (overview.liveMetrics || overview.profile?.metrics) {
+          const rawMetrics = overview.profile?.metrics || {};
+          const dbCounts = overview.dbCounts || overview.liveMetrics || {};
+          const useManual = rawMetrics.useManualStats !== false;
+          const merged = useManual
+            ? { ...fallbackProfile.metrics, ...dbCounts, ...rawMetrics }
+            : { ...fallbackProfile.metrics, ...rawMetrics, ...dbCounts };
+          setLiveMetrics(merged);
         }
       }
 
