@@ -12,6 +12,7 @@
     "prisma:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "db:seed:all": "tsx prisma/seedAll.ts",
+    "mou:sync": "node scripts/syncMous.cjs",
     "prisma:studio": "prisma studio"
   },
   "keywords": [

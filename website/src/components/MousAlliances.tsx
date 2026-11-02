@@ -49,8 +49,12 @@ export const MousAlliances: React.FC = () => {
           const linkMatch = m.notes.match(/https?:\/\/[^\s|]+/);
           if (linkMatch) link = linkMatch[0];
         }
-        if (!institutionAtSigning && m.notes.includes('Established at:')) {
-          institutionAtSigning = m.notes.split('|')[0].replace(/^Established at:\s*/, '').trim();
+        if (!institutionAtSigning) {
+          if (m.notes.includes('Established at:')) {
+            institutionAtSigning = m.notes.split('|')[0].replace(/^Established at:\s*/, '').trim();
+          } else {
+            institutionAtSigning = m.notes.split('|')[0].trim();
+          }
         }
       }
       if (!institutionAtSigning) {
