@@ -239,7 +239,7 @@ export const MODULES = {
     filters: ["category"],
     fields: [
       { name: "partner", label: "Partner organisation", type: "text", required: true },
-      { name: "category", label: "Category / Classification", type: "select", options: ["International Universities", "Corporate & National Alliances", "National Research Laboratories", "Government & Public Bodies"] },
+      { name: "category", label: "Category / Classification", type: "select", options: ["International Universities", "Universities of National Importance & Industry Alliances", "National Research Laboratories", "Government & Public Bodies"] },
       { name: "country", label: "Country / Region", type: "text" },
       { name: "scope", label: "Scope of collaboration", type: "text" },
       { name: "link", label: "Official Press / Verification Link", type: "url", placeholder: "https://..." },

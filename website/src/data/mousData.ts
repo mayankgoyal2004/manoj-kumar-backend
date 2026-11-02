@@ -93,7 +93,7 @@ export const strategicMoUsList: StrategicMoU[] = [
     institutionAtSigning: 'DAVIET, Jalandhar'
   },
 
-  // Corporate & National MoUs
+  // Universities of National Importance & Industry Alliances
   {
     id: 'MOU-CORP-01',
     partnerName: 'Larsen & Toubro EduTech Limited (L&T EduTech)',

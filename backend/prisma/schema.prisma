@@ -228,7 +228,7 @@ model Mou {
   id         String   @id @default(uuid())
   partner    String
   country    String?
-  category   String?  @default("International Universities") // "International Universities", "Corporate & National Alliances", etc.
+  category   String?  @default("International Universities") // "International Universities", "Universities of National Importance & Industry Alliances", etc.
   scope      String?
   link       String?  @db.Text
   signedDate String?

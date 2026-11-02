@@ -20,10 +20,26 @@ export const MousAlliances: React.FC = () => {
         isIntl = true;
       }
 
-      const standardCategory = isIntl ? 'International Universities' : 'Corporate & Industrial Alliances';
-      const category = m.category && !m.category.toLowerCase().includes('international') && !m.category.toLowerCase().includes('corporate')
-        ? m.category
-        : standardCategory;
+      const isNationalOrIndustry =
+        !isIntl ||
+        (m.category && (
+          m.category.toLowerCase().includes("corporate") ||
+          m.category.toLowerCase().includes("national importance") ||
+          m.category.toLowerCase().includes("industry")
+        ));
+
+      const standardCategory = isIntl && !isNationalOrIndustry
+        ? "International Universities"
+        : "Universities of National Importance & Industry Alliances";
+
+      const category =
+        m.category &&
+        !m.category.toLowerCase().includes("international") &&
+        !m.category.toLowerCase().includes("corporate") &&
+        !m.category.toLowerCase().includes("national importance") &&
+        !m.category.toLowerCase().includes("industry")
+          ? m.category
+          : standardCategory;
 
       let link = (m.link || '').trim() || null;
       let institutionAtSigning = m.institutionAtSigning || '';
@@ -61,7 +77,7 @@ export const MousAlliances: React.FC = () => {
 
     // Check if there are any other custom categories
     const customCategories: { id: string; label: string; count: number }[] = [];
-    const knownStandard = new Set(['International Universities', 'Corporate & Industrial Alliances']);
+    const knownStandard = new Set(['International Universities', 'Universities of National Importance & Industry Alliances']);
     
     const otherCounts: Record<string, number> = {};
     normalizedMoUs.forEach(m => {
@@ -77,7 +93,7 @@ export const MousAlliances: React.FC = () => {
     return [
       { id: 'All', label: 'All Strategic Partnerships', count: normalizedMoUs.length },
       { id: 'International', label: 'International Universities', count: intlCount },
-      { id: 'Corporate', label: 'Corporate & Industrial Alliances', count: corpCount },
+      { id: 'Corporate', label: 'Universities of National Importance & Industry Alliances', count: corpCount },
       ...customCategories,
     ];
   }, [normalizedMoUs]);
@@ -103,7 +119,7 @@ export const MousAlliances: React.FC = () => {
         <div className="content-eyebrow">Institutional Global Footprint</div>
         <h2 className="content-title">MoUs & Strategic Alliances</h2>
         <div className="content-subtitle">
-          Over {normalizedMoUs.length} bilateral partnerships with leading international universities across USA, Canada, Europe, and corporate tech pioneers
+          Over {normalizedMoUs.length} bilateral partnerships with leading international universities, universities of national importance, and industry alliances
         </div>
       </div>
 
