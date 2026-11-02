@@ -15,7 +15,9 @@ export const handleFileUpload = async (req: Request, res: Response) => {
       megabytes >= 1 ? `${megabytes.toFixed(1)} MB` : `${Math.max(1, Math.round(file.size / 1024))} KB`;
 
     const relativeUrl = `/uploads/${file.filename}`;
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const protocol = (req.headers['x-forwarded-proto'] as string) || req.protocol || 'http';
+    const host = req.get('host');
+    const baseUrl = `${protocol}://${host}`;
     const fullUrl = `${baseUrl}${relativeUrl}`;
 
     // Optionally auto-register into mediaAsset library

@@ -7,18 +7,27 @@ export function cn(...inputs) {
 
 export function resolveImageUrl(url) {
   if (!url) return "";
-  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:") || url.startsWith("blob:")) {
-    return url;
+  let cleanUrl = url;
+  const isHttps = typeof window !== "undefined" && window.location.protocol === "https:";
+  if (isHttps && cleanUrl.startsWith("http://")) {
+    cleanUrl = cleanUrl.replace(/^http:\/\//i, "https://");
+  }
+  if (cleanUrl.startsWith("http://") || cleanUrl.startsWith("https://") || cleanUrl.startsWith("data:") || cleanUrl.startsWith("blob:")) {
+    return cleanUrl;
   }
   const apiBase = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-  const backendHost = apiBase.replace(/\/api\/?$/, "");
-  if (url.startsWith("/")) {
-    if (url.startsWith("/uploads/")) {
-      return `${backendHost}${url}`;
-    }
-    return url;
+  let backendHost = apiBase.replace(/\/api\/?$/, "");
+  if (isHttps && backendHost.startsWith("http://")) {
+    backendHost = backendHost.replace(/^http:\/\//i, "https://");
   }
-  return url;
+  if (cleanUrl.startsWith("/")) {
+    if (cleanUrl.startsWith("/uploads/")) {
+      const full = `${backendHost}${cleanUrl}`;
+      return isHttps && full.startsWith("http://") ? full.replace(/^http:\/\//i, "https://") : full;
+    }
+    return cleanUrl;
+  }
+  return cleanUrl;
 }
 
 export function updateFavicon(iconUrl) {

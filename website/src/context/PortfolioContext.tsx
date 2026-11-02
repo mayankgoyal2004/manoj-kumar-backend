@@ -41,15 +41,23 @@ export interface PortfolioContextValue {
 
 export function resolveDocumentUrl(url?: string | null): string {
   if (!url) return '';
-  const cleanUrl = url.trim();
+  let cleanUrl = url.trim();
+  const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
+  if (isHttps && cleanUrl.startsWith('http://')) {
+    cleanUrl = cleanUrl.replace(/^http:\/\//i, 'https://');
+  }
   if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://') || cleanUrl.startsWith('blob:') || cleanUrl.startsWith('data:')) {
     return cleanUrl;
   }
   const apiBase = (import.meta as any).env?.VITE_API_URL || 'http://localhost:5000/api/public';
-  const backendHost = apiBase.replace(/\/api\/public\/?$/, '').replace(/\/api\/?$/, '');
+  let backendHost = apiBase.replace(/\/api\/public\/?$/, '').replace(/\/api\/?$/, '');
+  if (isHttps && backendHost.startsWith('http://')) {
+    backendHost = backendHost.replace(/^http:\/\//i, 'https://');
+  }
   if (cleanUrl.startsWith('/uploads/') || cleanUrl.startsWith('uploads/')) {
     const path = cleanUrl.startsWith('/') ? cleanUrl : `/${cleanUrl}`;
-    return `${backendHost}${path}`;
+    const full = `${backendHost}${path}`;
+    return isHttps && full.startsWith('http://') ? full.replace(/^http:\/\//i, 'https://') : full;
   }
   return cleanUrl;
 }
@@ -269,7 +277,11 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         : settings.siteTitle;
     }
 
-    const dynamicFavicon = settings?.favicon || profile?.photo || '/favicon.svg';
+    const rawFavicon = settings?.favicon || profile?.photo || '/favicon.svg';
+    let dynamicFavicon = resolveDocumentUrl(rawFavicon);
+    if (typeof window !== 'undefined' && window.location.protocol === 'https:' && dynamicFavicon.startsWith('http://')) {
+      dynamicFavicon = dynamicFavicon.replace(/^http:\/\//i, 'https://');
+    }
     if (dynamicFavicon) {
       let mimeType = 'image/x-icon';
       const clean = dynamicFavicon.split('?')[0].toLowerCase();

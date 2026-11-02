@@ -11,6 +11,9 @@ import { sendError, sendSuccess } from './utils/response';
 
 const app: Application = express();
 
+// Trust reverse proxy for HTTPS detection (Nginx, Cloudflare, AWS ALB)
+app.set('trust proxy', 1);
+
 // Security Headers
 app.use(
   helmet({

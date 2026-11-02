@@ -467,10 +467,11 @@ export default function ResourcePage({ moduleKey }) {
                 ytId ? (
                   <div className="aspect-video w-full overflow-hidden rounded-xl border border-border shadow-sm">
                     <iframe
-                      src={`https://www.youtube-nocookie.com/embed/${ytId}?rel=0`}
+                      src={`https://www.youtube.com/embed/${ytId}?rel=0`}
                       title={recordTitle(moduleKey, selected)}
                       className="h-full w-full"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerPolicy="strict-origin-when-cross-origin"
                       allowFullScreen
                     />
                   </div>
