@@ -11,35 +11,24 @@ export const MousAlliances: React.FC = () => {
       const partnerName = m.partner || m.partnerName || 'Partner Organisation';
       const country = m.country || 'Global';
 
+      // 1. Determine classification strictly from explicit database category
+      const rawCategory = (m.category || '').trim();
       let isIntl = false;
-      if (m.type === 'International') {
-        isIntl = true;
-      } else if (m.category && m.category.toLowerCase().includes('international')) {
-        isIntl = true;
-      } else if (country && !country.toLowerCase().includes('india')) {
+
+      if (rawCategory) {
+        // If category is explicitly stored in DB, rely on it 100%
+        isIntl = rawCategory.toLowerCase().includes('international');
+      } else if (m.type) {
+        isIntl = m.type === 'International';
+      } else if (country && !country.toLowerCase().includes('india') && !country.toLowerCase().includes('global')) {
         isIntl = true;
       }
 
-      const isNationalOrIndustry =
-        !isIntl ||
-        (m.category && (
-          m.category.toLowerCase().includes("corporate") ||
-          m.category.toLowerCase().includes("national importance") ||
-          m.category.toLowerCase().includes("industry")
-        ));
-
-      const standardCategory = isIntl && !isNationalOrIndustry
+      const standardCategory = isIntl
         ? "International Universities"
         : "Universities of National Importance & Industry Alliances";
 
-      const category =
-        m.category &&
-        !m.category.toLowerCase().includes("international") &&
-        !m.category.toLowerCase().includes("corporate") &&
-        !m.category.toLowerCase().includes("national importance") &&
-        !m.category.toLowerCase().includes("industry")
-          ? m.category
-          : standardCategory;
+      const category = rawCategory || standardCategory;
 
       let link = (m.link || '').trim() || null;
       let institutionAtSigning = m.institutionAtSigning || '';
