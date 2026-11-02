@@ -62,7 +62,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
       id: "publications",
       label: "Research Publications",
       icon: FileText,
-      count: String(metrics.publicationsCount ?? "151"),
+      count: `${metrics.publicationsCount ?? 151}${metrics.publicationsSuffix !== undefined ? metrics.publicationsSuffix : "+"}`,
     },
     {
       id: "phd",

@@ -3,12 +3,18 @@ import { Search, ExternalLink, Copy, Check } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
 
 export const PublicationsRepository: React.FC = () => {
-  const { publications: rawPublications } = usePortfolio();
+  const { publications: rawPublications, profile, liveMetrics } = usePortfolio();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
   const [selectedYear, setSelectedYear] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const rawMetrics = profile?.metrics || {};
+  const useManual = rawMetrics.useManualStats !== false;
+  const metrics = useManual
+    ? { ...liveMetrics, ...rawMetrics }
+    : { ...rawMetrics, ...liveMetrics };
 
   const itemsPerPage = 12;
 
@@ -37,6 +43,14 @@ export const PublicationsRepository: React.FC = () => {
       };
     });
   }, [rawPublications]);
+
+  // Manual publications count configured by user in Profile / Key Metrics
+  const manualCount =
+    metrics.publicationsCount !== undefined && metrics.publicationsCount !== null
+      ? metrics.publicationsCount
+      : allPublications.length;
+  const manualSuffix = metrics.publicationsSuffix !== undefined ? metrics.publicationsSuffix : "+";
+  const displayAllCount = `${manualCount}${manualSuffix}`;
 
   const journalPublications = useMemo(() => {
     return allPublications.filter((p) => p.category === 'Journal');
@@ -111,7 +125,7 @@ export const PublicationsRepository: React.FC = () => {
         <div className="content-eyebrow">Scholarly Research</div>
         <h2 className="content-title">Research Publications Repository</h2>
         <div className="content-subtitle">
-          Over 150 research articles in leading SCI / Scopus indexed international journals and IEEE / Springer conference proceedings
+          Over {manualCount} research articles in leading SCI / Scopus indexed international journals and IEEE / Springer conference proceedings
         </div>
       </div>
 
@@ -154,19 +168,19 @@ export const PublicationsRepository: React.FC = () => {
             className={`filter-btn ${selectedFilter === 'all' ? 'active' : ''}`}
             onClick={() => handleFilterChange('all')}
           >
-            All Papers ({allPublications.length})
+            All Papers ({displayAllCount})
           </button>
           <button
             className={`filter-btn ${selectedFilter === 'journal' ? 'active' : ''}`}
             onClick={() => handleFilterChange('journal')}
           >
-            Journal Articles ({journalPublications.length})
+            Journal Articles
           </button>
           <button
             className={`filter-btn ${selectedFilter === 'conference' ? 'active' : ''}`}
             onClick={() => handleFilterChange('conference')}
           >
-            Conference Proceedings ({conferencePublications.length})
+            Conference Proceedings
           </button>
           <button
             className={`filter-btn ${selectedFilter === 'sci' ? 'active' : ''}`}
@@ -194,10 +208,14 @@ export const PublicationsRepository: React.FC = () => {
           </button>
         </div>
 
-        <div className="pub-stats-summary">
-          <span>Showing {filteredPublications.length} matching publication{filteredPublications.length === 1 ? '' : 's'}</span>
+        {/* <div className="pub-stats-summary">
+          <span>
+            {selectedFilter === 'all' && selectedYear === 'all' && !searchQuery.trim()
+              ? `Showing all ${allPublications.length} publications`
+              : `Showing ${filteredPublications.length} matching publication${filteredPublications.length === 1 ? '' : 's'}`}
+          </span>
           <span>Page {currentPage} of {totalPages}</span>
-        </div>
+        </div> */}
       </div>
 
       {/* Publications List */}
