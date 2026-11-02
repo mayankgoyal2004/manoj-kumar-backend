@@ -1629,11 +1629,57 @@ function ProfilePage() {
         title="Edit profile & stats"
         description="Update the biography, contact details, photos, and header positions."
         size="xl"
+        footer={
+          <>
+            <button
+              type="button"
+              className={btnSecondary}
+              onClick={() => setEditing(false)}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className={btnPrimary}
+              onClick={save}
+            >
+              <Save className="h-3.5 w-3.5" />
+              Save profile
+            </button>
+          </>
+        }
       >
         <div className="space-y-6">
+          {/* Top Quick Actions Bar: placed right at top for user ease */}
+          <div className="sticky -top-5 z-20 -mx-5 -mt-5 flex flex-wrap items-center justify-between gap-3 border-b border-border bg-card/95 px-5 py-3.5 backdrop-blur-sm shadow-sm">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+              <span className="text-xs font-semibold text-foreground">Editing Executive Profile</span>
+              <span className="hidden sm:inline text-[11px] text-muted-foreground">· Quick save changes anytime</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className={btnSecondary}
+                onClick={() => setEditing(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className={btnPrimary}
+                onClick={save}
+              >
+                <Save className="h-3.5 w-3.5" />
+                Save profile
+              </button>
+            </div>
+          </div>
+
           <RecordForm
             fields={FIELDS}
             values={draft}
+            showButtons={false}
             onChange={(name, value) => {
               setDraft((prev) => ({ ...prev, [name]: value }));
               if (
