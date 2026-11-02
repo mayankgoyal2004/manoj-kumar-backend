@@ -10,7 +10,9 @@ export const AffiliationsGovernance: React.FC = () => {
     return (affiliations || []).map((item: any, idx: number) => {
       const role = item.position || item.role || 'Member / Fellow';
       const organization = item.body || item.organization || 'Academic & Governance Body';
-      const category = (item.kind || item.category || 'Fellowship').trim();
+      let category = (item.kind || item.category || 'Fellow Membership').trim();
+      if (category.toLowerCase() === 'fellowship') category = 'Fellow Membership';
+      if (category.toLowerCase() === 'life member') category = 'Life Membership';
       const period = item.since ? `Since ${item.since}` : (item.period || '');
       const details = item.notes || item.details;
 
@@ -39,11 +41,26 @@ export const AffiliationsGovernance: React.FC = () => {
       counts[item.category] = (counts[item.category] || 0) + 1;
     });
 
-    const uniqueCategories = Object.keys(counts);
+    const preferredOrder = [
+      'Fellow Membership',
+      'Life Membership',
+      'Board of Governors',
+      'Academic Governance',
+      'Editorial & Reviewer',
+    ];
+
+    const sortedCategories = Object.keys(counts).sort((a, b) => {
+      const idxA = preferredOrder.indexOf(a);
+      const idxB = preferredOrder.indexOf(b);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      if (idxA !== -1) return -1;
+      if (idxB !== -1) return 1;
+      return a.localeCompare(b);
+    });
 
     return [
-      { id: 'All', label: 'All Affiliations & Fellowships', count: normalized.length },
-      ...uniqueCategories.map((cat) => ({
+      { id: 'All', label: 'All Affiliations & Memberships', count: normalized.length },
+      ...sortedCategories.map((cat) => ({
         id: cat,
         label: cat,
         count: counts[cat],

@@ -269,7 +269,7 @@ export const MODULES = {
     fields: [
       { name: "body", label: "Body / Council", type: "text", required: true },
       { name: "position", label: "Position held", type: "text" },
-      { name: "kind", label: "Category / Classification", type: "select", options: ["Fellowship", "Life Member", "Board of Governors", "Academic Governance", "Editorial & Reviewer", "Professional Body", "Governing Council", "Statutory Committee"] },
+      { name: "kind", label: "Category / Classification", type: "select", options: ["Fellow Membership", "Life Membership", "Board of Governors", "Academic Governance", "Editorial & Reviewer", "Professional Body", "Governing Council", "Statutory Committee"] },
       { name: "link", label: "Official Link / Verification Document", type: "url", placeholder: "https://..." },
       { name: "since", label: "Member since (year)", type: "number" },
       { name: "status", label: "Status", type: "select", options: ["Current", "Completed"] },

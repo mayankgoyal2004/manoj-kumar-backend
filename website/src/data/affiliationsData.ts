@@ -9,33 +9,33 @@ export interface AffiliationItem {
 }
 
 export const affiliationsList: AffiliationItem[] = [
-  // Fellowships
+  // Fellow Memberships
   {
     id: 'AFF-F-01',
     organization: 'Punjab Forum for Science & Technology Communications',
     role: 'Founding Fellow',
-    category: 'Fellowship',
+    category: 'Fellow Membership',
     details: 'Founding member driving statewide science dissemination, environmental awareness, and public STEM education.'
   },
   {
     id: 'AFF-F-02',
     organization: 'The Institution of Engineers (India)',
     role: 'Fellow (F-1233471)',
-    category: 'Fellowship',
+    category: 'Fellow Membership',
     details: 'Elected Fellow in Electronics and Telecommunication Engineering Division.'
   },
   {
     id: 'AFF-F-03',
     organization: 'The Institution of Electronics & Telecommunication Engineers (IETE)',
     role: 'Fellow (F-222164)',
-    category: 'Fellowship',
+    category: 'Fellow Membership',
     details: 'Elected Fellow recognizing significant contributions to optical and wireless communications research.'
   },
   {
     id: 'AFF-F-04',
     organization: 'Association of Indian Principals (AIP)',
     role: 'Honorary Member, Advisory Council',
-    category: 'Fellowship',
+    category: 'Fellow Membership',
     period: '2024 – 2026',
     details: 'Advising national leadership on school and college administrative reforms and teacher quality frameworks.'
   },
@@ -45,25 +45,25 @@ export const affiliationsList: AffiliationItem[] = [
     id: 'AFF-LM-01',
     organization: 'The Indian Science Congress Association (ISCA)',
     role: 'Life Member',
-    category: 'Life Member'
+    category: 'Life Membership'
   },
   {
     id: 'AFF-LM-02',
     organization: 'Computer Society of India (CSI)',
     role: 'Life Member',
-    category: 'Life Member'
+    category: 'Life Membership'
   },
   {
     id: 'AFF-LM-03',
     organization: 'Indian Society for Technical Education (ISTE)',
     role: 'Life Member',
-    category: 'Life Member'
+    category: 'Life Membership'
   },
   {
     id: 'AFF-LM-04',
     organization: 'Punjab Academy of Sciences (PAS)',
     role: 'Life Member & Former Executive Council Member (2009-12 & 2018-21)',
-    category: 'Life Member'
+    category: 'Life Membership'
   },
 
   // Board of Governors & Policy Councils

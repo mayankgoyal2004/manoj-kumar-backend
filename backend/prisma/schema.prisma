@@ -213,7 +213,7 @@ model Affiliation {
   id         String   @id @default(uuid())
   body       String
   position   String?
-  kind       String?  @default("Fellowship") // "Fellowship", "Life Member", "Board of Governors", "Academic Governance", "Editorial & Reviewer"
+  kind       String?  @default("Fellow Membership") // "Fellow Membership", "Life Membership", "Board of Governors", "Academic Governance", "Editorial & Reviewer"
   category   String?
   link       String?  @db.Text
   since      Int?

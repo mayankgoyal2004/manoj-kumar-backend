@@ -162,7 +162,7 @@ export const conferenceSchema = z.object({
 export const affiliationSchema = z.object({
   body: z.string().min(1, 'Body / Council name is required'),
   position: z.string().optional().nullable(),
-  kind: z.string().optional().default('Fellowship'),
+  kind: z.string().optional().default('Fellow Membership'),
   category: z.string().optional().nullable(),
   link: z.string().optional().nullable(),
   since: optionalInt,
