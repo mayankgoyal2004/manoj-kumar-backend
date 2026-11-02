@@ -11,9 +11,7 @@ import {
   CheckCircle2, 
   Share2, 
   Award, 
-  Globe, 
-  Globe2,
-  Sparkles,
+  Globe,
   ArrowRight,
   TrendingUp,
   Eye,
@@ -176,9 +174,6 @@ export const NewsMedia: React.FC<NewsMediaProps> = () => {
     });
   }, [newsMediaItems, activeCategory, searchQuery]);
 
-  // Featured story
-  const featuredItem = newsMediaItems.find(item => item.isFeatured) || newsMediaItems[0];
-
   const handleShare = (item: NewsMediaItem, e: React.MouseEvent) => {
     e.stopPropagation();
     const shareText = `${item.title} — Prof. (Dr.) Manoj Kumar News Coverage`;
@@ -251,121 +246,9 @@ export const NewsMedia: React.FC<NewsMediaProps> = () => {
         </div>
       </div>
 
-      {/* Archival Newspaper Clippings Section with Left-Right Viewer */}
-      {clippings.length > 0 && (
-        <div className="news-clippings-showcase">
-          <div className="news-clippings-header">
-            <div className="news-clippings-title-group">
-              <h3>
-                <Newspaper size={20} color="var(--color-crimson-800)" />
-                <span>Archival Newspaper Clippings & Print Features</span>
-              </h3>
-              <p>
-                Original press clippings from leading national and state dailies. Click any clipping to open the interactive Left/Right popup viewer.
-              </p>
-            </div>
-          </div>
 
-          <div className="news-clippings-grid">
-            {clippings.map((clip, idx) => (
-              <div
-                key={clip.id}
-                className="news-clipping-card"
-                onClick={() => handleOpenLightbox(idx)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    handleOpenLightbox(idx);
-                  }
-                }}
-                title={`Click to inspect ${clip.newspaper} clipping in Left/Right viewer`}
-              >
-                <div className="news-clipping-img-wrap">
-                  <img
-                    src={clip.imageUrl}
-                    alt={clip.headline}
-                    className="news-clipping-img"
-                    loading="lazy"
-                  />
-                  <div className="news-clipping-overlay">
-                    <span className="news-clipping-zoom-badge">
-                      <Eye size={12} /> Click to View Clipping ({idx + 1}/{clippings.length})
-                    </span>
-                    <span className="badge badge-gold" style={{ fontSize: '0.74rem' }}>
-                      {clip.date}
-                    </span>
-                  </div>
-                </div>
 
-                <div className="news-clipping-body">
-                  <div className="news-clipping-meta-row">
-                    <span className="badge badge-crimson">{clip.newspaper}</span>
-                    {clip.edition && <span className="badge badge-surface">{clip.edition}</span>}
-                    {clip.language && (
-                      <span className="badge badge-surface" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                        <Globe2 size={11} /> {clip.language}
-                      </span>
-                    )}
-                  </div>
 
-                  <h4 className="news-clipping-headline">{clip.headline}</h4>
-                  <p className="news-clipping-sub">{clip.subheadline || clip.description}</p>
-
-                  <div className="news-clipping-action">
-                    <span>Open Left/Right Viewer</span>
-                    <ArrowRight size={13} />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Featured Headline Spotlight */}
-      {featuredItem && activeCategory === 'All' && !searchQuery && (
-        <div className="news-featured-hero-card" onClick={() => setSelectedArticle(featuredItem)}>
-          <div className="news-featured-badge-row">
-            <span className="badge badge-crimson" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
-              <Sparkles size={12} /> Spotlight News
-            </span>
-            <span className="badge badge-gold">{featuredItem.source}</span>
-            <span className="badge badge-surface">{featuredItem.date}</span>
-          </div>
-
-          <h3 className="news-featured-title">
-            {featuredItem.title}
-          </h3>
-
-          <p className="news-featured-excerpt">
-            {featuredItem.excerpt}
-          </p>
-
-          <div className="news-featured-footer">
-            <div className="news-featured-meta">
-              {featuredItem.location && (
-                <span className="news-meta-item">
-                  <MapPin size={13} /> {featuredItem.location}
-                </span>
-              )}
-              {featuredItem.readTime && (
-                <span className="news-meta-item">
-                  <Clock size={13} /> {featuredItem.readTime}
-                </span>
-              )}
-            </div>
-
-            <button className="btn btn-crimson-sm" onClick={(e) => {
-              e.stopPropagation();
-              setSelectedArticle(featuredItem);
-            }}>
-              <span>Read Full Story</span>
-              <ArrowRight size={14} />
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Filter & Search Bar */}
       <div className="news-controls-row">
