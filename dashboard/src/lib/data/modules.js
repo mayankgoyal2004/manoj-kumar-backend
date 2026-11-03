@@ -63,7 +63,9 @@ export const MODULES = {
     titleKey: "title",
     description: "National and international honours, fellowships and citations.",
     statusOptions: ["Awarded", "Nominated"],
+    defaultSort: { key: "orderIndex", dir: "asc" },
     columns: [
+      { key: "orderIndex", label: "Order (#)", type: "order" },
       { key: "title", label: "Award" },
       { key: "organisation", label: "Awarding Body" },
       { key: "category", label: "Category" },
@@ -73,6 +75,7 @@ export const MODULES = {
     filters: ["category"],
     fields: [
       { name: "title", label: "Award title", type: "text", required: true },
+      { name: "orderIndex", label: "Display Priority / Sort Order", type: "number", placeholder: "e.g. 1 (Top priority)", hint: "Priority ranking: 1 shows at the very top, 2 second, 3 third, etc." },
       { name: "organisation", label: "Awarding body", type: "text" },
       { name: "category", label: "Category", type: "select", options: ["Personal", "Institutional", "Government", "National", "International", "Professional Body"] },
       { name: "year", label: "Year", type: "number" },

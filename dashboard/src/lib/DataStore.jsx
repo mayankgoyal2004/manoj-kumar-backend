@@ -124,6 +124,10 @@ function normalizeLoadedItem(item) {
     signed_date: item.signed_date ?? item.signedDate ?? null,
     signedDate: item.signedDate ?? item.signed_date ?? null,
 
+    // Priority / Sort Order
+    order_index: item.order_index !== undefined ? Number(item.order_index) : (item.orderIndex !== undefined ? Number(item.orderIndex) : 0),
+    orderIndex: item.orderIndex !== undefined ? Number(item.orderIndex) : (item.order_index !== undefined ? Number(item.order_index) : 0),
+
     updated_date: item.updatedAt || item.updated_date || new Date().toISOString(),
   };
 }

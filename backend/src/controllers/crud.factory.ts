@@ -31,6 +31,10 @@ const FIELD_ALIAS_MAP: Record<string, string> = {
   enrolled_year: 'enrolledYear',
   co_supervisor: 'coSupervisor',
   signed_date: 'signedDate',
+  order_index: 'orderIndex',
+  sort_order: 'orderIndex',
+  sortOrder: 'orderIndex',
+  priority: 'orderIndex',
 };
 
 function normalizeCrudData(raw: any, modelName?: string): any {
@@ -54,6 +58,30 @@ function normalizeCrudData(raw: any, modelName?: string): any {
     if (snakeKey in result && FIELD_ALIAS_MAP[snakeKey] in result) {
       delete result[snakeKey];
     }
+  }
+
+  // Coerce integer fields to ensure Prisma never fails on string types
+  if ('orderIndex' in result) {
+    if (result.orderIndex === null || result.orderIndex === '' || result.orderIndex === undefined) {
+      result.orderIndex = 0;
+    } else {
+      result.orderIndex = parseInt(String(result.orderIndex), 10) || 0;
+    }
+  }
+
+  if ('year' in result && result.year !== null && result.year !== '') {
+    const parsedYear = parseInt(String(result.year), 10);
+    result.year = isNaN(parsedYear) ? null : parsedYear;
+  }
+
+  if ('startYear' in result && result.startYear !== null && result.startYear !== '') {
+    const parsed = parseInt(String(result.startYear), 10);
+    result.startYear = isNaN(parsed) ? null : parsed;
+  }
+
+  if ('endYear' in result && result.endYear !== null && result.endYear !== '') {
+    const parsed = parseInt(String(result.endYear), 10);
+    result.endYear = isNaN(parsed) ? null : parsed;
   }
 
   // Strip id or auto fields if passed in update/create payload
@@ -94,6 +122,7 @@ export function createCrudController(options: CrudOptions) {
   const { modelName, moduleTitle, searchFields = ['title', 'name'], filterFields = ['status'], titleField = 'title', defaultSort = { field: 'createdAt', order: 'desc' } } = options;
 
   const model = prisma[modelName] as any;
+  const modelFields = MODEL_FIELDS_MAP[String(modelName).toLowerCase()] || new Set<string>();
 
   return {
     // List records with pagination, filtering, search, sorting
@@ -128,13 +157,21 @@ export function createCrudController(options: CrudOptions) {
           }));
         }
 
+        const orderByClause: any[] = [{ [sortField]: sortOrder }];
+        if (sortField !== 'year' && modelFields.has('year')) {
+          orderByClause.push({ year: 'desc' });
+        }
+        if (sortField !== 'createdAt' && modelFields.has('createdAt')) {
+          orderByClause.push({ createdAt: 'desc' });
+        }
+
         const [total, rows] = await Promise.all([
           model.count({ where }),
           model.findMany({
             where,
             skip: (page - 1) * pageSize,
             take: pageSize,
-            orderBy: { [sortField]: sortOrder },
+            orderBy: orderByClause,
           }),
         ]);
 
@@ -204,13 +241,24 @@ export function createCrudController(options: CrudOptions) {
           }));
         }
 
+        const publicOrderBy: any[] = [];
+        if (modelFields.has('orderIndex')) {
+          publicOrderBy.push({ orderIndex: 'asc' });
+        }
+        if (defaultSort.field && defaultSort.field !== 'orderIndex' && modelFields.has(defaultSort.field)) {
+          publicOrderBy.push({ [defaultSort.field]: defaultSort.order });
+        }
+        if (defaultSort.field !== 'year' && modelFields.has('year')) {
+          publicOrderBy.push({ year: 'desc' });
+        }
+
         const [total, rows] = await Promise.all([
           model.count({ where }),
           model.findMany({
             where,
             skip: (page - 1) * pageSize,
             take: pageSize,
-            orderBy: [{ orderIndex: 'asc' }, { [defaultSort.field]: defaultSort.order }],
+            orderBy: publicOrderBy.length > 0 ? publicOrderBy : undefined,
           }),
         ]);
 

@@ -65,6 +65,10 @@ export const awardSchema = z.object({
   status: z.enum(['Awarded', 'Nominated']).optional().default('Awarded'),
   citation: z.string().optional().nullable(),
   orderIndex: z.coerce.number().int().optional().default(0),
+  order_index: z.coerce.number().int().optional(),
+  sort_order: z.coerce.number().int().optional(),
+  sortOrder: z.coerce.number().int().optional(),
+  priority: z.coerce.number().int().optional(),
 });
 
 // Patents
@@ -255,14 +259,21 @@ export const notificationSchema = z.object({
 });
 
 // Contact Inquiries (Website Submission)
-export const contactMessageSchema = z.object({
-  fullName: z.string().min(2, 'Full Name is required'),
-  organization: z.string().optional().nullable(),
-  email: z.string().email('Please enter a valid email address'),
-  phone: z.string().optional().nullable(),
-  purpose: z.string().optional().default('Academic Collaboration'),
-  message: z.string().min(5, 'Message must be at least 5 characters long'),
-});
+export const contactMessageSchema = z
+  .object({
+    fullName: z.string().optional(),
+    name: z.string().optional(),
+    organization: z.string().optional().nullable(),
+    email: z.string().email('Please enter a valid email address'),
+    phone: z.string().optional().nullable(),
+    purpose: z.string().optional(),
+    subject: z.string().optional(),
+    message: z.string().min(5, 'Message must be at least 5 characters long'),
+  })
+  .refine((data) => Boolean(data.fullName?.trim() || data.name?.trim()), {
+    message: 'Full Name is required',
+    path: ['fullName'],
+  });
 
 // Website Settings
 export const websiteSettingSchema = z.object({

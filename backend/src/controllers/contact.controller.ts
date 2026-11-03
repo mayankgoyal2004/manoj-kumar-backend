@@ -2,32 +2,48 @@ import { Request, Response } from 'express';
 import prisma from '../config/prisma';
 import { sendError, sendSuccess } from '../utils/response';
 import { logActivity } from '../utils/auditLogger';
+import { sendContactNotificationEmail } from '../services/mail.service';
 
 export const submitPublicContact = async (req: Request, res: Response) => {
   try {
-    const { fullName, organization, email, phone, purpose, message } = req.body;
+    const { fullName, name, organization, email, phone, purpose, subject, message } = req.body;
+    const finalName = (fullName || name || '').trim();
+    const finalSubject = (purpose || subject || 'Academic Collaboration').trim();
 
     const savedMessage = await prisma.contactMessage.create({
       data: {
-        fullName,
+        fullName: finalName,
         organization: organization || null,
         email: email.toLowerCase().trim(),
         phone: phone || null,
-        purpose: purpose || 'Academic Collaboration',
+        purpose: finalSubject,
         message,
         status: 'Unread',
       },
     });
 
-    // Create a notification for administrators
+    // Create an in-app notification for administrators
     await prisma.notification.create({
       data: {
-        title: `New Inquiry from ${fullName}`,
+        title: `New Inquiry from ${finalName}`,
         kind: 'Review',
-        message: `${fullName} (${organization || email}) submitted an inquiry regarding "${purpose || 'Collaboration'}".`,
+        message: `${finalName} (${organization || email}) submitted an inquiry regarding "${finalSubject}".`,
         status: 'Unread',
         link: `/contact-messages/${savedMessage.id}`,
       },
+    });
+
+    // Send notification email ONLY to website owner (isolated, non-blocking delivery)
+    sendContactNotificationEmail({
+      name: finalName,
+      email: email.toLowerCase().trim(),
+      phone: phone || null,
+      organization: organization || null,
+      subject: finalSubject,
+      message,
+      createdAt: savedMessage.createdAt,
+    }).catch((err) => {
+      console.error('[ContactController] Background notification email failure:', err);
     });
 
     return sendSuccess(

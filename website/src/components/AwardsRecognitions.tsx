@@ -26,6 +26,23 @@ export const AwardsRecognitions: React.FC = () => {
     ? awards
     : awards.filter((a: any) => a.category === activeCategory);
 
+  // Sort awards by sort order / priority (orderIndex > 0: 1 = Top Priority, 2 = Second, etc.), then by year descending
+  const sortedAwards = [...filteredAwards].sort((a: any, b: any) => {
+    const rawA = a.orderIndex !== undefined ? a.orderIndex : a.order_index;
+    const rawB = b.orderIndex !== undefined ? b.orderIndex : b.order_index;
+    const numA = Number(rawA);
+    const numB = Number(rawB);
+    const valA = Number.isFinite(numA) && numA > 0 ? numA : 999999;
+    const valB = Number.isFinite(numB) && numB > 0 ? numB : 999999;
+    if (valA !== valB) return valA - valB;
+
+    const yearA = parseInt(String(a.year || '0'), 10) || 0;
+    const yearB = parseInt(String(b.year || '0'), 10) || 0;
+    if (yearB !== yearA) return yearB - yearA;
+
+    return String(a.title || '').localeCompare(String(b.title || ''));
+  });
+
   return (
     <div className="section-content-wrapper">
       <div className="content-header">
@@ -63,7 +80,7 @@ export const AwardsRecognitions: React.FC = () => {
 
       {/* Awards List */}
       <div className="awards-cards-list">
-        {filteredAwards.map((award: any) => {
+        {sortedAwards.map((award: any) => {
           const conferringBody = award.organisation || award.conferringBody;
           const desc = award.citation || award.description;
           const isInst = award.category === 'Institutional';
@@ -77,7 +94,8 @@ export const AwardsRecognitions: React.FC = () => {
               <div className="award-content">
                 <div className="award-header-row">
                   <h4 className="award-title">{award.title}</h4>
-                  <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+
+                  <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', flexShrink: 0 }}>
                     {award.year && <span className="badge badge-gold">{award.year}</span>}
                     {award.category && (
                       <span className={`badge ${isInst ? 'badge-navy' : 'badge-crimson'}`}>

@@ -6,8 +6,62 @@ import { btnIcon, thCls, tdCls } from "@/components/kit/styles";
 import { formatDate, formatINR } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-function renderValue(column, row) {
+function InlineOrderInput({ value, onSave }) {
+  const [current, setCurrent] = React.useState(value === 0 || !value ? "" : String(value));
+  const [isSaved, setIsSaved] = React.useState(false);
+
+  React.useEffect(() => {
+    setCurrent(value === 0 || !value ? "" : String(value));
+  }, [value]);
+
+  const handleCommit = () => {
+    const parsed = current === "" ? 0 : parseInt(String(current), 10) || 0;
+    if (parsed !== (value || 0)) {
+      onSave?.(parsed);
+      setIsSaved(true);
+      setTimeout(() => setIsSaved(false), 1500);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+      <span className="text-[11px] font-bold text-muted-foreground">#</span>
+      <input
+        type="number"
+        min="1"
+        value={current}
+        onChange={(e) => setCurrent(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.currentTarget.blur();
+          }
+        }}
+        onBlur={handleCommit}
+        placeholder="—"
+        className={cn(
+          "h-7 w-16 rounded-md border px-1.5 text-center font-mono text-xs font-bold tabular-nums shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-primary/40",
+          isSaved
+            ? "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400"
+            : "border-input bg-background/95 text-foreground hover:border-primary/50"
+        )}
+        title="Set priority order number (1 = Top priority). Press Enter or click away to save."
+      />
+    </div>
+  );
+}
+
+function renderValue(column, row, onCellChange) {
   const value = row[column.key];
+
+  if (column.type === "order" || column.key === "orderIndex") {
+    return (
+      <InlineOrderInput
+        value={row[column.key]}
+        onSave={(newVal) => onCellChange?.(row, column.key, newVal)}
+      />
+    );
+  }
+
   if (column.type === "status") return <StatusBadge value={value} />;
   if (column.type === "money") return <span className="font-medium tabular-nums">{formatINR(value)}</span>;
   if (column.type === "date") return <span className="text-muted-foreground">{formatDate(value)}</span>;
@@ -40,6 +94,7 @@ export default function DataTable({
   onRowClick,
   onEdit,
   onDelete,
+  onCellChange,
   emptyTitle = "No records found",
   emptyDescription = "Adjust your search or filters, or create a new record.",
   emptyIcon,
@@ -90,7 +145,7 @@ export default function DataTable({
                       index === 0 && "max-w-[22rem] truncate"
                     )}
                   >
-                    {renderValue(column, row)}
+                    {renderValue(column, row, onCellChange)}
                   </td>
                 ))}
                 <td className={cn(tdCls, "text-right")}>
@@ -134,9 +189,9 @@ export default function DataTable({
             className="block w-full px-4 py-4 text-left transition active:bg-muted/60"
           >
             <div className="flex items-start justify-between gap-3">
-              <p className="text-sm font-semibold leading-snug text-foreground">
-                {renderValue(columns[0], row)}
-              </p>
+              <div className="text-sm font-semibold leading-snug text-foreground">
+                {renderValue(columns[0], row, onCellChange)}
+              </div>
               <StatusBadge value={row.status} />
             </div>
             <dl className="mt-2.5 space-y-1">
@@ -144,7 +199,7 @@ export default function DataTable({
                 <div key={column.key} className="flex items-baseline justify-between gap-3 text-xs">
                   <dt className="text-muted-foreground">{column.label}</dt>
                   <dd className="max-w-[60%] truncate text-right text-foreground">
-                    {renderValue(column, row)}
+                    {renderValue(column, row, onCellChange)}
                   </dd>
                 </div>
               ))}

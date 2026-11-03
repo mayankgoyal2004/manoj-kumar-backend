@@ -13,4 +13,12 @@ export const env = {
     .split(',')
     .map((origin) => origin.trim()),
   UPLOAD_DIR: process.env.UPLOAD_DIR || 'uploads',
+
+  // SMTP Email Configuration for Contact Notifications
+  SMTP_HOST: process.env.SMTP_HOST || '',
+  SMTP_PORT: parseInt(process.env.SMTP_PORT || '587', 10),
+  SMTP_USER: process.env.SMTP_USER || '',
+  SMTP_PASS: process.env.SMTP_PASS || '',
+  MAIL_FROM: process.env.MAIL_FROM || 'Prof. Manoj Kumar <noreply@profmanojkumar.com>',
+  CONTACT_NOTIFICATION_EMAIL: process.env.CONTACT_NOTIFICATION_EMAIL || '',
 };

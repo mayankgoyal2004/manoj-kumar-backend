@@ -390,7 +390,7 @@ export const PhotoGallery: React.FC = () => {
                 {selectedItem.type === 'video' && selectedItem.youtubeId ? (
                   <div className="lightbox-video-frame">
                     <iframe
-                      src={`https://www.youtube.com/embed/${selectedItem.youtubeId}?autoplay=1&rel=0`}
+                      src={`https://www.youtube.com/embed/${selectedItem.youtubeId}?autoplay=1&rel=0&origin=${typeof window !== 'undefined' ? encodeURIComponent(window.location.origin) : ''}`}
                       title={selectedItem.title}
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                       referrerPolicy="strict-origin-when-cross-origin"

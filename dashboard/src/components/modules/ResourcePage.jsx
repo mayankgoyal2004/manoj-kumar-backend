@@ -50,7 +50,7 @@ export default function ResourcePage({ moduleKey }) {
 
   const [query, setQuery] = useState("");
   const [filterValues, setFilterValues] = useState({});
-  const [sort, setSort] = useState({ key: "updated_date", dir: "desc" });
+  const [sort, setSort] = useState(() => config?.defaultSort || { key: "updated_date", dir: "desc" });
   const [page, setPage] = useState(1);
   const [selectedId, setSelectedId] = useState(null);
   const [formOpen, setFormOpen] = useState(false);
@@ -70,8 +70,8 @@ export default function ResourcePage({ moduleKey }) {
     setFilterValues({});
     setPage(1);
     setSelectedId(null);
-    setSort({ key: "updated_date", dir: "desc" });
-  }, [moduleKey]);
+    setSort(config?.defaultSort || { key: "updated_date", dir: "desc" });
+  }, [moduleKey, config]);
 
   const openCreate = () => {
     setEditingId(null);
@@ -147,6 +147,20 @@ export default function ResourcePage({ moduleKey }) {
     list.sort((a, b) => {
       const left = a[key];
       const right = b[key];
+
+      // Prioritize orderIndex: 1 = Top priority (lowest positive number first)
+      if (key === "orderIndex") {
+        const leftNum = Number(left);
+        const rightNum = Number(right);
+        const valA = Number.isFinite(leftNum) && leftNum > 0 ? leftNum : 999999;
+        const valB = Number.isFinite(rightNum) && rightNum > 0 ? rightNum : 999999;
+        if (valA !== valB) return dir === "asc" ? valA - valB : valB - valA;
+        // Secondary fallback sort: year descending
+        const yA = Number(a.year) || 0;
+        const yB = Number(b.year) || 0;
+        return yB - yA;
+      }
+
       const leftNumber = Number(left);
       const rightNumber = Number(right);
       let result;
@@ -177,10 +191,16 @@ export default function ResourcePage({ moduleKey }) {
   }, [rows]);
 
   const sortOptions = [
+    ...(config.columns.some((c) => c.key === "orderIndex")
+      ? [
+          { value: "orderIndex:asc", label: "Priority / Order (1 = Top)" },
+          { value: "orderIndex:desc", label: "Priority / Order (Reverse)" },
+        ]
+      : []),
     { value: "updated_date:desc", label: "Recently updated" },
     { value: "updated_date:asc", label: "Oldest updated" },
     ...config.columns
-      .filter((column) => column.type !== "status")
+      .filter((column) => column.type !== "status" && column.key !== "orderIndex")
       .flatMap((column) => [
         { value: `${column.key}:asc`, label: `${column.label} (A–Z)` },
         { value: `${column.key}:desc`, label: `${column.label} (Z–A)` },
@@ -212,18 +232,39 @@ export default function ResourcePage({ moduleKey }) {
       return;
     }
     try {
+      const payload = { ...formValues };
+      if (payload.orderIndex !== undefined && payload.orderIndex !== null) {
+        payload.orderIndex = payload.orderIndex === "" ? 0 : parseInt(String(payload.orderIndex), 10) || 0;
+      }
+      if (payload.year !== undefined && payload.year !== null && payload.year !== "") {
+        payload.year = parseInt(String(payload.year), 10) || null;
+      }
+
       if (editingId) {
-        await update(moduleKey, editingId, formValues);
+        await update(moduleKey, editingId, payload);
         toast.success(`${config.singular} updated`);
       } else {
-        const title = recordTitle(moduleKey, formValues);
-        await create(moduleKey, formValues);
+        const title = recordTitle(moduleKey, payload);
+        await create(moduleKey, payload);
         toast.success(`${config.singular} created`, { description: title });
       }
       setFormOpen(false);
       setEditingId(null);
     } catch (err) {
       toast.error(`Failed to ${editingId ? "update" : "create"} ${config.singular}`, {
+        description: err.message || "Server error occurred",
+      });
+    }
+  };
+
+  const handleCellChange = async (row, fieldName, value) => {
+    try {
+      await update(moduleKey, row.id, { [fieldName]: value });
+      toast.success(`Priority updated to #${value}`, {
+        description: recordTitle(moduleKey, row),
+      });
+    } catch (err) {
+      toast.error(`Failed to update ${fieldName}`, {
         description: err.message || "Server error occurred",
       });
     }
@@ -420,6 +461,7 @@ export default function ResourcePage({ moduleKey }) {
             onRowClick={(row) => setSelectedId(row.id)}
             onEdit={openEdit}
             onDelete={(row) => setDeleteTarget(row)}
+            onCellChange={handleCellChange}
             emptyTitle={`No ${config.short?.toLowerCase() || "records"} found`}
             emptyDescription="Adjust your search and filters, or create the first record for this module."
           />

@@ -24,7 +24,7 @@ export const awardsController = createCrudController({
   searchFields: ['title', 'organisation', 'citation'],
   filterFields: ['status', 'category'],
   titleField: 'title',
-  defaultSort: { field: 'year', order: 'desc' },
+  defaultSort: { field: 'orderIndex', order: 'asc' },
 });
 
 export const patentsController = createCrudController({
