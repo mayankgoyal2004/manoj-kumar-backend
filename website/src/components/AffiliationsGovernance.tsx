@@ -13,6 +13,7 @@ export const AffiliationsGovernance: React.FC = () => {
       let category = (item.kind || item.category || 'Fellow Membership').trim();
       if (category.toLowerCase() === 'fellowship') category = 'Fellow Membership';
       if (category.toLowerCase() === 'life member') category = 'Life Membership';
+      if (category.toLowerCase() === 'senior life member' || category.toLowerCase() === 'seniour life member' || category.toLowerCase() === 'seniour life membership') category = 'Senior Life Membership';
       const period = item.since ? `Since ${item.since}` : (item.period || '');
       const details = item.notes || item.details;
 
@@ -43,6 +44,7 @@ export const AffiliationsGovernance: React.FC = () => {
 
     const preferredOrder = [
       'Fellow Membership',
+      'Senior Life Membership',
       'Life Membership',
       'Board of Governors',
       'Academic Governance',
