@@ -109,9 +109,13 @@ export const portfolioApi = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    const json = await res.json();
-    if (!res.ok) {
-      throw new Error(json.message || 'Failed to submit contact message');
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok || json.success === false) {
+      let errMsg = json.message || 'Failed to submit contact message';
+      if (Array.isArray(json.errors) && json.errors.length > 0) {
+        errMsg = json.errors.map((e: any) => e.message).join('. ');
+      }
+      throw new Error(errMsg);
     }
     return json;
   },

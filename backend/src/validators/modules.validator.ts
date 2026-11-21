@@ -268,7 +268,7 @@ export const contactMessageSchema = z
     phone: z.string().optional().nullable(),
     purpose: z.string().optional(),
     subject: z.string().optional(),
-    message: z.string().min(5, 'Message must be at least 5 characters long'),
+    message: z.string().trim().min(3, 'Message must be at least 3 characters long'),
   })
   .refine((data) => Boolean(data.fullName?.trim() || data.name?.trim()), {
     message: 'Full Name is required',

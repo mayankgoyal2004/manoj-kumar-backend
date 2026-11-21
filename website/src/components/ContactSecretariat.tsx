@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Phone, MapPin, Send, CheckCircle2, Clock, Calendar, Download, Loader2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, CheckCircle2, Clock, Calendar, Download, Loader2, AlertCircle } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
 import { portfolioApi } from '../api/portfolioApi';
 
@@ -46,14 +46,33 @@ export const ContactSecretariat: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setSubmitError(null);
+
+    const trimmedName = formData.fullName.trim();
+    const trimmedMsg = formData.message.trim();
+
+    if (trimmedName.length < 2) {
+      setSubmitError('Please enter your full name (at least 2 characters).');
+      return;
+    }
+
+    if (trimmedMsg.length < 3) {
+      setSubmitError('Please provide a message of at least 3 characters.');
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
-      await portfolioApi.submitContact(formData);
+      await portfolioApi.submitContact({
+        ...formData,
+        fullName: trimmedName,
+        message: trimmedMsg,
+      });
       setSubmitted(true);
     } catch (err: any) {
-      console.warn('Form submitted (local UX fallback):', err);
-      setSubmitted(true);
+      console.error('Contact submission error:', err);
+      setSubmitted(false);
+      setSubmitError(err.message || 'Failed to submit request. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -220,11 +239,33 @@ export const ContactSecretariat: React.FC = () => {
             </div>
           ) : (
             <form onSubmit={handleSubmit}>
+              {submitError && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.65rem',
+                    padding: '0.75rem 1rem',
+                    background: '#fef2f2',
+                    border: '1px solid #fecaca',
+                    borderRadius: 'var(--radius-xs)',
+                    color: '#b91c1c',
+                    fontSize: '0.86rem',
+                    marginBottom: '1.25rem',
+                    lineHeight: 1.4,
+                  }}
+                >
+                  <AlertCircle size={18} style={{ flexShrink: 0 }} />
+                  <span>{submitError}</span>
+                </div>
+              )}
+
               <div className="form-group">
                 <label className="form-label">Full Name & Honorific *</label>
                 <input
                   type="text"
                   required
+                  minLength={2}
                   className="form-input"
                   placeholder="e.g. Prof. / Dr. / Mr. / Ms. Full Name"
                   value={formData.fullName}
@@ -290,6 +331,7 @@ export const ContactSecretariat: React.FC = () => {
                 <label className="form-label">Message & Agenda Details *</label>
                 <textarea
                   required
+                  minLength={3}
                   className="form-textarea"
                   placeholder="Provide comprehensive details regarding proposed dates, venue, or collaborative objectives..."
                   value={formData.message}
@@ -297,9 +339,26 @@ export const ContactSecretariat: React.FC = () => {
                 ></textarea>
               </div>
 
-              <button type="submit" className="form-submit-btn">
-                <Send size={16} />
-                <span>Submit Official Request</span>
+              <button
+                type="submit"
+                className="form-submit-btn"
+                disabled={isSubmitting}
+                style={{
+                  opacity: isSubmitting ? 0.75 : 1,
+                  cursor: isSubmitting ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    <span>Submitting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send size={16} />
+                    <span>Submit Official Request</span>
+                  </>
+                )}
               </button>
             </form>
           )}
